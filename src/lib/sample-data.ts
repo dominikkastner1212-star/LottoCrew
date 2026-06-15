@@ -20,7 +20,7 @@ export const members = [
 
 export const draws = [
   { id: "d1", date: "2026-06-19", lottery: "Eurojackpot", jackpot: 68000000, status: "offen" },
-  { id: "d2", date: "2026-06-14", lottery: "Lotto 6aus49", jackpot: 15000000, status: "ausgewertet" },
+  { id: "d2", date: "2026-06-14", lottery: "Eurojackpot", jackpot: 61000000, status: "ausgewertet" },
   { id: "d3", date: "2026-06-07", lottery: "Eurojackpot", jackpot: 53000000, status: "ausgewertet" },
   { id: "d4", date: "2026-05-31", lottery: "Eurojackpot", jackpot: 41000000, status: "ausgewertet" },
 ];
@@ -51,11 +51,11 @@ export const tickets = [
   {
     id: "T-2614-A",
     drawId: "d2",
-    label: "Lotto Mittwoch Kombi",
+    label: "Eurojackpot Teamfeld C",
     status: "ausgewertet" as TicketStatus,
     date: "2026-06-14",
-    numbers: [2, 12, 21, 31, 37, 45],
-    euroNumbers: [],
+    numbers: [2, 12, 21, 37, 45],
+    euroNumbers: [4, 9],
     stake: 16.8,
     winnings: 38.5,
   },

@@ -15,7 +15,7 @@ create table public.groups (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   slug text not null unique,
-  default_lottery text not null default 'eurojackpot' check (default_lottery in ('eurojackpot', 'lotto_6aus49')),
+  default_lottery text not null default 'eurojackpot' check (default_lottery = 'eurojackpot'),
   monthly_amount numeric(10,2) not null default 24.00 check (monthly_amount >= 0),
   currency text not null default 'EUR',
   created_by uuid not null references public.profiles(id) on delete restrict,
@@ -37,7 +37,7 @@ create table public.group_members (
 create table public.draws (
   id uuid primary key default gen_random_uuid(),
   group_id uuid not null references public.groups(id) on delete cascade,
-  lottery_type text not null check (lottery_type in ('eurojackpot', 'lotto_6aus49')),
+  lottery_type text not null default 'eurojackpot' check (lottery_type = 'eurojackpot'),
   draw_date date not null,
   jackpot_amount numeric(14,2) not null default 0 check (jackpot_amount >= 0),
   result_numbers int[],
@@ -67,6 +67,10 @@ create table public.ticket_numbers (
   position int not null check (position > 0),
   kind text not null check (kind in ('main', 'extra')),
   number int not null check (number > 0),
+  constraint eurojackpot_number_ranges check (
+    (kind = 'main' and position between 1 and 5 and number between 1 and 50)
+    or (kind = 'extra' and position between 1 and 2 and number between 1 and 12)
+  ),
   unique (ticket_id, kind, position)
 );
 

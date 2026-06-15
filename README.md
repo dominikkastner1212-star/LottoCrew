@@ -1,6 +1,6 @@
 # LottoCrew
 
-Premium-PWA fur Lotto-Tippgemeinschaften in Teams und Abteilungen.
+Premium-PWA fur Eurojackpot-Tippgemeinschaften in Teams und Abteilungen.
 
 ## Stack
 
@@ -9,6 +9,7 @@ Premium-PWA fur Lotto-Tippgemeinschaften in Teams und Abteilungen.
 - Supabase Auth, Database und RLS
 - Railway Deployment
 - Installierbare PWA via Web App Manifest
+- Eurojackpot-only: 5 Hauptzahlen von 1-50 und 2 Eurozahlen von 1-12
 
 ## Lokal starten
 
