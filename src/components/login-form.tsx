@@ -39,7 +39,12 @@ export function LoginForm() {
       setMessage("Magic Link wurde versendet. Bitte pruefe dein E-Mail-Postfach.");
     } catch (error) {
       setState("error");
-      setMessage(error instanceof Error ? error.message : "Der Magic Link konnte nicht gesendet werden.");
+      const message = error instanceof Error ? error.message : "";
+      setMessage(
+        message === "Failed to fetch"
+          ? "Supabase ist nicht erreichbar. Bitte NEXT_PUBLIC_SUPABASE_URL und NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in Railway pruefen und danach neu deployen."
+          : message || "Der Magic Link konnte nicht gesendet werden.",
+      );
     }
   }
 
