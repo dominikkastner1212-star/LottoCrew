@@ -1,8 +1,10 @@
 import { AlertCircle, CalendarClock, CreditCard, Euro, Trophy, Users } from "lucide-react";
 import { AppShell, PageHeader, QuickActionRail } from "@/components/app-shell";
 import { ChartBars } from "@/components/chart-bars";
+import { DrawCountdown } from "@/components/draw-countdown";
 import { MetricCard } from "@/components/metric-card";
 import { NumberRow } from "@/components/number-row";
+import { PaymentReminderButton } from "@/components/payment-reminder";
 import { StatusPill } from "@/components/status-pill";
 import { Panel, Surface } from "@/components/ui/panel";
 import { requireAppContext } from "@/lib/auth-guard";
@@ -43,14 +45,7 @@ export default async function DashboardPage() {
             </div>
             <div className="rounded-[28px] border border-white/10 bg-slate-950/50 p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Live-Fokus</p>
-              <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-                {["--", "--", "--"].map((part, index) => (
-                  <div key={index} className="rounded-2xl bg-white/[.07] p-4">
-                    <p className="font-mono text-2xl font-semibold text-white">{part}</p>
-                    <p className="mt-1 text-[0.65rem] text-slate-500">{["Tage", "Std", "Min"][index]}</p>
-                  </div>
-                ))}
-              </div>
+              <DrawCountdown date={nextDraw?.date ?? null} />
             </div>
           </div>
           <div className="mt-6">
@@ -78,6 +73,7 @@ export default async function DashboardPage() {
             ))}
             {openPayments.length === 0 ? <Surface className="text-sm text-slate-500">Keine offenen Zahlungen.</Surface> : null}
           </div>
+          <PaymentReminderButton openCount={openPayments.length} />
         </Panel>
       </section>
 

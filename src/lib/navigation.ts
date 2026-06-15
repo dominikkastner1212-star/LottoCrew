@@ -4,6 +4,7 @@ import {
   CreditCard,
   Crown,
   Gauge,
+  Printer,
   Settings,
   Sparkles,
   Ticket,
@@ -21,6 +22,7 @@ export const navigation = [
   { href: "/zahlungen", label: "Zahlungen", icon: CreditCard },
   { href: "/gewinne", label: "Gewinne", icon: Trophy },
   { href: "/statistiken", label: "Statistiken", icon: BarChart3 },
+  { href: "/druck", label: "Druck", icon: Printer },
   { href: "/einstellungen", label: "Admin", icon: Settings },
 ] as const;
 

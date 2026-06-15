@@ -1,6 +1,6 @@
 import { CalendarPlus } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
-import { CreateDrawForm } from "@/components/admin-forms";
+import { CreateDrawForm, EvaluateDrawForm } from "@/components/admin-forms";
 import { Button } from "@/components/ui/button";
 import { Panel, Surface } from "@/components/ui/panel";
 import { requireAppContext } from "@/lib/auth-guard";
@@ -20,8 +20,9 @@ export default async function DrawsPage() {
       />
       <Panel>
         {app.group ? (
-          <div className="mb-5">
+          <div className="mb-5 grid gap-4">
             <CreateDrawForm groupId={app.group.id} isAdmin={app.isAdmin} />
+            <EvaluateDrawForm groupId={app.group.id} draws={app.draws} isAdmin={app.isAdmin} />
           </div>
         ) : null}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -30,6 +31,14 @@ export default async function DrawsPage() {
               <p className="text-sm font-semibold text-amber-200">Eurojackpot</p>
               <h2 className="mt-4 text-3xl font-semibold text-white">{formatCurrency(draw.jackpot)}</h2>
               <p className="mt-3 text-sm text-slate-400">{formatDate(draw.date)}</p>
+              {draw.resultNumbers.length ? (
+                <div className="mt-5 rounded-2xl bg-white/[.06] p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Gezogen</p>
+                  <p className="mt-2 text-sm font-semibold text-white">
+                    {draw.resultNumbers.join(" ")} <span className="text-amber-200">+ {draw.resultEuroNumbers.join(" ")}</span>
+                  </p>
+                </div>
+              ) : null}
               <div className="mt-8 h-2 rounded-full bg-white/[.08]">
                 <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-amber-300 to-violet-500" />
               </div>

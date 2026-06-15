@@ -42,6 +42,13 @@ function parseNumber(value: FormDataEntryValue | null) {
   return Number(String(value ?? "").trim());
 }
 
+function parseIntegerList(value: FormDataEntryValue | null) {
+  return String(value ?? "")
+    .split(/[,\s;]+/)
+    .map((part) => Number(part.trim()))
+    .filter((number) => Number.isInteger(number));
+}
+
 function assertEurojackpotNumbers(mainNumbers: number[], euroNumbers: number[]) {
   if (mainNumbers.length !== 5 || euroNumbers.length !== 2) {
     throw new Error("Eurojackpot braucht 5 Hauptzahlen und 2 Eurozahlen.");
@@ -58,6 +65,117 @@ function assertEurojackpotNumbers(mainNumbers: number[], euroNumbers: number[]) 
   if (euroNumbers.some((number) => !Number.isInteger(number) || number < 1 || number > 12)) {
     throw new Error("Eurozahlen muessen zwischen 1 und 12 liegen.");
   }
+}
+
+function getEurojackpotPrizeRank(mainMatches: number, euroMatches: number) {
+  const key = `${mainMatches}+${euroMatches}`;
+  const classes: Record<string, string> = {
+    "5+2": "Gewinnklasse 1",
+    "5+1": "Gewinnklasse 2",
+    "5+0": "Gewinnklasse 3",
+    "4+2": "Gewinnklasse 4",
+    "4+1": "Gewinnklasse 5",
+    "3+2": "Gewinnklasse 6",
+    "4+0": "Gewinnklasse 7",
+    "2+2": "Gewinnklasse 8",
+    "3+1": "Gewinnklasse 9",
+    "3+0": "Gewinnklasse 10",
+    "1+2": "Gewinnklasse 11",
+    "2+1": "Gewinnklasse 12",
+  };
+
+  return classes[key] ?? null;
+}
+
+function countMatches(ticketNumbers: number[], resultNumbers: number[]) {
+  const resultSet = new Set(resultNumbers);
+  return ticketNumbers.filter((number) => resultSet.has(number)).length;
+}
+
+async function assertActiveMember(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, groupId: string) {
+  const { data } = await supabase
+    .from("group_members")
+    .select("id,role")
+    .eq("group_id", groupId)
+    .eq("profile_id", userId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (!data) {
+    throw new Error("Du bist kein aktives Mitglied dieser Gruppe.");
+  }
+
+  return data;
+}
+
+async function insertTicket(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  payload: {
+    groupId: string;
+    drawId: string;
+    label: string;
+    stakeAmount: number;
+    mainNumbers: number[];
+    euroNumbers: number[];
+  },
+) {
+  assertEurojackpotNumbers(payload.mainNumbers, payload.euroNumbers);
+
+  if (!payload.drawId || !payload.label) {
+    throw new Error("Tippname und Ziehung sind erforderlich.");
+  }
+
+  const { data: draw } = await supabase
+    .from("draws")
+    .select("id")
+    .eq("id", payload.drawId)
+    .eq("group_id", payload.groupId)
+    .maybeSingle()
+    .throwOnError();
+
+  if (!draw) {
+    throw new Error("Ziehung gehoert nicht zu dieser Gruppe.");
+  }
+
+  const { data: ticket } = await supabase
+    .from("tickets")
+    .insert({
+      group_id: payload.groupId,
+      draw_id: payload.drawId,
+      label: payload.label,
+      status: "submitted",
+      stake_amount: payload.stakeAmount,
+      submitted_at: new Date().toISOString(),
+      created_by: userId,
+    })
+    .select("id")
+    .single()
+    .throwOnError();
+
+  await supabase
+    .from("ticket_numbers")
+    .insert([
+      ...payload.mainNumbers.map((number, index) => ({
+        ticket_id: ticket.id,
+        position: index + 1,
+        kind: "main",
+        number,
+      })),
+      ...payload.euroNumbers.map((number, index) => ({
+        ticket_id: ticket.id,
+        position: index + 1,
+        kind: "extra",
+        number,
+      })),
+    ])
+    .throwOnError();
+
+  await supabase
+    .from("draws")
+    .update({ status: "submitted", updated_at: new Date().toISOString() })
+    .eq("id", payload.drawId)
+    .eq("group_id", payload.groupId);
 }
 
 export async function signOut() {
@@ -308,46 +426,24 @@ export async function createTicket(formData: FormData) {
   const euroNumbers = [1, 2].map((position) => parseNumber(formData.get(`extra_${position}`)));
 
   await assertAdmin(supabase, userId, groupId);
-  assertEurojackpotNumbers(mainNumbers, euroNumbers);
+  await insertTicket(supabase, userId, { groupId, drawId, label, stakeAmount, mainNumbers, euroNumbers });
 
-  if (!drawId || !label) {
-    throw new Error("Tippname und Ziehung sind erforderlich.");
-  }
+  revalidatePath("/");
+  revalidatePath("/tipps");
+  revalidatePath("/ziehungen");
+}
 
-  const { data: ticket } = await supabase
-    .from("tickets")
-    .insert({
-      group_id: groupId,
-      draw_id: drawId,
-      label,
-      status: "submitted",
-      stake_amount: stakeAmount,
-      submitted_at: new Date().toISOString(),
-      created_by: userId,
-    })
-    .select("id")
-    .single()
-    .throwOnError();
+export async function createMemberTicket(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const drawId = String(formData.get("draw_id") ?? "");
+  const label = String(formData.get("label") ?? "Mein Eurojackpot-Tipp").trim();
+  const stakeAmount = parseAmount(formData.get("stake_amount"), 2);
+  const mainNumbers = [1, 2, 3, 4, 5].map((position) => parseNumber(formData.get(`main_${position}`)));
+  const euroNumbers = [1, 2].map((position) => parseNumber(formData.get(`extra_${position}`)));
 
-  await supabase
-    .from("ticket_numbers")
-    .insert([
-      ...mainNumbers.map((number, index) => ({
-        ticket_id: ticket.id,
-        position: index + 1,
-        kind: "main",
-        number,
-      })),
-      ...euroNumbers.map((number, index) => ({
-        ticket_id: ticket.id,
-        position: index + 1,
-        kind: "extra",
-        number,
-      })),
-    ])
-    .throwOnError();
-
-  await supabase.from("draws").update({ status: "submitted", updated_at: new Date().toISOString() }).eq("id", drawId).eq("group_id", groupId);
+  await assertActiveMember(supabase, userId, groupId);
+  await insertTicket(supabase, userId, { groupId, drawId, label, stakeAmount, mainNumbers, euroNumbers });
 
   revalidatePath("/");
   revalidatePath("/tipps");
@@ -385,6 +481,50 @@ export async function createPayment(formData: FormData) {
   revalidatePath("/zahlungen");
 }
 
+export async function createMonthlyPayments(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const dueMonth = String(formData.get("due_month") ?? "");
+
+  await assertAdmin(supabase, userId, groupId);
+
+  if (!dueMonth) {
+    throw new Error("Monat ist erforderlich.");
+  }
+
+  const { data: group } = await supabase
+    .from("groups")
+    .select("monthly_amount")
+    .eq("id", groupId)
+    .single()
+    .throwOnError();
+
+  const { data: members } = await supabase
+    .from("group_members")
+    .select("id,monthly_amount")
+    .eq("group_id", groupId)
+    .eq("status", "active")
+    .throwOnError();
+
+  const paymentRows = (members ?? []).map((member) => ({
+    group_id: groupId,
+    member_id: member.id,
+    due_month: `${dueMonth}-01`,
+    amount: member.monthly_amount ?? group?.monthly_amount ?? 24,
+    status: "open",
+  }));
+
+  if (paymentRows.length) {
+    await supabase
+      .from("payments")
+      .upsert(paymentRows, { onConflict: "member_id,due_month" })
+      .throwOnError();
+  }
+
+  revalidatePath("/");
+  revalidatePath("/zahlungen");
+}
+
 export async function createWinning(formData: FormData) {
   const { supabase, userId } = await getUserId();
   const groupId = String(formData.get("group_id") ?? "");
@@ -407,6 +547,7 @@ export async function createWinning(formData: FormData) {
       ticket_id: ticketId,
       amount,
       prize_rank: prizeRank || "Gewinn",
+      source: "manual",
       recorded_by: userId,
     })
     .throwOnError();
@@ -419,6 +560,151 @@ export async function createWinning(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/gewinne");
   revalidatePath("/statistiken");
+  revalidatePath("/tipps");
+  revalidatePath("/ziehungen");
+}
+
+export async function evaluateDraw(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const drawId = String(formData.get("draw_id") ?? "");
+  const mainNumbers = parseIntegerList(formData.get("result_numbers"));
+  const euroNumbers = parseIntegerList(formData.get("result_extra_numbers"));
+
+  await assertAdmin(supabase, userId, groupId);
+  assertEurojackpotNumbers(mainNumbers, euroNumbers);
+
+  if (!drawId) {
+    throw new Error("Ziehung fehlt.");
+  }
+
+  const { data: tickets } = await supabase
+    .from("tickets")
+    .select("id")
+    .eq("group_id", groupId)
+    .eq("draw_id", drawId)
+    .throwOnError();
+
+  const ticketIds = (tickets ?? []).map((ticket) => ticket.id);
+  const { data: numberRows } = ticketIds.length
+    ? await supabase
+        .from("ticket_numbers")
+        .select("ticket_id,kind,number")
+        .in("ticket_id", ticketIds)
+        .throwOnError()
+    : { data: [] };
+
+  const numbersByTicket = new Map<string, { main: number[]; extra: number[] }>();
+  (numberRows ?? []).forEach((row) => {
+    const current = numbersByTicket.get(row.ticket_id) ?? { main: [], extra: [] };
+    if (row.kind === "main") {
+      current.main.push(Number(row.number));
+    } else {
+      current.extra.push(Number(row.number));
+    }
+    numbersByTicket.set(row.ticket_id, current);
+  });
+
+  await supabase
+    .from("draws")
+    .update({
+      result_numbers: mainNumbers,
+      result_extra_numbers: euroNumbers,
+      status: "evaluated",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", drawId)
+    .eq("group_id", groupId)
+    .throwOnError();
+
+  await supabase.from("winnings").delete().eq("group_id", groupId).eq("draw_id", drawId).eq("source", "auto");
+
+  const automaticWinnings: Array<{
+    group_id: string;
+    draw_id: string;
+    ticket_id: string;
+    amount: number;
+    prize_rank: string;
+    source: "auto";
+    recorded_by: string;
+  }> = [];
+  for (const ticket of tickets ?? []) {
+    const ticketNumbers = numbersByTicket.get(ticket.id) ?? { main: [], extra: [] };
+    const mainMatches = countMatches(ticketNumbers.main, mainNumbers);
+    const euroMatches = countMatches(ticketNumbers.extra, euroNumbers);
+    const prizeRank = getEurojackpotPrizeRank(mainMatches, euroMatches);
+
+    await supabase
+      .from("tickets")
+      .update({
+        main_matches: mainMatches,
+        euro_matches: euroMatches,
+        prize_rank: prizeRank,
+        evaluated_at: new Date().toISOString(),
+        status: "evaluated",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", ticket.id)
+      .eq("group_id", groupId)
+      .throwOnError();
+
+    if (prizeRank) {
+      automaticWinnings.push({
+        group_id: groupId,
+        draw_id: drawId,
+        ticket_id: ticket.id,
+        amount: 0,
+        prize_rank: `${prizeRank} (${mainMatches}+${euroMatches})`,
+        source: "auto",
+        recorded_by: userId,
+      });
+    }
+  }
+
+  if (automaticWinnings.length) {
+    await supabase.from("winnings").insert(automaticWinnings).throwOnError();
+  }
+
+  revalidatePath("/");
+  revalidatePath("/gewinne");
+  revalidatePath("/statistiken");
+  revalidatePath("/tipps");
+  revalidatePath("/ziehungen");
+}
+
+export async function uploadTicketDocument(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const ticketId = String(formData.get("ticket_id") ?? "");
+  const file = formData.get("file");
+
+  await assertAdmin(supabase, userId, groupId);
+
+  if (!ticketId || !(file instanceof File) || file.size === 0) {
+    throw new Error("Bitte einen Spielschein auswaehlen.");
+  }
+
+  const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-|-$/g, "") || "spielschein";
+  const path = `${groupId}/${ticketId}/${Date.now()}-${safeName}`;
+
+  const { error } = await supabase.storage
+    .from("ticket-documents")
+    .upload(path, file, {
+      contentType: file.type || "application/octet-stream",
+      upsert: true,
+    });
+
+  if (error) {
+    throw error;
+  }
+
+  await supabase
+    .from("tickets")
+    .update({ ticket_image_path: path, updated_at: new Date().toISOString() })
+    .eq("id", ticketId)
+    .eq("group_id", groupId)
+    .throwOnError();
+
   revalidatePath("/tipps");
   revalidatePath("/ziehungen");
 }

@@ -85,8 +85,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </main>
       </div>
 
-      <nav className="glass-panel fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-[28px] p-2 lg:hidden">
-        {navigation.slice(0, 5).map((item) => {
+      <nav className="glass-panel fixed inset-x-3 bottom-3 z-40 flex gap-1 overflow-x-auto rounded-[28px] p-2 lg:hidden">
+        {navigation.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
           return (
@@ -94,7 +94,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[0.68rem] font-semibold transition",
+                "flex min-h-14 min-w-20 flex-col items-center justify-center gap-1 rounded-2xl text-[0.68rem] font-semibold transition",
                 active ? "bg-white text-slate-950" : "text-slate-400 hover:bg-white/[.08] hover:text-white",
               )}
             >

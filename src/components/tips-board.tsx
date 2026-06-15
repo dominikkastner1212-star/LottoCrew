@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, SlidersHorizontal } from "lucide-react";
+import { FileText, Search, SlidersHorizontal, Target } from "lucide-react";
 import { useMemo, useState } from "react";
 import { NumberRow } from "@/components/number-row";
 import { StatusPill } from "@/components/status-pill";
@@ -80,6 +80,30 @@ export function TipsBoard({ tickets }: { tickets: AppTicket[] }) {
                   <p className="font-semibold text-emerald-100">{formatCurrency(ticket.winnings)}</p>
                 </div>
               </div>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+              {ticket.prizeRank ? (
+                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 font-semibold text-emerald-100">
+                  <Target className="size-3.5" />
+                  {ticket.prizeRank} · {ticket.mainMatches}+{ticket.euroMatches}
+                </span>
+              ) : ticket.status === "evaluated" ? (
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[.06] px-3 py-1">
+                  <Target className="size-3.5" />
+                  {ticket.mainMatches}+{ticket.euroMatches} Treffer
+                </span>
+              ) : null}
+              {ticket.imageUrl ? (
+                <a
+                  href={ticket.imageUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 font-semibold text-amber-100 transition hover:bg-amber-300 hover:text-slate-950"
+                >
+                  <FileText className="size-3.5" />
+                  Spielschein
+                </a>
+              ) : null}
             </div>
           </Surface>
         ))}

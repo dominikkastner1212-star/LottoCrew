@@ -2,12 +2,15 @@ import {
   addMemberByEmail,
   createDraw,
   createInitialGroup,
+  createMonthlyPayments,
   createPayment,
   createTicket,
   createWinning,
+  evaluateDraw,
   updateGroupSettings,
   updateMemberRole,
   updateProfile,
+  uploadTicketDocument,
 } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/panel";
@@ -302,6 +305,25 @@ export function CreatePaymentForm({ groupId, members, isAdmin }: { groupId: stri
   );
 }
 
+export function CreateMonthlyPaymentsForm({ groupId, isAdmin }: { groupId: string; isAdmin: boolean }) {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <Surface>
+      <form action={createMonthlyPayments} className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+        <input type="hidden" name="group_id" value={groupId} />
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Monat fuer alle aktiven Mitglieder</span>
+          <input name="due_month" type="month" required className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50" />
+        </label>
+        <Button>Monatsbeitraege erzeugen</Button>
+      </form>
+    </Surface>
+  );
+}
+
 export function CreateWinningForm({ groupId, draws, tickets, isAdmin }: { groupId: string; draws: AppDraw[]; tickets: AppTicket[]; isAdmin: boolean }) {
   if (!isAdmin) {
     return null;
@@ -342,6 +364,70 @@ export function CreateWinningForm({ groupId, draws, tickets, isAdmin }: { groupI
           <input name="prize_rank" placeholder="z. B. 3 + 1" className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50" />
         </label>
         <Button disabled={draws.length === 0 || tickets.length === 0}>Gewinn speichern</Button>
+      </form>
+    </Surface>
+  );
+}
+
+export function EvaluateDrawForm({ groupId, draws, isAdmin }: { groupId: string; draws: AppDraw[]; isAdmin: boolean }) {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <Surface>
+      <form action={evaluateDraw} className="grid gap-3 xl:grid-cols-[1fr_1fr_1fr_auto] xl:items-end">
+        <input type="hidden" name="group_id" value={groupId} />
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Ziehung auswerten</span>
+          <select name="draw_id" required className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50">
+            <option value="">Auswaehlen</option>
+            {draws.map((draw) => (
+              <option key={draw.id} value={draw.id}>
+                {draw.date}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Hauptzahlen</span>
+          <input name="result_numbers" required placeholder="5 12 23 34 49" className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50" />
+        </label>
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Eurozahlen</span>
+          <input name="result_extra_numbers" required placeholder="5 10" className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50" />
+        </label>
+        <Button disabled={draws.length === 0}>Automatisch auswerten</Button>
+      </form>
+    </Surface>
+  );
+}
+
+export function TicketDocumentUploadForm({ groupId, tickets, isAdmin }: { groupId: string; tickets: AppTicket[]; isAdmin: boolean }) {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <Surface>
+      <form action={uploadTicketDocument} className="grid gap-3 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
+        <input type="hidden" name="group_id" value={groupId} />
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Tipp</span>
+          <select name="ticket_id" required className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50">
+            <option value="">Auswaehlen</option>
+            {tickets.map((ticket) => (
+              <option key={ticket.id} value={ticket.id}>
+                {ticket.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Spielschein-Datei</span>
+          <input name="file" type="file" accept="image/*,application/pdf" required className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-slate-300 outline-none file:mr-3 file:rounded-xl file:border-0 file:bg-amber-300 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-950 focus:border-amber-300/50" />
+        </label>
+        <Button disabled={tickets.length === 0}>Spielschein hochladen</Button>
       </form>
     </Surface>
   );

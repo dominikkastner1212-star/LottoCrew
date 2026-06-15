@@ -38,17 +38,26 @@ export type AppDraw = {
   date: string;
   jackpot: number;
   status: string;
+  resultNumbers: number[];
+  resultEuroNumbers: number[];
 };
 
 export type AppTicket = {
   id: string;
   label: string;
   status: string;
+  drawId: string;
   date: string | null;
   numbers: number[];
   euroNumbers: number[];
   stake: number;
   winnings: number;
+  createdBy: string | null;
+  mainMatches: number;
+  euroMatches: number;
+  prizeRank: string | null;
+  imagePath: string | null;
+  imageUrl: string | null;
 };
 
 export type AppPayment = {
@@ -338,12 +347,12 @@ export async function getAppContext(): Promise<AppContext> {
       .order("joined_at", { ascending: true }),
     supabase
       .from("draws")
-      .select("id,draw_date,jackpot_amount,status")
+      .select("id,draw_date,jackpot_amount,status,result_numbers,result_extra_numbers")
       .eq("group_id", group.id)
       .order("draw_date", { ascending: false }),
     supabase
       .from("tickets")
-      .select("id,label,status,stake_amount,draw_id,draws(draw_date)")
+      .select("id,label,status,stake_amount,draw_id,created_by,main_matches,euro_matches,prize_rank,ticket_image_path,draws(draw_date)")
       .eq("group_id", group.id)
       .order("created_at", { ascending: false }),
     supabase
@@ -378,6 +387,8 @@ export async function getAppContext(): Promise<AppContext> {
     date: draw.draw_date,
     jackpot: toNumber(draw.jackpot_amount),
     status: draw.status,
+    resultNumbers: Array.isArray(draw.result_numbers) ? draw.result_numbers.map(Number) : [],
+    resultEuroNumbers: Array.isArray(draw.result_extra_numbers) ? draw.result_extra_numbers.map(Number) : [],
   }));
 
   const ticketRows = ticketsResult.data ?? [];
@@ -411,20 +422,35 @@ export async function getAppContext(): Promise<AppContext> {
   });
 
   const ticketLabels = new Map<string, string>();
-  const tickets: AppTicket[] = ticketRows.map((ticket) => {
+  const tickets: AppTicket[] = await Promise.all(ticketRows.map(async (ticket) => {
     const draw = Array.isArray(ticket.draws) ? ticket.draws[0] : ticket.draws;
     ticketLabels.set(ticket.id, ticket.label);
+    const imagePath = ticket.ticket_image_path ?? null;
+    let imageUrl: string | null = null;
+
+    if (imagePath) {
+      const { data: signed } = await supabase.storage.from("ticket-documents").createSignedUrl(imagePath, 60 * 30);
+      imageUrl = signed?.signedUrl ?? null;
+    }
+
     return {
       id: ticket.id,
       label: ticket.label,
       status: ticket.status,
+      drawId: ticket.draw_id,
       date: draw?.draw_date ?? null,
       numbers: numbersByTicket.get(ticket.id)?.main ?? [],
       euroNumbers: numbersByTicket.get(ticket.id)?.extra ?? [],
       stake: toNumber(ticket.stake_amount),
       winnings: winningsByTicket.get(ticket.id) ?? 0,
+      createdBy: ticket.created_by ?? null,
+      mainMatches: toNumber(ticket.main_matches),
+      euroMatches: toNumber(ticket.euro_matches),
+      prizeRank: ticket.prize_rank ?? null,
+      imagePath,
+      imageUrl,
     };
-  });
+  }));
 
   const memberNames = new Map(members.map((member) => [member.id, member.name]));
   const payments: AppPayment[] = (paymentsResult.data ?? []).map((payment) => ({
