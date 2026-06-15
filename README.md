@@ -12,6 +12,8 @@ Premium-PWA fur Lotto-Tippgemeinschaften in Teams und Abteilungen.
 
 ## Lokal starten
 
+Benotigt Node.js 22 oder neuer.
+
 ```bash
 npm install
 cp .env.example .env.local
