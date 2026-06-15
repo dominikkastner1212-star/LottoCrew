@@ -1,21 +1,19 @@
-import { winnings } from "@/lib/sample-data";
+import { getAppContext } from "@/lib/app-data";
 
-function buildPdfText() {
-  const lines = [
-    "LottoCrew Gewinnhistorie",
-    "",
-    ...winnings.map((winning) => `${winning.date}  ${winning.ticket}  EUR ${winning.amount.toFixed(2)}  ${winning.rank}`),
-  ];
-
-  return lines.join("\\n");
-}
+export const dynamic = "force-dynamic";
 
 function escapePdfText(value: string) {
   return value.replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)");
 }
 
-export function GET() {
-  const stream = `BT /F1 18 Tf 72 760 Td (${escapePdfText(buildPdfText())}) Tj ET`;
+export async function GET() {
+  const app = await getAppContext();
+  const lines = [
+    "LottoCrew Gewinnhistorie",
+    "",
+    ...app.winnings.map((winning) => `${winning.date}  ${winning.ticket}  EUR ${winning.amount.toFixed(2)}  ${winning.rank}`),
+  ];
+  const stream = `BT /F1 18 Tf 72 760 Td (${escapePdfText(lines.join("\\n"))}) Tj ET`;
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",

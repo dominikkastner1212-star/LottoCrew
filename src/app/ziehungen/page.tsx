@@ -2,22 +2,26 @@ import { CalendarPlus } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Panel, Surface } from "@/components/ui/panel";
-import { draws } from "@/lib/sample-data";
+import { getAppContext } from "@/lib/app-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-export default function DrawsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function DrawsPage() {
+  const app = await getAppContext();
+
   return (
     <AppShell>
       <PageHeader
         title="Ziehungen"
-        description="Jackpots, Ziehungsdaten und Auswertung der gespielten Runden."
-        action={<Button><CalendarPlus className="size-4" />Ziehung anlegen</Button>}
+        description="Eurojackpot-Jackpots, Ziehungsdaten und Auswertung der gespielten Runden."
+        action={<Button disabled={!app.isAdmin}><CalendarPlus className="size-4" />Ziehung anlegen</Button>}
       />
       <Panel>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {draws.map((draw) => (
+          {app.draws.map((draw) => (
             <Surface key={draw.id} className="min-h-52">
-              <p className="text-sm font-semibold text-amber-200">{draw.lottery}</p>
+              <p className="text-sm font-semibold text-amber-200">Eurojackpot</p>
               <h2 className="mt-4 text-3xl font-semibold text-white">{formatCurrency(draw.jackpot)}</h2>
               <p className="mt-3 text-sm text-slate-400">{formatDate(draw.date)}</p>
               <div className="mt-8 h-2 rounded-full bg-white/[.08]">
@@ -26,6 +30,9 @@ export default function DrawsPage() {
               <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{draw.status}</p>
             </Surface>
           ))}
+          {app.draws.length === 0 ? (
+            <Surface className="py-10 text-center text-sm text-slate-500 md:col-span-2 xl:col-span-4">Noch keine Ziehungen vorhanden.</Surface>
+          ) : null}
         </div>
       </Panel>
     </AppShell>

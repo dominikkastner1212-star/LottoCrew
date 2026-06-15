@@ -1,9 +1,12 @@
-import { payments } from "@/lib/sample-data";
+import { getAppContext } from "@/lib/app-data";
 
-export function GET() {
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  const app = await getAppContext();
   const rows = [
     ["Mitglied", "Monat", "Betrag", "Status", "Bezahlt am"],
-    ...payments.map((payment) => [
+    ...app.payments.map((payment) => [
       payment.member,
       payment.month,
       payment.amount.toFixed(2),

@@ -71,7 +71,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="ml-auto flex items-center gap-2">
               <Button variant="secondary" className="hidden sm:inline-flex">
                 <Bell className="size-4" />
-                2 offen
+                Hinweise
               </Button>
               <LinkButton href="/login" variant="ghost" className="size-11 rounded-2xl p-0" aria-label="Abmelden">
                 <LogOut className="size-5" />

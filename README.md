@@ -29,9 +29,11 @@ Danach `http://localhost:3000` offnen.
 2. SQL aus `supabase/migrations/001_initial_schema.sql` im SQL Editor ausfuhren.
 3. `NEXT_PUBLIC_SUPABASE_URL` und `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env.local` setzen.
 4. In Supabase Auth E-Mail-Login aktivieren.
-5. Optional Demo-Daten aus `supabase/seed.sql` einspielen.
 
 Die RLS-Policies erlauben Teilnehmern nur Zugriff auf ihre Gruppen. Gruppen-Admins durfen Mitglieder, Tipps, Zahlungen und Gewinne verwalten.
+
+Beim ersten Login kann der erste Nutzer im Admin-Bereich eine Gruppe erstellen und wird automatisch Admin.
+Zum Hinzufuegen von Mitgliedern per E-Mail braucht die Server-App `SUPABASE_SECRET_KEY` mit dem Supabase `service_role` Key. Dieser Key darf niemals als `NEXT_PUBLIC_` Variable gesetzt werden.
 
 ## Railway Deployment
 

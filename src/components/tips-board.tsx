@@ -5,13 +5,18 @@ import { useMemo, useState } from "react";
 import { NumberRow } from "@/components/number-row";
 import { StatusPill } from "@/components/status-pill";
 import { Surface } from "@/components/ui/panel";
-import type { TicketStatus } from "@/lib/sample-data";
-import { tickets } from "@/lib/sample-data";
+import type { AppTicket } from "@/lib/app-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-const statusOptions = ["alle", "geplant", "abgegeben", "ausgewertet"] as const;
+const statusOptions = ["alle", "planned", "submitted", "evaluated"] as const;
+const statusLabels = {
+  alle: "alle",
+  planned: "geplant",
+  submitted: "abgegeben",
+  evaluated: "ausgewertet",
+};
 
-export function TipsBoard() {
+export function TipsBoard({ tickets }: { tickets: AppTicket[] }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<(typeof statusOptions)[number]>("alle");
 
@@ -21,7 +26,7 @@ export function TipsBoard() {
       const matchesStatus = status === "alle" || ticket.status === status;
       return matchesQuery && matchesStatus;
     });
-  }, [query, status]);
+  }, [query, status, tickets]);
 
   return (
     <div>
@@ -45,7 +50,7 @@ export function TipsBoard() {
                 status === option ? "bg-white text-slate-950" : "text-slate-400 hover:bg-white/[.08] hover:text-white"
               }`}
             >
-              {option}
+              {statusLabels[option]}
             </button>
           ))}
         </div>
@@ -58,9 +63,11 @@ export function TipsBoard() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-3">
                   <h2 className="text-lg font-semibold text-white">{ticket.label}</h2>
-                  <StatusPill status={ticket.status as TicketStatus} />
+                  <StatusPill status={ticket.status as "planned" | "submitted" | "evaluated"} />
                 </div>
-                <p className="mt-2 text-sm text-slate-400">{ticket.id} · Ziehung {formatDate(ticket.date)}</p>
+                <p className="mt-2 text-sm text-slate-400">
+                  {ticket.id} - Ziehung {ticket.date ? formatDate(ticket.date) : "noch nicht zugeordnet"}
+                </p>
               </div>
               <NumberRow numbers={ticket.numbers} euroNumbers={ticket.euroNumbers} />
               <div className="grid grid-cols-2 gap-3 text-right sm:min-w-52">
@@ -76,6 +83,11 @@ export function TipsBoard() {
             </div>
           </Surface>
         ))}
+        {filteredTickets.length === 0 ? (
+          <Surface className="py-10 text-center text-sm text-slate-500">
+            Keine Tipps vorhanden. Admins koennen neue Eurojackpot-Tipps anlegen.
+          </Surface>
+        ) : null}
       </div>
     </div>
   );

@@ -3,8 +3,13 @@ import { AppShell, PageHeader } from "@/components/app-shell";
 import { PaymentsBoard } from "@/components/payments-board";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Panel } from "@/components/ui/panel";
+import { getAppContext } from "@/lib/app-data";
 
-export default function PaymentsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function PaymentsPage() {
+  const app = await getAppContext();
+
   return (
     <AppShell>
       <PageHeader
@@ -13,12 +18,12 @@ export default function PaymentsPage() {
         action={
           <>
             <LinkButton href="/api/export/payments.csv" variant="secondary"><Download className="size-4" />CSV</LinkButton>
-            <Button><Check className="size-4" />Beitrag abhaken</Button>
+            <Button disabled={!app.isAdmin}><Check className="size-4" />Beitrag anlegen</Button>
           </>
         }
       />
       <Panel>
-        <PaymentsBoard />
+        <PaymentsBoard payments={app.payments} groupId={app.group?.id ?? ""} isAdmin={app.isAdmin} />
       </Panel>
     </AppShell>
   );

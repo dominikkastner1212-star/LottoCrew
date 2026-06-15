@@ -2,10 +2,16 @@ import { TrendingUp } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { ChartBars } from "@/components/chart-bars";
 import { Panel, Surface } from "@/components/ui/panel";
-import { monthlyStats, totals } from "@/lib/sample-data";
+import { getAppContext } from "@/lib/app-data";
 import { formatCurrency } from "@/lib/utils";
 
-export default function StatsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function StatsPage() {
+  const app = await getAppContext();
+  const totalStake = app.monthlyStats.reduce((sum, item) => sum + item.stake, 0);
+  const returnRate = totalStake > 0 ? (app.totals.totalWinnings / totalStake) * 100 : 0;
+
   return (
     <AppShell>
       <PageHeader
@@ -21,21 +27,21 @@ export default function StatsPage() {
             </div>
             <TrendingUp className="size-5 text-emerald-200" />
           </div>
-          <ChartBars />
+          <ChartBars monthlyStats={app.monthlyStats} />
         </Panel>
         <Panel>
           <div className="grid gap-3">
             <Surface>
               <p className="text-sm text-slate-400">Gesamteinsaetze</p>
-              <p className="mt-2 text-3xl font-semibold text-white">{formatCurrency(monthlyStats.reduce((sum, item) => sum + item.stake, 0))}</p>
+              <p className="mt-2 text-3xl font-semibold text-white">{formatCurrency(totalStake)}</p>
             </Surface>
             <Surface>
               <p className="text-sm text-slate-400">Gewinnsumme</p>
-              <p className="mt-2 text-3xl font-semibold text-emerald-100">{formatCurrency(totals.totalWinnings)}</p>
+              <p className="mt-2 text-3xl font-semibold text-emerald-100">{formatCurrency(app.totals.totalWinnings)}</p>
             </Surface>
             <Surface>
               <p className="text-sm text-slate-400">Rueckflussquote</p>
-              <p className="mt-2 text-3xl font-semibold text-amber-100">18,6%</p>
+              <p className="mt-2 text-3xl font-semibold text-amber-100">{returnRate.toFixed(1)}%</p>
             </Surface>
           </div>
         </Panel>

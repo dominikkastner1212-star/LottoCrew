@@ -2,10 +2,14 @@ import { FileDown, Plus } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Panel, Surface } from "@/components/ui/panel";
-import { winnings } from "@/lib/sample-data";
+import { getAppContext } from "@/lib/app-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-export default function WinningsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function WinningsPage() {
+  const app = await getAppContext();
+
   return (
     <AppShell>
       <PageHeader
@@ -14,13 +18,13 @@ export default function WinningsPage() {
         action={
           <>
             <LinkButton href="/api/export/winnings.pdf" variant="secondary"><FileDown className="size-4" />PDF</LinkButton>
-            <Button><Plus className="size-4" />Gewinn erfassen</Button>
+            <Button disabled={!app.isAdmin}><Plus className="size-4" />Gewinn erfassen</Button>
           </>
         }
       />
       <Panel>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {winnings.map((winning) => (
+          {app.winnings.map((winning) => (
             <Surface key={winning.id}>
               <p className="text-sm font-semibold text-emerald-100">{winning.rank}</p>
               <h2 className="mt-4 text-3xl font-semibold text-white">{formatCurrency(winning.amount)}</h2>
@@ -32,6 +36,9 @@ export default function WinningsPage() {
               <p className="mt-4 text-xs text-slate-500">{formatDate(winning.date)}</p>
             </Surface>
           ))}
+          {app.winnings.length === 0 ? (
+            <Surface className="py-10 text-center text-sm text-slate-500 md:col-span-2 xl:col-span-4">Noch keine Gewinne vorhanden.</Surface>
+          ) : null}
         </div>
       </Panel>
     </AppShell>

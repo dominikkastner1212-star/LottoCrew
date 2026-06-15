@@ -1,24 +1,12 @@
-"use client";
-
 import { Check } from "lucide-react";
-import { useMemo, useState } from "react";
+import { updatePaymentStatus } from "@/app/actions";
 import { StatusPill } from "@/components/status-pill";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/panel";
-import { payments as seedPayments, type PaymentStatus } from "@/lib/sample-data";
+import type { AppPayment } from "@/lib/app-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-export function PaymentsBoard() {
-  const [paidIds, setPaidIds] = useState(() => new Set(seedPayments.filter((payment) => payment.status === "bezahlt").map((payment) => payment.id)));
-
-  const payments = useMemo(() => {
-    return seedPayments.map((payment) => ({
-      ...payment,
-      status: paidIds.has(payment.id) ? "bezahlt" as PaymentStatus : "offen" as PaymentStatus,
-      paidAt: paidIds.has(payment.id) ? payment.paidAt ?? new Date().toISOString() : null,
-    }));
-  }, [paidIds]);
-
+export function PaymentsBoard({ payments, groupId, isAdmin }: { payments: AppPayment[]; groupId: string; isAdmin: boolean }) {
   return (
     <div className="grid gap-3">
       {payments.map((payment) => (
@@ -30,26 +18,24 @@ export function PaymentsBoard() {
           <StatusPill status={payment.status} />
           <p className="font-semibold text-white md:text-right">{formatCurrency(payment.amount)}</p>
           <p className="text-sm text-slate-400 md:text-right">{payment.paidAt ? formatDate(payment.paidAt) : "Noch offen"}</p>
-          <Button
-            variant={payment.status === "bezahlt" ? "secondary" : "primary"}
-            className="min-w-36"
-            onClick={() => {
-              setPaidIds((current) => {
-                const next = new Set(current);
-                if (next.has(payment.id)) {
-                  next.delete(payment.id);
-                } else {
-                  next.add(payment.id);
-                }
-                return next;
-              });
-            }}
-          >
-            <Check className="size-4" />
-            {payment.status === "bezahlt" ? "Bezahlt" : "Abhaken"}
-          </Button>
+          {isAdmin ? (
+            <form action={updatePaymentStatus}>
+              <input type="hidden" name="group_id" value={groupId} />
+              <input type="hidden" name="payment_id" value={payment.id} />
+              <input type="hidden" name="status" value={payment.status === "paid" ? "open" : "paid"} />
+              <Button variant={payment.status === "paid" ? "secondary" : "primary"} className="min-w-36">
+                <Check className="size-4" />
+                {payment.status === "paid" ? "Bezahlt" : "Abhaken"}
+              </Button>
+            </form>
+          ) : null}
         </Surface>
       ))}
+      {payments.length === 0 ? (
+        <Surface className="py-10 text-center text-sm text-slate-500">
+          Noch keine Zahlungen vorhanden.
+        </Surface>
+      ) : null}
     </div>
   );
 }

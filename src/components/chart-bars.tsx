@@ -1,7 +1,15 @@
-import { monthlyStats } from "@/lib/sample-data";
+import type { MonthlyStat } from "@/lib/app-data";
 
-export function ChartBars() {
-  const max = Math.max(...monthlyStats.map((item) => item.stake));
+export function ChartBars({ monthlyStats }: { monthlyStats: MonthlyStat[] }) {
+  if (monthlyStats.length === 0) {
+    return (
+      <div className="mt-5 grid h-48 place-items-center rounded-3xl border border-white/10 bg-white/[.04] text-center text-sm text-slate-500">
+        Noch keine Statistikdaten vorhanden.
+      </div>
+    );
+  }
+
+  const max = Math.max(...monthlyStats.map((item) => Math.max(item.stake, item.winnings)), 1);
 
   return (
     <div className="mt-5 flex h-48 items-end gap-3">
