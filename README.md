@@ -35,6 +35,8 @@ Die RLS-Policies erlauben Teilnehmern nur Zugriff auf ihre Gruppen. Gruppen-Admi
 Beim ersten Login kann der erste Nutzer im Admin-Bereich eine Gruppe erstellen und wird automatisch Admin.
 Zum Hinzufuegen von Mitgliedern per E-Mail braucht die Server-App `SUPABASE_SECRET_KEY` mit dem Supabase `service_role` Key. Dieser Key darf niemals als `NEXT_PUBLIC_` Variable gesetzt werden.
 
+Neue Admins starten ueber `/registrieren`: Name, E-Mail, Gruppenname und Monatsbeitrag werden vor der Mail-Bestaetigung erfasst. Nach dem Klick auf den Bestaetigungslink wird das Profil erstellt, die Gruppe angelegt und der Nutzer direkt als Admin ins Dashboard geleitet.
+
 ## Railway Deployment
 
 1. Repository mit Railway verbinden.
@@ -44,6 +46,7 @@ Zum Hinzufuegen von Mitgliedern per E-Mail braucht die Server-App `SUPABASE_SECR
 ## Seiten
 
 - `/login`
+- `/registrieren`
 - `/`
 - `/tipps`
 - `/ziehungen`

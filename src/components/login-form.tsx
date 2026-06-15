@@ -24,8 +24,8 @@ export function LoginForm() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${origin}/auth/confirm`,
-          shouldCreateUser: true,
+          emailRedirectTo: `${origin}/auth/confirm?next=/`,
+          shouldCreateUser: false,
         },
       });
 
@@ -36,7 +36,7 @@ export function LoginForm() {
       }
 
       setState("success");
-      setMessage("Magic Link wurde versendet. Bitte pruefe dein E-Mail-Postfach.");
+      setMessage("Magic Link wurde versendet. Nach dem Klick bist du direkt in der App.");
     } catch (error) {
       setState("error");
       const message = error instanceof Error ? error.message : "";

@@ -153,6 +153,9 @@ function buildMonthlyStats(payments: AppPayment[], winnings: AppWinning[]) {
 }
 
 async function ensureProfile(supabase: Awaited<ReturnType<typeof createClient>>, user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> }) {
+  const metadataDisplayName = typeof user.user_metadata?.display_name === "string" ? user.user_metadata.display_name.trim() : "";
+  const displayName = metadataDisplayName || getDefaultDisplayName(user.email);
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("id,email,display_name,avatar_url")
@@ -160,6 +163,28 @@ async function ensureProfile(supabase: Awaited<ReturnType<typeof createClient>>,
     .maybeSingle();
 
   if (profile) {
+    if (!profile.display_name || profile.display_name === profile.email?.split("@")[0] || metadataDisplayName) {
+      const { data: updated } = await supabase
+        .from("profiles")
+        .update({
+          email: user.email ?? profile.email,
+          display_name: displayName,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id)
+        .select("id,email,display_name,avatar_url")
+        .single();
+
+      if (updated) {
+        return {
+          id: updated.id,
+          email: updated.email,
+          displayName: updated.display_name,
+          avatarUrl: updated.avatar_url,
+        };
+      }
+    }
+
     return {
       id: profile.id,
       email: profile.email,
@@ -167,11 +192,6 @@ async function ensureProfile(supabase: Awaited<ReturnType<typeof createClient>>,
       avatarUrl: profile.avatar_url,
     };
   }
-
-  const displayName =
-    typeof user.user_metadata?.display_name === "string"
-      ? user.user_metadata.display_name
-      : getDefaultDisplayName(user.email);
 
   const { data: inserted } = await supabase
     .from("profiles")
@@ -211,15 +231,22 @@ export async function ensureUserWorkspace(
     return;
   }
 
-  const groupName = "AbteilungsJackpot";
-  const slug = `abteilungsjackpot-${user.id.slice(0, 8)}`;
+  const metadataGroupName = typeof user.user_metadata?.group_name === "string" ? user.user_metadata.group_name.trim() : "";
+  const metadataMonthlyAmount =
+    typeof user.user_metadata?.monthly_amount === "number"
+      ? user.user_metadata.monthly_amount
+      : Number(String(user.user_metadata?.monthly_amount ?? "24").replace(",", "."));
+  const groupName = metadataGroupName || "AbteilungsJackpot";
+  const baseSlug = groupName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "abteilungsjackpot";
+  const monthlyAmount = Number.isFinite(metadataMonthlyAmount) && metadataMonthlyAmount >= 0 ? metadataMonthlyAmount : 24;
+  const slug = `${baseSlug}-${user.id.slice(0, 8)}`;
 
   const { data: group } = await supabase
     .from("groups")
     .insert({
       name: groupName,
       slug,
-      monthly_amount: 24,
+      monthly_amount: monthlyAmount,
       created_by: user.id,
     })
     .select("id")
@@ -233,7 +260,7 @@ export async function ensureUserWorkspace(
       profile_id: user.id,
       role: "admin",
       status: "active",
-      monthly_amount: 24,
+      monthly_amount: monthlyAmount,
     })
     .throwOnError();
 }
@@ -406,7 +433,7 @@ export async function getAppContext(): Promise<AppContext> {
     member: memberNames.get(payment.member_id) ?? "Mitglied",
     month: payment.due_month,
     amount: toNumber(payment.amount),
-      status: toPaymentStatus(payment.status),
+    status: toPaymentStatus(payment.status),
     paidAt: payment.paid_at,
   }));
 
