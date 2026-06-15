@@ -20,5 +20,8 @@ export function assertSupabaseEnv() {
     throw new Error("Supabase URL ist ungueltig. Erwartet wird https://projekt-ref.supabase.co");
   }
 
-  return env;
+  return {
+    url: env.url,
+    key: env.key,
+  };
 }
