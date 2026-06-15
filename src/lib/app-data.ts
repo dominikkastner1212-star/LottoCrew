@@ -97,8 +97,12 @@ export type AppContext = {
   };
 };
 
-function toNumber(value: unknown) {
+export function toNumber(value: unknown) {
   return typeof value === "number" ? value : Number(value ?? 0);
+}
+
+export function getDefaultDisplayName(email: string | null | undefined, fallback = "Mitglied") {
+  return email?.split("@")[0] || fallback;
 }
 
 function getProfileName(profile: Record<string, unknown> | null | undefined) {
@@ -108,7 +112,7 @@ function getProfileName(profile: Record<string, unknown> | null | undefined) {
     return displayName;
   }
   if (typeof email === "string" && email.length > 0) {
-    return email.split("@")[0];
+    return getDefaultDisplayName(email);
   }
   return "Mitglied";
 }
@@ -167,7 +171,7 @@ async function ensureProfile(supabase: Awaited<ReturnType<typeof createClient>>,
   const displayName =
     typeof user.user_metadata?.display_name === "string"
       ? user.user_metadata.display_name
-      : user.email?.split("@")[0] ?? "Mitglied";
+      : getDefaultDisplayName(user.email);
 
   const { data: inserted } = await supabase
     .from("profiles")
@@ -187,6 +191,51 @@ async function ensureProfile(supabase: Awaited<ReturnType<typeof createClient>>,
         avatarUrl: inserted.avatar_url,
       }
     : null;
+}
+
+export async function ensureUserWorkspace(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> },
+) {
+  await ensureProfile(supabase, user);
+
+  const { data: existingMembership } = await supabase
+    .from("group_members")
+    .select("id")
+    .eq("profile_id", user.id)
+    .eq("status", "active")
+    .limit(1)
+    .maybeSingle();
+
+  if (existingMembership) {
+    return;
+  }
+
+  const groupName = "AbteilungsJackpot";
+  const slug = `abteilungsjackpot-${user.id.slice(0, 8)}`;
+
+  const { data: group } = await supabase
+    .from("groups")
+    .insert({
+      name: groupName,
+      slug,
+      monthly_amount: 24,
+      created_by: user.id,
+    })
+    .select("id")
+    .single()
+    .throwOnError();
+
+  await supabase
+    .from("group_members")
+    .insert({
+      group_id: group.id,
+      profile_id: user.id,
+      role: "admin",
+      status: "active",
+      monthly_amount: 24,
+    })
+    .throwOnError();
 }
 
 export async function getAppContext(): Promise<AppContext> {
@@ -220,6 +269,7 @@ export async function getAppContext(): Promise<AppContext> {
     return empty;
   }
 
+  await ensureUserWorkspace(supabase, user);
   const profile = await ensureProfile(supabase, user);
 
   const { data: membershipRow } = await supabase

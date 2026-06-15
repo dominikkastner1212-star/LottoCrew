@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getDefaultDisplayName } from "@/lib/app-data";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -65,7 +66,7 @@ export async function createInitialGroup(formData: FormData) {
     .upsert({
       id: userId,
       email,
-      display_name: email.split("@")[0] || "Admin",
+      display_name: getDefaultDisplayName(email, "Admin"),
     })
     .throwOnError();
 
