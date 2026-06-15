@@ -37,6 +37,8 @@ Zum Hinzufuegen von Mitgliedern per E-Mail braucht die Server-App `SUPABASE_SECR
 
 Neue Admins starten ueber `/registrieren`: Name, E-Mail, Gruppenname und Monatsbeitrag werden vor der Mail-Bestaetigung erfasst. Nach dem Klick auf den Bestaetigungslink wird das Profil erstellt, die Gruppe angelegt und der Nutzer direkt als Admin ins Dashboard geleitet.
 
+Geschuetzte App-Seiten leiten ohne Session zu `/login` weiter. Admins koennen Ziehungen, Tipps, Zahlungen, Gewinne und Rollen direkt in der App pflegen.
+
 ## Railway Deployment
 
 1. Repository mit Railway verbinden.

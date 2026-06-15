@@ -3,13 +3,13 @@ import { AppShell, PageHeader } from "@/components/app-shell";
 import { StatusPill } from "@/components/status-pill";
 import { Button } from "@/components/ui/button";
 import { Panel, Surface } from "@/components/ui/panel";
-import { getAppContext } from "@/lib/app-data";
+import { requireAppContext } from "@/lib/auth-guard";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function MembersPage() {
-  const app = await getAppContext();
+  const app = await requireAppContext();
 
   return (
     <AppShell>

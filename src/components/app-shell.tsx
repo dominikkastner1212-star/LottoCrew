@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Command, LogOut, Menu, Search } from "lucide-react";
 import type { ReactNode } from "react";
+import { signOut } from "@/app/actions";
 import { AppLogo } from "@/components/app-logo";
 import { Button, LinkButton } from "@/components/ui/button";
 import { navigation, quickActions } from "@/lib/navigation";
@@ -73,9 +74,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Bell className="size-4" />
                 Hinweise
               </Button>
-              <LinkButton href="/login" variant="ghost" className="size-11 rounded-2xl p-0" aria-label="Abmelden">
-                <LogOut className="size-5" />
-              </LinkButton>
+              <form action={signOut}>
+                <Button variant="ghost" className="size-11 rounded-2xl p-0" aria-label="Abmelden">
+                  <LogOut className="size-5" />
+                </Button>
+              </form>
             </div>
           </header>
           {children}

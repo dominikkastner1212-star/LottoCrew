@@ -8,6 +8,11 @@ function escapePdfText(value: string) {
 
 export async function GET() {
   const app = await getAppContext();
+
+  if (!app.userId) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const lines = [
     "LottoCrew Gewinnhistorie",
     "",

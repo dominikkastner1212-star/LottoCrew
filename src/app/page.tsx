@@ -4,15 +4,14 @@ import { ChartBars } from "@/components/chart-bars";
 import { MetricCard } from "@/components/metric-card";
 import { NumberRow } from "@/components/number-row";
 import { StatusPill } from "@/components/status-pill";
-import { LinkButton } from "@/components/ui/button";
 import { Panel, Surface } from "@/components/ui/panel";
-import { getAppContext } from "@/lib/app-data";
+import { requireAppContext } from "@/lib/auth-guard";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const app = await getAppContext();
+  const app = await requireAppContext();
   const openPayments = app.payments.filter((payment) => payment.status === "open");
   const nextDraw = app.draws.find((draw) => new Date(draw.date) >= new Date()) ?? app.draws[0];
 
@@ -22,24 +21,6 @@ export default async function DashboardPage() {
         title="Dashboard"
         description="Alles Wichtige fuer die naechste Runde: Jackpot, Tipps, offene Beitraege und Gewinne."
       />
-
-      {!app.userId ? (
-        <Panel className="mb-5">
-          <h2 className="text-2xl font-semibold text-white">Bitte einloggen</h2>
-          <p className="mt-2 text-sm text-slate-400">Melde dich an, um eure Abteilungsdaten zu sehen.</p>
-          <LinkButton href="/login" className="mt-5">Zur Anmeldung</LinkButton>
-        </Panel>
-      ) : null}
-
-      {app.userId && !app.group ? (
-        <Panel className="mb-5">
-          <h2 className="text-2xl font-semibold text-white">Gruppe einrichten</h2>
-          <p className="mt-2 text-sm text-slate-400">
-            Es gibt noch keine Tippgemeinschaft fuer deinen Account. Lege sie im Admin-Bereich an, du wirst automatisch Admin.
-          </p>
-          <LinkButton href="/einstellungen" className="mt-5">Admin-Bereich oeffnen</LinkButton>
-        </Panel>
-      ) : null}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="Aktueller Jackpot" value={formatCurrency(nextDraw?.jackpot ?? 0)} trend="Eurojackpot" icon={Euro} tone="gold" />

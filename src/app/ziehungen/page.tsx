@@ -1,14 +1,15 @@
 import { CalendarPlus } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { CreateDrawForm } from "@/components/admin-forms";
 import { Button } from "@/components/ui/button";
 import { Panel, Surface } from "@/components/ui/panel";
-import { getAppContext } from "@/lib/app-data";
+import { requireAppContext } from "@/lib/auth-guard";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function DrawsPage() {
-  const app = await getAppContext();
+  const app = await requireAppContext();
 
   return (
     <AppShell>
@@ -18,6 +19,11 @@ export default async function DrawsPage() {
         action={<Button disabled={!app.isAdmin}><CalendarPlus className="size-4" />Ziehung anlegen</Button>}
       />
       <Panel>
+        {app.group ? (
+          <div className="mb-5">
+            <CreateDrawForm groupId={app.group.id} isAdmin={app.isAdmin} />
+          </div>
+        ) : null}
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {app.draws.map((draw) => (
             <Surface key={draw.id} className="min-h-52">

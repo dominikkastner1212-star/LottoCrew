@@ -2,13 +2,13 @@ import { TrendingUp } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { ChartBars } from "@/components/chart-bars";
 import { Panel, Surface } from "@/components/ui/panel";
-import { getAppContext } from "@/lib/app-data";
+import { requireAppContext } from "@/lib/auth-guard";
 import { formatCurrency } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function StatsPage() {
-  const app = await getAppContext();
+  const app = await requireAppContext();
   const totalStake = app.monthlyStats.reduce((sum, item) => sum + item.stake, 0);
   const returnRate = totalStake > 0 ? (app.totals.totalWinnings / totalStake) * 100 : 0;
 

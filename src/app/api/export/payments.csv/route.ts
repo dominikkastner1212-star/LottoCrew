@@ -4,6 +4,11 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const app = await getAppContext();
+
+  if (!app.userId) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const rows = [
     ["Mitglied", "Monat", "Betrag", "Status", "Bezahlt am"],
     ...app.payments.map((payment) => [

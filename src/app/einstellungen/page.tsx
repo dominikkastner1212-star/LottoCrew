@@ -2,12 +2,12 @@ import { Database, Shield, UserCircle, UsersRound } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { GroupSettingsForm, MemberRoleList, ProfileForm } from "@/components/admin-forms";
 import { Panel, Surface } from "@/components/ui/panel";
-import { getAppContext } from "@/lib/app-data";
+import { requireAppContext } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const app = await getAppContext();
+  const app = await requireAppContext();
 
   return (
     <AppShell>

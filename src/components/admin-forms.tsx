@@ -1,7 +1,17 @@
-import { addMemberByEmail, createInitialGroup, updateGroupSettings, updateMemberRole, updateProfile } from "@/app/actions";
+import {
+  addMemberByEmail,
+  createDraw,
+  createInitialGroup,
+  createPayment,
+  createTicket,
+  createWinning,
+  updateGroupSettings,
+  updateMemberRole,
+  updateProfile,
+} from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/panel";
-import type { AppContext, AppMember } from "@/lib/app-data";
+import type { AppContext, AppDraw, AppMember, AppTicket } from "@/lib/app-data";
 import { formatCurrency } from "@/lib/utils";
 
 export function ProfileForm({ profile }: { profile: AppContext["profile"] }) {
@@ -146,5 +156,193 @@ export function MemberRoleList({ members, groupId, currentProfileId, isAdmin }: 
         );
       })}
     </div>
+  );
+}
+
+export function CreateDrawForm({ groupId, isAdmin }: { groupId: string; isAdmin: boolean }) {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <Surface>
+      <form action={createDraw} className="grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end">
+        <input type="hidden" name="group_id" value={groupId} />
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Ziehungsdatum</span>
+          <input
+            name="draw_date"
+            type="date"
+            required
+            className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+          />
+        </label>
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Jackpot</span>
+          <input
+            name="jackpot_amount"
+            inputMode="decimal"
+            required
+            placeholder="0"
+            className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+          />
+        </label>
+        <Button>Ziehung anlegen</Button>
+      </form>
+    </Surface>
+  );
+}
+
+export function CreateTicketForm({ groupId, draws, isAdmin }: { groupId: string; draws: AppDraw[]; isAdmin: boolean }) {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <Surface>
+      <form action={createTicket} className="space-y-4">
+        <input type="hidden" name="group_id" value={groupId} />
+        <div className="grid gap-3 md:grid-cols-[1fr_1fr_10rem]">
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-300">Tippname</span>
+            <input
+              name="label"
+              required
+              placeholder="Eurojackpot Runde"
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-300">Ziehung</span>
+            <select
+              name="draw_id"
+              required
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+            >
+              <option value="">Auswaehlen</option>
+              {draws.map((draw) => (
+                <option key={draw.id} value={draw.id}>
+                  {draw.date}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="text-sm font-semibold text-slate-300">Einsatz</span>
+            <input
+              name="stake_amount"
+              inputMode="decimal"
+              required
+              placeholder="0"
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+            />
+          </label>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-5">
+          {[1, 2, 3, 4, 5].map((position) => (
+            <input
+              key={position}
+              name={`main_${position}`}
+              inputMode="numeric"
+              required
+              placeholder={`Zahl ${position}`}
+              className="rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+            />
+          ))}
+        </div>
+        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+          {[1, 2].map((position) => (
+            <input
+              key={position}
+              name={`extra_${position}`}
+              inputMode="numeric"
+              required
+              placeholder={`Eurozahl ${position}`}
+              className="rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+            />
+          ))}
+          <Button disabled={draws.length === 0}>Tipp speichern</Button>
+        </div>
+      </form>
+    </Surface>
+  );
+}
+
+export function CreatePaymentForm({ groupId, members, isAdmin }: { groupId: string; members: AppMember[]; isAdmin: boolean }) {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <Surface>
+      <form action={createPayment} className="grid gap-3 md:grid-cols-[1fr_10rem_10rem_auto] md:items-end">
+        <input type="hidden" name="group_id" value={groupId} />
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Mitglied</span>
+          <select name="member_id" required className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50">
+            <option value="">Auswaehlen</option>
+            {members.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Monat</span>
+          <input name="due_month" type="month" required className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50" />
+        </label>
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Betrag</span>
+          <input name="amount" inputMode="decimal" required placeholder="24" className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50" />
+        </label>
+        <Button disabled={members.length === 0}>Zahlung anlegen</Button>
+      </form>
+    </Surface>
+  );
+}
+
+export function CreateWinningForm({ groupId, draws, tickets, isAdmin }: { groupId: string; draws: AppDraw[]; tickets: AppTicket[]; isAdmin: boolean }) {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <Surface>
+      <form action={createWinning} className="grid gap-3 md:grid-cols-[1fr_1fr_9rem_1fr_auto] md:items-end">
+        <input type="hidden" name="group_id" value={groupId} />
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Ziehung</span>
+          <select name="draw_id" required className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50">
+            <option value="">Auswaehlen</option>
+            {draws.map((draw) => (
+              <option key={draw.id} value={draw.id}>
+                {draw.date}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Tipp</span>
+          <select name="ticket_id" required className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50">
+            <option value="">Auswaehlen</option>
+            {tickets.map((ticket) => (
+              <option key={ticket.id} value={ticket.id}>
+                {ticket.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Betrag</span>
+          <input name="amount" inputMode="decimal" required placeholder="0" className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50" />
+        </label>
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Gewinnrang</span>
+          <input name="prize_rank" placeholder="z. B. 3 + 1" className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50" />
+        </label>
+        <Button disabled={draws.length === 0 || tickets.length === 0}>Gewinn speichern</Button>
+      </form>
+    </Surface>
   );
 }
