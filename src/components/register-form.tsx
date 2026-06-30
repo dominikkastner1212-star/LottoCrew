@@ -1,9 +1,10 @@
 "use client";
 
-import { Building2, Mail, Sparkles, UserRound } from "lucide-react";
+import { Building2, KeyRound, Mail, UserPlus, UserRound } from "lucide-react";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { registerWithEmailPassword } from "@/lib/auth/password-auth";
 import { createClient } from "@/lib/supabase/browser";
 
 type RegisterState = "idle" | "loading" | "success" | "error";
@@ -11,6 +12,8 @@ type RegisterState = "idle" | "loading" | "success" | "error";
 export function RegisterForm() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [groupName, setGroupName] = useState("AbteilungsJackpot");
   const [monthlyAmount, setMonthlyAmount] = useState("24");
   const [state, setState] = useState<RegisterState>("idle");
@@ -21,21 +24,20 @@ export function RegisterForm() {
     setState("loading");
     setMessage("");
 
+    if (password !== passwordConfirm) {
+      setState("error");
+      setMessage("Die Passwoerter stimmen nicht ueberein.");
+      return;
+    }
+
     try {
       const supabase = createClient();
-      const origin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-      const normalizedAmount = Number(monthlyAmount.replace(",", "."));
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await registerWithEmailPassword(supabase, {
+        displayName,
         email,
-        options: {
-          emailRedirectTo: `${origin}/auth/confirm?next=/`,
-          shouldCreateUser: true,
-          data: {
-            display_name: displayName.trim(),
-            group_name: groupName.trim(),
-            monthly_amount: Number.isFinite(normalizedAmount) ? normalizedAmount : 24,
-          },
-        },
+        groupName,
+        monthlyAmount,
+        password,
       });
 
       if (error) {
@@ -45,7 +47,7 @@ export function RegisterForm() {
       }
 
       setState("success");
-      setMessage("Bestaetigungslink wurde gesendet. Nach dem Klick bist du direkt in der App.");
+      setMessage("Registrierung erstellt. Du kannst dich jetzt mit E-Mail und Passwort einloggen.");
     } catch (error) {
       setState("error");
       const errorMessage = error instanceof Error ? error.message : "";
@@ -86,6 +88,38 @@ export function RegisterForm() {
           />
         </div>
       </label>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Passwort</span>
+          <div className="mt-2 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3">
+            <KeyRound className="size-4 text-slate-500" />
+            <input
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Mind. 6 Zeichen"
+              className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
+            />
+          </div>
+        </label>
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-300">Passwort wiederholen</span>
+          <div className="mt-2 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3">
+            <KeyRound className="size-4 text-slate-500" />
+            <input
+              type="password"
+              required
+              minLength={6}
+              value={passwordConfirm}
+              onChange={(event) => setPasswordConfirm(event.target.value)}
+              placeholder="Nochmal eingeben"
+              className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
+            />
+          </div>
+        </label>
+      </div>
       <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
         <label className="block">
           <span className="text-sm font-semibold text-slate-300">Gruppe</span>
@@ -111,8 +145,8 @@ export function RegisterForm() {
         </label>
       </div>
       <Button className="w-full" disabled={state === "loading"}>
-        <Sparkles className="size-4" />
-        {state === "loading" ? "Wird vorbereitet..." : "Registrieren und bestaetigen"}
+        <UserPlus className="size-4" />
+        {state === "loading" ? "Wird registriert..." : "Registrieren"}
       </Button>
       {message ? (
         <div

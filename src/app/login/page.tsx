@@ -13,7 +13,7 @@ export default function LoginPage() {
         <div className="mt-10">
           <h1 className="text-4xl font-semibold tracking-normal text-white">Einloggen</h1>
           <p className="mt-3 text-sm leading-6 text-slate-400">
-            Mit deiner Firmen-E-Mail anmelden und direkt sehen, ob du bezahlt hast, welche Tipps laufen und ob es Gewinne gab.
+            Mit E-Mail und Passwort anmelden und direkt sehen, ob du bezahlt hast, welche Tipps laufen und ob es Gewinne gab.
           </p>
         </div>
         <LoginForm />

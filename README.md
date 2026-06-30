@@ -35,7 +35,7 @@ Die RLS-Policies erlauben Teilnehmern nur Zugriff auf ihre Gruppen. Gruppen-Admi
 Beim ersten Login kann der erste Nutzer im Admin-Bereich eine Gruppe erstellen und wird automatisch Admin.
 Zum Hinzufuegen von Mitgliedern per E-Mail braucht die Server-App `SUPABASE_SECRET_KEY` mit dem Supabase `service_role` Key. Dieser Key darf niemals als `NEXT_PUBLIC_` Variable gesetzt werden.
 
-Neue Admins starten ueber `/registrieren`: Name, E-Mail, Gruppenname und Monatsbeitrag werden vor der Mail-Bestaetigung erfasst. Nach dem Klick auf den Bestaetigungslink wird das Profil erstellt, die Gruppe angelegt und der Nutzer direkt als Admin ins Dashboard geleitet.
+Neue Admins starten ueber `/registrieren`: Name, E-Mail, Passwort, Gruppenname und Monatsbeitrag werden erfasst. Danach melden sie sich klassisch mit E-Mail und Passwort an.
 
 Geschuetzte App-Seiten leiten ohne Session zu `/login` weiter. Admins koennen Ziehungen, Tipps, Zahlungen, Gewinne und Rollen direkt in der App pflegen.
 

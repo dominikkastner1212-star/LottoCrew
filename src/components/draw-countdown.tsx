@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-function getParts(targetDate: string | null) {
+function getParts(targetDate: string | null, now: number) {
   if (!targetDate) {
     return ["--", "--", "--"];
   }
 
   const target = new Date(`${targetDate}T20:00:00`);
-  const diff = Math.max(0, target.getTime() - Date.now());
+  const diff = Math.max(0, target.getTime() - now);
   const days = Math.floor(diff / 86_400_000);
   const hours = Math.floor((diff % 86_400_000) / 3_600_000);
   const minutes = Math.floor((diff % 3_600_000) / 60_000);
@@ -17,14 +17,13 @@ function getParts(targetDate: string | null) {
 }
 
 export function DrawCountdown({ date }: { date: string | null }) {
-  const initialParts = useMemo(() => getParts(date), [date]);
-  const [parts, setParts] = useState(initialParts);
+  const [now, setNow] = useState(() => Date.now());
+  const parts = useMemo(() => getParts(date, now), [date, now]);
 
   useEffect(() => {
-    setParts(getParts(date));
-    const interval = window.setInterval(() => setParts(getParts(date)), 30_000);
+    const interval = window.setInterval(() => setNow(Date.now()), 30_000);
     return () => window.clearInterval(interval);
-  }, [date]);
+  }, []);
 
   return (
     <div className="mt-4 grid grid-cols-3 gap-3 text-center">

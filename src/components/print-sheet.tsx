@@ -43,8 +43,11 @@ export function PrintSheet({ draws, tickets }: { draws: AppDraw[]; tickets: AppT
   const [adjustY, setAdjustY] = useState(0);
 
   useEffect(() => {
-    setAdjustX(Number(window.localStorage.getItem("lottocrew_print_x") ?? "0"));
-    setAdjustY(Number(window.localStorage.getItem("lottocrew_print_y") ?? "0"));
+    const timeout = window.setTimeout(() => {
+      setAdjustX(Number(window.localStorage.getItem("lottocrew_print_x") ?? "0"));
+      setAdjustY(Number(window.localStorage.getItem("lottocrew_print_y") ?? "0"));
+    }, 0);
+    return () => window.clearTimeout(timeout);
   }, []);
 
   function saveAdjustments(nextX: number, nextY: number) {

@@ -13,7 +13,7 @@ export default function RegisterPage() {
         <div className="mt-10">
           <h1 className="text-4xl font-semibold tracking-normal text-white">Registrieren</h1>
           <p className="mt-3 text-sm leading-6 text-slate-400">
-            Gib deine Daten einmal ein. Nach der Mail-Bestaetigung wird dein Profil erstellt, deine Gruppe angelegt und du bist direkt Admin.
+            Gib deine Daten einmal ein. Danach meldest du dich klassisch mit E-Mail und Passwort an.
           </p>
         </div>
         <RegisterForm />
