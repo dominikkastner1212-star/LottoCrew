@@ -539,6 +539,17 @@ export async function createWinning(formData: FormData) {
     throw new Error("Ziehung und Tipp sind erforderlich.");
   }
 
+  // Entfernt einen eventuell von der automatischen Auswertung angelegten
+  // Platzhalter (source "auto", Betrag 0) fuer denselben Tipp, damit der
+  // manuell erfasste Betrag ihn ersetzt statt einen Doppeleintrag zu erzeugen.
+  await supabase
+    .from("winnings")
+    .delete()
+    .eq("group_id", groupId)
+    .eq("draw_id", drawId)
+    .eq("ticket_id", ticketId)
+    .eq("source", "auto");
+
   await supabase
     .from("winnings")
     .insert({
@@ -619,6 +630,18 @@ export async function evaluateDraw(formData: FormData) {
 
   await supabase.from("winnings").delete().eq("group_id", groupId).eq("draw_id", drawId).eq("source", "auto");
 
+  // Tipps, fuer die bereits ein Betrag manuell erfasst wurde, bekommen keinen
+  // Auto-Platzhalter mehr, damit die manuelle Eingabe nicht ueberschrieben oder
+  // dupliziert wird.
+  const { data: manualWinnings } = await supabase
+    .from("winnings")
+    .select("ticket_id")
+    .eq("group_id", groupId)
+    .eq("draw_id", drawId)
+    .eq("source", "manual")
+    .throwOnError();
+  const manuallyRecorded = new Set((manualWinnings ?? []).map((row) => row.ticket_id));
+
   const automaticWinnings: Array<{
     group_id: string;
     draw_id: string;
@@ -648,7 +671,7 @@ export async function evaluateDraw(formData: FormData) {
       .eq("group_id", groupId)
       .throwOnError();
 
-    if (prizeRank) {
+    if (prizeRank && !manuallyRecorded.has(ticket.id)) {
       automaticWinnings.push({
         group_id: groupId,
         draw_id: drawId,

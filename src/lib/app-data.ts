@@ -470,6 +470,8 @@ export async function getAppContext(): Promise<AppContext> {
     paidAt: payment.paid_at,
   }));
 
+  const activeMemberCount = members.filter((member) => member.status === "active").length;
+
   const winnings: AppWinning[] = (winningsResult.data ?? []).map((winning) => {
     const amount = toNumber(winning.amount);
     return {
@@ -477,7 +479,7 @@ export async function getAppContext(): Promise<AppContext> {
       date: winning.recorded_at,
       ticket: ticketLabels.get(winning.ticket_id) ?? "Tipp",
       amount,
-      perMember: members.length ? amount / members.length : 0,
+      perMember: activeMemberCount ? amount / activeMemberCount : 0,
       rank: winning.prize_rank ?? "Gewinn",
     };
   });
