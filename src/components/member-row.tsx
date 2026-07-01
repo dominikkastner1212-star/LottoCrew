@@ -2,7 +2,7 @@
 
 import { Mail, Pencil, UserMinus, X } from "lucide-react";
 import { useState } from "react";
-import { deactivateMember, updateMemberEmail, updateMemberRole } from "@/app/actions";
+import { deactivateMember, reactivateMember, updateMemberEmail, updateMemberRole } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/panel";
 import type { AppMember } from "@/lib/app-data";
@@ -110,6 +110,14 @@ export function MemberRow({
             <UserMinus className="size-3.5" /> Mitglied deaktivieren
           </button>
         )
+      ) : null}
+
+      {isAdmin && isInactive ? (
+        <form action={reactivateMember} className="mt-2">
+          <input type="hidden" name="group_id" value={groupId} />
+          <input type="hidden" name="member_id" value={member.id} />
+          <Button variant="secondary" className="w-full">Wieder aktivieren</Button>
+        </form>
       ) : null}
     </Surface>
   );

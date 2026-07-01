@@ -295,6 +295,25 @@ export async function updateMemberRole(formData: FormData) {
   revalidatePath("/teilnehmer");
 }
 
+export async function reactivateMember(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const memberId = String(formData.get("member_id") ?? "");
+
+  await assertAdmin(supabase, userId, groupId);
+
+  const admin = createAdminClient();
+  await admin
+    .from("group_members")
+    .update({ status: "active" })
+    .eq("id", memberId)
+    .eq("group_id", groupId)
+    .throwOnError();
+
+  revalidatePath("/einstellungen");
+  revalidatePath("/teilnehmer");
+}
+
 export async function deactivateMember(formData: FormData) {
   const { supabase, userId } = await getUserId();
   const groupId = String(formData.get("group_id") ?? "");
@@ -339,7 +358,7 @@ export async function deactivateMember(formData: FormData) {
 
   await admin
     .from("group_members")
-    .update({ status: "inactive" })
+    .update({ status: "paused" })
     .eq("id", memberId)
     .eq("group_id", groupId)
     .throwOnError();
