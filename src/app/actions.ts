@@ -295,6 +295,115 @@ export async function updateMemberRole(formData: FormData) {
   revalidatePath("/teilnehmer");
 }
 
+export async function deactivateMember(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const memberId = String(formData.get("member_id") ?? "");
+  const memberProfileId = String(formData.get("profile_id") ?? "");
+
+  await assertAdmin(supabase, userId, groupId);
+
+  // Man kann sich nicht selbst deaktivieren.
+  if (memberProfileId === userId) {
+    throw new Error("Du kannst dich nicht selbst deaktivieren.");
+  }
+
+  const admin = createAdminClient();
+
+  // Rolle des zu deaktivierenden Mitglieds ermitteln.
+  const { data: target } = await admin
+    .from("group_members")
+    .select("role,status")
+    .eq("id", memberId)
+    .eq("group_id", groupId)
+    .maybeSingle()
+    .throwOnError();
+
+  if (!target) {
+    throw new Error("Mitglied nicht gefunden.");
+  }
+
+  // Den letzten aktiven Admin nicht deaktivieren, sonst sperrt sich die Gruppe aus.
+  if (target.role === "admin") {
+    const { count } = await admin
+      .from("group_members")
+      .select("id", { count: "exact", head: true })
+      .eq("group_id", groupId)
+      .eq("role", "admin")
+      .eq("status", "active");
+
+    if ((count ?? 0) <= 1) {
+      throw new Error("Der letzte aktive Admin kann nicht deaktiviert werden.");
+    }
+  }
+
+  await admin
+    .from("group_members")
+    .update({ status: "inactive" })
+    .eq("id", memberId)
+    .eq("group_id", groupId)
+    .throwOnError();
+
+  revalidatePath("/einstellungen");
+  revalidatePath("/teilnehmer");
+}
+
+export async function updateMemberEmail(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const memberProfileId = String(formData.get("profile_id") ?? "");
+  const newEmail = String(formData.get("email") ?? "").trim().toLowerCase();
+
+  await assertAdmin(supabase, userId, groupId);
+
+  if (!newEmail.includes("@")) {
+    throw new Error("Bitte eine gueltige E-Mail-Adresse eintragen.");
+  }
+
+  const admin = createAdminClient();
+
+  // Sicherstellen, dass das Mitglied wirklich zu dieser Gruppe gehoert.
+  const { data: membership } = await admin
+    .from("group_members")
+    .select("id")
+    .eq("group_id", groupId)
+    .eq("profile_id", memberProfileId)
+    .maybeSingle()
+    .throwOnError();
+
+  if (!membership) {
+    throw new Error("Mitglied gehoert nicht zu dieser Gruppe.");
+  }
+
+  // Pruefen, ob die neue Adresse bereits von jemand anderem verwendet wird.
+  const { data: clash } = await admin
+    .from("profiles")
+    .select("id")
+    .ilike("email", newEmail)
+    .neq("id", memberProfileId)
+    .maybeSingle()
+    .throwOnError();
+
+  if (clash) {
+    throw new Error("Diese E-Mail wird bereits von einem anderen Konto verwendet.");
+  }
+
+  // Beide Stellen aktualisieren: Login-System (Auth) und Profil.
+  const { error: authError } = await admin.auth.admin.updateUserById(memberProfileId, {
+    email: newEmail,
+    email_confirm: true,
+  });
+
+  if (authError) {
+    throw authError;
+  }
+
+  await admin.from("profiles").update({ email: newEmail }).eq("id", memberProfileId).throwOnError();
+
+  revalidatePath("/einstellungen");
+  revalidatePath("/teilnehmer");
+}
+
 export async function addMemberWithPassword(formData: FormData) {
   const { supabase, userId } = await getUserId();
   const groupId = String(formData.get("group_id") ?? "");

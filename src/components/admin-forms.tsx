@@ -7,15 +7,14 @@ import {
   createWinning,
   evaluateDraw,
   updateGroupSettings,
-  updateMemberRole,
   updateProfile,
   uploadTicketDocument,
 } from "@/app/actions";
 import { AddMemberForm } from "@/components/add-member-form";
+import { MemberRow } from "@/components/member-row";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/panel";
 import type { AppContext, AppDraw, AppMember, AppTicket } from "@/lib/app-data";
-import { formatCurrency } from "@/lib/utils";
 
 export function ProfileForm({ profile }: { profile: AppContext["profile"] }) {
   return (
@@ -110,29 +109,13 @@ export function MemberRoleList({ members, groupId, currentProfileId, isAdmin }: 
       {members.map((member) => {
         const isSelf = member.profileId === currentProfileId;
         return (
-          <Surface key={member.id}>
-            <form action={updateMemberRole} className="space-y-3">
-              <input type="hidden" name="group_id" value={groupId} />
-              <input type="hidden" name="member_id" value={member.id} />
-              <input type="hidden" name="profile_id" value={member.profileId} />
-              <div>
-                <p className="font-semibold text-slate-900">{member.name}</p>
-                <p className="mt-1 text-xs text-slate-500">{member.email || "ohne E-Mail"} - {formatCurrency(member.monthlyAmount)}</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <select
-                  name="role"
-                  defaultValue={member.role}
-                  disabled={!isAdmin || isSelf}
-                  className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-900 outline-none focus:border-amber-300/50 disabled:opacity-60"
-                >
-                  <option value="participant">Teilnehmer</option>
-                  <option value="admin">Admin</option>
-                </select>
-                <Button variant="secondary" disabled={!isAdmin || isSelf}>Speichern</Button>
-              </div>
-            </form>
-          </Surface>
+          <MemberRow
+            key={member.id}
+            member={member}
+            groupId={groupId}
+            isAdmin={isAdmin}
+            isSelf={isSelf}
+          />
         );
       })}
     </div>
