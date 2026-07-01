@@ -34,8 +34,8 @@ export default async function TipsPage() {
       </Panel>
       {app.group && app.isAdmin ? (
         <Panel id="spielschein-upload" className="mt-5">
-          <h2 className="text-xl font-semibold text-white">Spielschein hinterlegen</h2>
-          <p className="mt-1 text-sm text-slate-400">Foto oder PDF zum passenden Tipp speichern.</p>
+          <h2 className="text-xl font-semibold text-slate-900">Spielschein hinterlegen</h2>
+          <p className="mt-1 text-sm text-slate-500">Foto oder PDF zum passenden Tipp speichern.</p>
           <div className="mt-5">
             <TicketDocumentUploadForm groupId={app.group.id} tickets={app.tickets} isAdmin={app.isAdmin} />
           </div>

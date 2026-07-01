@@ -32,19 +32,19 @@ export function AppShell({ children }: { children: ReactNode }) {
                   className={cn(
                     "group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-semibold transition",
                     active
-                      ? "bg-white text-slate-950 shadow-[0_16px_45px_rgba(255,255,255,.14)]"
-                      : "text-slate-300 hover:bg-white/[.08] hover:text-white",
+                      ? "bg-amber-100 text-slate-900 shadow-[0_10px_28px_rgba(232,166,0,.14)]"
+                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
                   )}
                 >
-                  <Icon className={cn("size-4", active ? "text-violet-600" : "text-slate-400 group-hover:text-amber-200")} />
+                  <Icon className={cn("size-4", active ? "text-amber-600" : "text-slate-400 group-hover:text-amber-500")} />
                   {item.label}
                 </Link>
               );
             })}
           </nav>
-          <div className="rounded-3xl border border-amber-300/20 bg-amber-300/10 p-4">
-            <p className="text-sm font-semibold text-amber-100">Admin-Fokus</p>
-            <p className="mt-1 text-xs leading-5 text-amber-100/70">Ziehungen, Tipps und Beitrage in wenigen Klicks pflegen.</p>
+          <div className="rounded-3xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-semibold text-amber-900">Admin-Fokus</p>
+            <p className="mt-1 text-xs leading-5 text-amber-800/80">Ziehungen, Tipps und Beitrage in wenigen Klicks pflegen.</p>
             <LinkButton href="/einstellungen" className="mt-4 w-full" variant="secondary">
               Aktionen
             </LinkButton>
@@ -58,14 +58,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Menu className="size-5" />
               </Button>
             </div>
-            <div className="hidden min-w-0 flex-1 items-center gap-3 rounded-2xl border border-white/10 bg-white/[.055] px-3 py-2 md:flex">
-              <Search className="size-4 text-slate-400" />
+            <div className="hidden min-w-0 flex-1 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 md:flex">
+              <Search className="size-4 text-slate-500" />
               <input
                 aria-label="Suchen"
                 placeholder="Suchen nach Tipp, Mitglied, Zahlung..."
-                className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
+                className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-500 outline-none"
               />
-              <kbd className="rounded-lg border border-white/10 bg-white/[.06] px-2 py-1 text-[0.68rem] text-slate-400">
+              <kbd className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[0.68rem] text-slate-500">
                 <Command className="mr-1 inline size-3" />K
               </kbd>
             </div>
@@ -95,7 +95,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               href={item.href}
               className={cn(
                 "flex min-h-14 min-w-20 flex-col items-center justify-center gap-1 rounded-2xl text-[0.68rem] font-semibold transition",
-                active ? "bg-white text-slate-950" : "text-slate-400 hover:bg-white/[.08] hover:text-white",
+                active ? "bg-amber-100 text-slate-900" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
               )}
             >
               <Icon className="size-4" />
@@ -120,8 +120,8 @@ export function PageHeader({
   return (
     <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div>
-        <h1 className="text-3xl font-semibold tracking-normal text-white md:text-5xl">{title}</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400 md:text-base">{description}</p>
+        <h1 className="text-3xl font-semibold tracking-normal text-slate-900 md:text-5xl">{title}</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 md:text-base">{description}</p>
       </div>
       {action ? <div className="flex shrink-0 gap-2">{action}</div> : null}
     </div>
@@ -136,10 +136,10 @@ export function QuickActionRail() {
         return (
           <button
             key={action.label}
-            className="group flex items-center justify-between rounded-3xl border border-white/10 bg-white/[.055] p-4 text-left transition hover:-translate-y-0.5 hover:bg-white/[.09]"
+            className="group flex items-center justify-between rounded-3xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:-translate-y-0.5 hover:bg-slate-100"
           >
-            <span className="text-sm font-semibold text-white">{action.label}</span>
-            <span className="grid size-10 place-items-center rounded-2xl bg-white/[.08] text-amber-200 transition group-hover:bg-amber-300 group-hover:text-slate-950">
+            <span className="text-sm font-semibold text-slate-900">{action.label}</span>
+            <span className="grid size-10 place-items-center rounded-2xl bg-amber-100 text-amber-600 transition group-hover:bg-amber-300 group-hover:text-slate-950">
               <Icon className="size-4" />
             </span>
           </button>

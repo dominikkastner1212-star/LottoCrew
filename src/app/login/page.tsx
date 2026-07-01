@@ -11,16 +11,16 @@ export default function LoginPage() {
       <Panel className="relative w-full max-w-md p-6 md:p-8">
         <AppLogo />
         <div className="mt-10">
-          <h1 className="text-4xl font-semibold tracking-normal text-white">Einloggen</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-400">
+          <h1 className="text-4xl font-semibold tracking-normal text-slate-900">Einloggen</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-500">
             Mit E-Mail und Passwort anmelden und direkt sehen, ob du bezahlt hast, welche Tipps laufen und ob es Gewinne gab.
           </p>
         </div>
         <LoginForm />
-        <div className="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-300/15 bg-emerald-400/10 p-4">
-          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-200" />
-          <p className="text-xs leading-5 text-emerald-100/80">
-            Noch kein Konto? <Link href="/registrieren" className="font-semibold text-white">Jetzt registrieren</Link>
+        <div className="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+          <p className="text-xs leading-5 text-emerald-800/80">
+            Noch kein Konto? <Link href="/registrieren" className="font-semibold text-slate-900">Jetzt registrieren</Link>
           </p>
         </div>
       </Panel>

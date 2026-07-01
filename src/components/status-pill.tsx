@@ -2,20 +2,20 @@ import { CheckCircle2, Clock3, Send, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const styles = {
-  geplant: "border-sky-300/20 bg-sky-400/10 text-sky-100",
-  abgegeben: "border-violet-300/20 bg-violet-400/10 text-violet-100",
-  ausgewertet: "border-emerald-300/20 bg-emerald-400/10 text-emerald-100",
-  offen: "border-amber-300/20 bg-amber-400/10 text-amber-100",
-  bezahlt: "border-emerald-300/20 bg-emerald-400/10 text-emerald-100",
-  Admin: "border-amber-300/20 bg-amber-400/10 text-amber-100",
-  Teilnehmer: "border-slate-300/20 bg-white/[.06] text-slate-200",
-  planned: "border-sky-300/20 bg-sky-400/10 text-sky-100",
-  submitted: "border-violet-300/20 bg-violet-400/10 text-violet-100",
-  evaluated: "border-emerald-300/20 bg-emerald-400/10 text-emerald-100",
-  open: "border-amber-300/20 bg-amber-400/10 text-amber-100",
-  paid: "border-emerald-300/20 bg-emerald-400/10 text-emerald-100",
-  admin: "border-amber-300/20 bg-amber-400/10 text-amber-100",
-  participant: "border-slate-300/20 bg-white/[.06] text-slate-200",
+  geplant: "border-sky-200 bg-sky-50 text-sky-700",
+  abgegeben: "border-violet-200 bg-violet-50 text-violet-700",
+  ausgewertet: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  offen: "border-amber-200 bg-amber-50 text-amber-700",
+  bezahlt: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  Admin: "border-amber-200 bg-amber-50 text-amber-700",
+  Teilnehmer: "border-slate-200 bg-slate-50 text-slate-600",
+  planned: "border-sky-200 bg-sky-50 text-sky-700",
+  submitted: "border-violet-200 bg-violet-50 text-violet-700",
+  evaluated: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  open: "border-amber-200 bg-amber-50 text-amber-700",
+  paid: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  admin: "border-amber-200 bg-amber-50 text-amber-700",
+  participant: "border-slate-200 bg-slate-50 text-slate-600",
 };
 
 const labels: Record<keyof typeof styles, string> = {

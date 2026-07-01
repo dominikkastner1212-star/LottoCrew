@@ -35,15 +35,15 @@ export default async function DashboardPage() {
         <Panel className="premium-ring overflow-hidden">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-sm font-semibold text-amber-200">{app.group?.name ?? "LottoCrew"}</p>
-              <h2 className="mt-2 max-w-xl text-3xl font-semibold tracking-normal text-white md:text-5xl">
+              <p className="text-sm font-semibold text-amber-600">{app.group?.name ?? "LottoCrew"}</p>
+              <h2 className="mt-2 max-w-xl text-3xl font-semibold tracking-normal text-slate-900 md:text-5xl">
                 {formatCurrency(nextDraw?.jackpot ?? 0)} fuer eure naechste Eurojackpot-Runde.
               </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-400">
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
                 Alle Kennzahlen kommen direkt aus eurer Supabase-Gruppe.
               </p>
             </div>
-            <div className="rounded-[28px] border border-white/10 bg-slate-950/50 p-5">
+            <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Live-Fokus</p>
               <DrawCountdown date={nextDraw?.date ?? null} />
             </div>
@@ -56,19 +56,19 @@ export default async function DashboardPage() {
         <Panel>
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-white">Erinnerungen</h2>
-              <p className="mt-1 text-sm text-slate-400">Offene Beitraege vor der Ziehung.</p>
+              <h2 className="text-xl font-semibold text-slate-900">Erinnerungen</h2>
+              <p className="mt-1 text-sm text-slate-500">Offene Beitraege vor der Ziehung.</p>
             </div>
-            <AlertCircle className="size-5 text-amber-200" />
+            <AlertCircle className="size-5 text-amber-600" />
           </div>
           <div className="mt-5 space-y-3">
             {openPayments.map((payment) => (
               <Surface key={payment.id} className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="font-semibold text-white">{payment.member}</p>
-                  <p className="text-xs text-slate-400">{formatDate(payment.month)}</p>
+                  <p className="font-semibold text-slate-900">{payment.member}</p>
+                  <p className="text-xs text-slate-500">{formatDate(payment.month)}</p>
                 </div>
-                <p className="font-semibold text-amber-100">{formatCurrency(payment.amount)}</p>
+                <p className="font-semibold text-amber-700">{formatCurrency(payment.amount)}</p>
               </Surface>
             ))}
             {openPayments.length === 0 ? <Surface className="text-sm text-slate-500">Keine offenen Zahlungen.</Surface> : null}
@@ -81,8 +81,8 @@ export default async function DashboardPage() {
         <Panel>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-semibold text-white">Aktive Tipps</h2>
-              <p className="mt-1 text-sm text-slate-400">Mehrere Tipps pro Ziehung, sauber getrennt.</p>
+              <h2 className="text-xl font-semibold text-slate-900">Aktive Tipps</h2>
+              <p className="mt-1 text-sm text-slate-500">Mehrere Tipps pro Ziehung, sauber getrennt.</p>
             </div>
             <StatusPill status="submitted" />
           </div>
@@ -91,7 +91,7 @@ export default async function DashboardPage() {
               <Surface key={ticket.id}>
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <p className="font-semibold text-white">{ticket.label}</p>
+                    <p className="font-semibold text-slate-900">{ticket.label}</p>
                     <p className="mt-1 text-xs text-slate-500">{ticket.id} - {ticket.date ? formatDate(ticket.date) : "ohne Ziehung"}</p>
                   </div>
                   <StatusPill status={ticket.status as "planned" | "submitted" | "evaluated"} />
@@ -110,20 +110,20 @@ export default async function DashboardPage() {
         <Panel>
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-semibold text-white">Gewinntrend</h2>
-              <p className="mt-1 text-sm text-slate-400">Einsaetze und Gewinne im Monatsvergleich.</p>
+              <h2 className="text-xl font-semibold text-slate-900">Gewinntrend</h2>
+              <p className="mt-1 text-sm text-slate-500">Einsaetze und Gewinne im Monatsvergleich.</p>
             </div>
-            <Trophy className="size-5 text-amber-200" />
+            <Trophy className="size-5 text-amber-600" />
           </div>
           <ChartBars monthlyStats={app.monthlyStats} />
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <Surface>
-              <p className="text-sm text-slate-400">Letzter Gewinn</p>
-              <p className="mt-2 text-2xl font-semibold text-white">{formatCurrency(app.totals.lastWinnings)}</p>
+              <p className="text-sm text-slate-500">Letzter Gewinn</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-900">{formatCurrency(app.totals.lastWinnings)}</p>
             </Surface>
             <Surface>
-              <p className="text-sm text-slate-400">Gesamt historisch</p>
-              <p className="mt-2 text-2xl font-semibold text-white">{formatCurrency(app.totals.totalWinnings)}</p>
+              <p className="text-sm text-slate-500">Gesamt historisch</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-900">{formatCurrency(app.totals.totalWinnings)}</p>
             </Surface>
           </div>
         </Panel>

@@ -3,7 +3,7 @@ import type { MonthlyStat } from "@/lib/app-data";
 export function ChartBars({ monthlyStats }: { monthlyStats: MonthlyStat[] }) {
   if (monthlyStats.length === 0) {
     return (
-      <div className="mt-5 grid h-48 place-items-center rounded-3xl border border-white/10 bg-white/[.04] text-center text-sm text-slate-500">
+      <div className="mt-5 grid h-48 place-items-center rounded-3xl border border-slate-200 bg-slate-50 text-center text-sm text-slate-500">
         Noch keine Statistikdaten vorhanden.
       </div>
     );
@@ -17,7 +17,7 @@ export function ChartBars({ monthlyStats }: { monthlyStats: MonthlyStat[] }) {
         <div key={item.month} className="flex h-full flex-1 flex-col justify-end gap-2">
           <div className="flex flex-1 items-end gap-1.5">
             <div
-              className="w-full rounded-t-xl bg-white/[.09]"
+              className="w-full rounded-t-xl bg-slate-100"
               style={{ height: `${Math.max(12, (item.stake / max) * 100)}%` }}
               title={`Einsatz ${item.stake}`}
             />

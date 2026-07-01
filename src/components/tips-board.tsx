@@ -31,23 +31,23 @@ export function TipsBoard({ tickets }: { tickets: AppTicket[] }) {
   return (
     <div>
       <div className="mb-5 grid gap-3 lg:grid-cols-[1fr_auto]">
-        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.055] px-4 py-3">
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
           <Search className="size-4 text-slate-500" />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Tipp oder ID suchen..."
-            className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
+            className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-500 outline-none"
           />
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto rounded-2xl border border-white/10 bg-white/[.055] p-1.5">
+        <div className="flex items-center gap-2 overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50 p-1.5">
           <SlidersHorizontal className="ml-2 size-4 shrink-0 text-slate-500" />
           {statusOptions.map((option) => (
             <button
               key={option}
               onClick={() => setStatus(option)}
               className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                status === option ? "bg-white text-slate-950" : "text-slate-400 hover:bg-white/[.08] hover:text-white"
+                status === option ? "bg-amber-100 text-slate-900" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               {statusLabels[option]}
@@ -58,14 +58,14 @@ export function TipsBoard({ tickets }: { tickets: AppTicket[] }) {
 
       <div className="grid gap-4">
         {filteredTickets.map((ticket) => (
-          <Surface key={ticket.id} className="transition hover:bg-white/[.085]">
+          <Surface key={ticket.id} className="transition hover:bg-slate-100">
             <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h2 className="text-lg font-semibold text-white">{ticket.label}</h2>
+                  <h2 className="text-lg font-semibold text-slate-900">{ticket.label}</h2>
                   <StatusPill status={ticket.status as "planned" | "submitted" | "evaluated"} />
                 </div>
-                <p className="mt-2 text-sm text-slate-400">
+                <p className="mt-2 text-sm text-slate-500">
                   {ticket.id} - Ziehung {ticket.date ? formatDate(ticket.date) : "noch nicht zugeordnet"}
                 </p>
               </div>
@@ -73,22 +73,22 @@ export function TipsBoard({ tickets }: { tickets: AppTicket[] }) {
               <div className="grid grid-cols-2 gap-3 text-right sm:min-w-52">
                 <div>
                   <p className="text-xs text-slate-500">Einsatz</p>
-                  <p className="font-semibold text-white">{formatCurrency(ticket.stake)}</p>
+                  <p className="font-semibold text-slate-900">{formatCurrency(ticket.stake)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Gewinn</p>
-                  <p className="font-semibold text-emerald-100">{formatCurrency(ticket.winnings)}</p>
+                  <p className="font-semibold text-emerald-700">{formatCurrency(ticket.winnings)}</p>
                 </div>
               </div>
             </div>
-            <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
               {ticket.prizeRank ? (
-                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 font-semibold text-emerald-100">
+                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
                   <Target className="size-3.5" />
                   {ticket.prizeRank} · {ticket.mainMatches}+{ticket.euroMatches}
                 </span>
               ) : ticket.status === "evaluated" ? (
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[.06] px-3 py-1">
+                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
                   <Target className="size-3.5" />
                   {ticket.mainMatches}+{ticket.euroMatches} Treffer
                 </span>
@@ -98,7 +98,7 @@ export function TipsBoard({ tickets }: { tickets: AppTicket[] }) {
                   href={ticket.imageUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 font-semibold text-amber-100 transition hover:bg-amber-300 hover:text-slate-950"
+                  className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 font-semibold text-amber-700 transition hover:bg-amber-300 hover:text-slate-950"
                 >
                   <FileText className="size-3.5" />
                   Spielschein

@@ -20,5 +20,5 @@ export function Surface({
   children: ReactNode;
   className?: string;
 } & ComponentPropsWithoutRef<"div">) {
-  return <div className={cn("rounded-3xl border border-white/10 bg-white/[.055] p-4", className)} {...props}>{children}</div>;
+  return <div className={cn("rounded-3xl border border-slate-200 bg-slate-50 p-4", className)} {...props}>{children}</div>;
 }

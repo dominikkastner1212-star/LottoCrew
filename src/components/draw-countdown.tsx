@@ -28,8 +28,8 @@ export function DrawCountdown({ date }: { date: string | null }) {
   return (
     <div className="mt-4 grid grid-cols-3 gap-3 text-center">
       {parts.map((part, index) => (
-        <div key={index} className="rounded-2xl bg-white/[.07] p-4">
-          <p className="font-mono text-2xl font-semibold text-white">{part}</p>
+        <div key={index} className="rounded-2xl bg-slate-50 p-4">
+          <p className="font-mono text-2xl font-semibold text-slate-900">{part}</p>
           <p className="mt-1 text-[0.65rem] text-slate-500">{["Tage", "Std", "Min"][index]}</p>
         </div>
       ))}

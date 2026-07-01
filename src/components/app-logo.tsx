@@ -8,8 +8,8 @@ export function AppLogo() {
         <Sparkles className="size-5" />
       </div>
       <div>
-        <p className="text-[1.05rem] font-semibold tracking-normal text-white">{appName}</p>
-        <p className="text-xs font-medium text-slate-400">AbteilungsJackpot</p>
+        <p className="text-[1.05rem] font-semibold tracking-normal text-slate-900">{appName}</p>
+        <p className="text-xs font-medium text-slate-500">AbteilungsJackpot</p>
       </div>
     </div>
   );

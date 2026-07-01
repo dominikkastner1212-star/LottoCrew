@@ -28,18 +28,18 @@ export default async function DrawsPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {app.draws.map((draw) => (
             <Surface key={draw.id} className="min-h-52">
-              <p className="text-sm font-semibold text-amber-200">Eurojackpot</p>
-              <h2 className="mt-4 text-3xl font-semibold text-white">{formatCurrency(draw.jackpot)}</h2>
-              <p className="mt-3 text-sm text-slate-400">{formatDate(draw.date)}</p>
+              <p className="text-sm font-semibold text-amber-600">Eurojackpot</p>
+              <h2 className="mt-4 text-3xl font-semibold text-slate-900">{formatCurrency(draw.jackpot)}</h2>
+              <p className="mt-3 text-sm text-slate-500">{formatDate(draw.date)}</p>
               {draw.resultNumbers.length ? (
-                <div className="mt-5 rounded-2xl bg-white/[.06] p-3">
+                <div className="mt-5 rounded-2xl bg-slate-50 p-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Gezogen</p>
-                  <p className="mt-2 text-sm font-semibold text-white">
-                    {draw.resultNumbers.join(" ")} <span className="text-amber-200">+ {draw.resultEuroNumbers.join(" ")}</span>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">
+                    {draw.resultNumbers.join(" ")} <span className="text-amber-600">+ {draw.resultEuroNumbers.join(" ")}</span>
                   </p>
                 </div>
               ) : null}
-              <div className="mt-8 h-2 rounded-full bg-white/[.08]">
+              <div className="mt-8 h-2 rounded-full bg-slate-100">
                 <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-amber-300 to-violet-500" />
               </div>
               <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{draw.status}</p>

@@ -11,16 +11,16 @@ export default function RegisterPage() {
       <Panel className="relative w-full max-w-xl p-6 md:p-8">
         <AppLogo />
         <div className="mt-10">
-          <h1 className="text-4xl font-semibold tracking-normal text-white">Registrieren</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-400">
+          <h1 className="text-4xl font-semibold tracking-normal text-slate-900">Registrieren</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-500">
             Gib deine Daten einmal ein. Danach meldest du dich klassisch mit E-Mail und Passwort an.
           </p>
         </div>
         <RegisterForm />
-        <div className="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-300/15 bg-emerald-400/10 p-4">
-          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-200" />
-          <p className="text-xs leading-5 text-emerald-100/80">
-            Bereits registriert? <Link href="/login" className="font-semibold text-white">Einloggen</Link>
+        <div className="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+          <p className="text-xs leading-5 text-emerald-800/80">
+            Bereits registriert? <Link href="/login" className="font-semibold text-slate-900">Einloggen</Link>
           </p>
         </div>
       </Panel>

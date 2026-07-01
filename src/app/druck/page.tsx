@@ -20,7 +20,7 @@ export default async function PrintPage() {
           <PrintSheet draws={app.draws} tickets={app.tickets} />
         ) : (
           <Surface className="py-10 text-center text-sm text-slate-500">
-            <Printer className="mx-auto mb-3 size-6 text-amber-200" />
+            <Printer className="mx-auto mb-3 size-6 text-amber-600" />
             Lege zuerst eine Ziehung und mindestens einen Tipp an.
           </Surface>
         )}

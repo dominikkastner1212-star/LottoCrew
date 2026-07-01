@@ -53,21 +53,21 @@ export function TicketEntryForm({
         <input type="hidden" name="group_id" value={groupId} />
         <div className="grid gap-3 md:grid-cols-[1fr_1fr_10rem]">
           <label className="block">
-            <span className="text-sm font-semibold text-slate-300">Tippname</span>
+            <span className="text-sm font-semibold text-slate-500">Tippname</span>
             <input
               name="label"
               required
               defaultValue={isAdmin ? "Eurojackpot Runde" : "Mein Eurojackpot-Tipp"}
-              className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
             />
           </label>
           <label className="block">
-            <span className="text-sm font-semibold text-slate-300">Ziehung</span>
+            <span className="text-sm font-semibold text-slate-500">Ziehung</span>
             <select
               name="draw_id"
               required
               defaultValue={nextDraw?.id ?? ""}
-              className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
             >
               <option value="">Auswaehlen</option>
               {draws.map((draw) => (
@@ -78,13 +78,13 @@ export function TicketEntryForm({
             </select>
           </label>
           <label className="block">
-            <span className="text-sm font-semibold text-slate-300">Einsatz</span>
+            <span className="text-sm font-semibold text-slate-500">Einsatz</span>
             <input
               name="stake_amount"
               inputMode="decimal"
               required
               defaultValue="2"
-              className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
             />
           </label>
         </div>
@@ -101,7 +101,7 @@ export function TicketEntryForm({
               value={number}
               onChange={(event) => updateMain(index, event.target.value)}
               placeholder={`Zahl ${index + 1}`}
-              className="rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
             />
           ))}
         </div>
@@ -118,7 +118,7 @@ export function TicketEntryForm({
               value={number}
               onChange={(event) => updateEuro(index, event.target.value)}
               placeholder={`Eurozahl ${index + 1}`}
-              className="rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
             />
           ))}
           <Button type="button" variant="secondary" onClick={randomize}>

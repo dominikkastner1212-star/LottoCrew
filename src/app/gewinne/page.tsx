@@ -32,12 +32,12 @@ export default async function WinningsPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {app.winnings.map((winning) => (
             <Surface key={winning.id}>
-              <p className="text-sm font-semibold text-emerald-100">{winning.rank}</p>
-              <h2 className="mt-4 text-3xl font-semibold text-white">{formatCurrency(winning.amount)}</h2>
-              <p className="mt-2 text-sm text-slate-400">{winning.ticket}</p>
-              <div className="mt-6 rounded-2xl bg-white/[.06] p-3">
+              <p className="text-sm font-semibold text-emerald-700">{winning.rank}</p>
+              <h2 className="mt-4 text-3xl font-semibold text-slate-900">{formatCurrency(winning.amount)}</h2>
+              <p className="mt-2 text-sm text-slate-500">{winning.ticket}</p>
+              <div className="mt-6 rounded-2xl bg-slate-50 p-3">
                 <p className="text-xs text-slate-500">Anteil pro Teilnehmer</p>
-                <p className="mt-1 font-semibold text-amber-100">{formatCurrency(winning.perMember)}</p>
+                <p className="mt-1 font-semibold text-amber-700">{formatCurrency(winning.perMember)}</p>
               </div>
               <p className="mt-4 text-xs text-slate-500">{formatDate(winning.date)}</p>
             </Surface>

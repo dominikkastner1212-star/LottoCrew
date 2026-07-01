@@ -25,6 +25,12 @@ export async function GET(request: NextRequest) {
         await ensureUserWorkspace(supabase, user);
       }
 
+      if (type === "invite") {
+        const target = new URL("/passwort-festlegen", request.url);
+        target.searchParams.set("next", next);
+        return NextResponse.redirect(target);
+      }
+
       return NextResponse.redirect(new URL(next, request.url));
     }
   }

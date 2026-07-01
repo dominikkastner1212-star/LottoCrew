@@ -23,17 +23,17 @@ export default async function MembersPage() {
           {app.members.map((member) => (
             <Surface key={member.id} className="grid gap-4 md:grid-cols-[1fr_auto_auto_auto] md:items-center">
               <div>
-                <p className="font-semibold text-white">{member.name}</p>
+                <p className="font-semibold text-slate-900">{member.name}</p>
                 <p className="mt-1 text-sm text-slate-500">{member.email || "ohne E-Mail"}</p>
               </div>
               <StatusPill status={member.role} />
               <div className="md:text-right">
                 <p className="text-xs text-slate-500">Monatlich</p>
-                <p className="font-semibold text-white">{formatCurrency(member.monthlyAmount)}</p>
+                <p className="font-semibold text-slate-900">{formatCurrency(member.monthlyAmount)}</p>
               </div>
               <div className="md:text-right">
                 <p className="text-xs text-slate-500">Seit</p>
-                <p className="font-semibold text-slate-200">{formatDate(member.joinedAt)}</p>
+                <p className="font-semibold text-slate-600">{formatDate(member.joinedAt)}</p>
               </div>
             </Surface>
           ))}

@@ -22,8 +22,8 @@ export default async function StatsPage() {
         <Panel>
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-white">Monatsverlauf</h2>
-              <p className="mt-1 text-sm text-slate-400">Einsaetze gegen Gewinne.</p>
+              <h2 className="text-xl font-semibold text-slate-900">Monatsverlauf</h2>
+              <p className="mt-1 text-sm text-slate-500">Einsaetze gegen Gewinne.</p>
             </div>
             <TrendingUp className="size-5 text-emerald-200" />
           </div>
@@ -32,16 +32,16 @@ export default async function StatsPage() {
         <Panel>
           <div className="grid gap-3">
             <Surface>
-              <p className="text-sm text-slate-400">Gesamteinsaetze</p>
-              <p className="mt-2 text-3xl font-semibold text-white">{formatCurrency(totalStake)}</p>
+              <p className="text-sm text-slate-500">Gesamteinsaetze</p>
+              <p className="mt-2 text-3xl font-semibold text-slate-900">{formatCurrency(totalStake)}</p>
             </Surface>
             <Surface>
-              <p className="text-sm text-slate-400">Gewinnsumme</p>
-              <p className="mt-2 text-3xl font-semibold text-emerald-100">{formatCurrency(app.totals.totalWinnings)}</p>
+              <p className="text-sm text-slate-500">Gewinnsumme</p>
+              <p className="mt-2 text-3xl font-semibold text-emerald-700">{formatCurrency(app.totals.totalWinnings)}</p>
             </Surface>
             <Surface>
-              <p className="text-sm text-slate-400">Rueckflussquote</p>
-              <p className="mt-2 text-3xl font-semibold text-amber-100">{returnRate.toFixed(1)}%</p>
+              <p className="text-sm text-slate-500">Rueckflussquote</p>
+              <p className="mt-2 text-3xl font-semibold text-amber-700">{returnRate.toFixed(1)}%</p>
             </Surface>
           </div>
         </Panel>

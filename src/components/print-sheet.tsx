@@ -61,13 +61,13 @@ export function PrintSheet({ draws, tickets }: { draws: AppDraw[]; tickets: AppT
 
   return (
     <div>
-      <div className="print-controls mb-5 grid gap-3 rounded-[28px] border border-white/10 bg-white/[.055] p-4 lg:grid-cols-[1fr_8rem_8rem_auto] lg:items-end">
+      <div className="print-controls mb-5 grid gap-3 rounded-[28px] border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[1fr_8rem_8rem_auto] lg:items-end">
         <label className="block">
-          <span className="text-sm font-semibold text-slate-300">Ziehung</span>
+          <span className="text-sm font-semibold text-slate-500">Ziehung</span>
           <select
             value={drawId}
             onChange={(event) => setDrawId(event.target.value)}
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
           >
             {draws.map((draw) => (
               <option key={draw.id} value={draw.id}>
@@ -77,23 +77,23 @@ export function PrintSheet({ draws, tickets }: { draws: AppDraw[]; tickets: AppT
           </select>
         </label>
         <label className="block">
-          <span className="text-sm font-semibold text-slate-300">X cm</span>
+          <span className="text-sm font-semibold text-slate-500">X cm</span>
           <input
             value={adjustX}
             onChange={(event) => saveAdjustments(Number(event.target.value), adjustY)}
             step="0.01"
             type="number"
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
           />
         </label>
         <label className="block">
-          <span className="text-sm font-semibold text-slate-300">Y cm</span>
+          <span className="text-sm font-semibold text-slate-500">Y cm</span>
           <input
             value={adjustY}
             onChange={(event) => saveAdjustments(adjustX, Number(event.target.value))}
             step="0.01"
             type="number"
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none focus:border-amber-300/50"
+            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
           />
         </label>
         <Button type="button" onClick={() => window.print()}>

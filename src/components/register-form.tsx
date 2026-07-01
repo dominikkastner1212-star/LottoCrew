@@ -62,21 +62,21 @@ export function RegisterForm() {
   return (
     <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
       <label className="block">
-        <span className="text-sm font-semibold text-slate-300">Dein Name</span>
-        <div className="mt-2 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3">
+        <span className="text-sm font-semibold text-slate-500">Dein Name</span>
+        <div className="mt-2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
           <UserRound className="size-4 text-slate-500" />
           <input
             required
             value={displayName}
             onChange={(event) => setDisplayName(event.target.value)}
             placeholder="Dominik Kastner"
-            className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
+            className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-500 outline-none"
           />
         </div>
       </label>
       <label className="block">
-        <span className="text-sm font-semibold text-slate-300">E-Mail</span>
-        <div className="mt-2 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3">
+        <span className="text-sm font-semibold text-slate-500">E-Mail</span>
+        <div className="mt-2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
           <Mail className="size-4 text-slate-500" />
           <input
             type="email"
@@ -84,14 +84,14 @@ export function RegisterForm() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="name@firma.de"
-            className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
+            className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-500 outline-none"
           />
         </div>
       </label>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
-          <span className="text-sm font-semibold text-slate-300">Passwort</span>
-          <div className="mt-2 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3">
+          <span className="text-sm font-semibold text-slate-500">Passwort</span>
+          <div className="mt-2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
             <KeyRound className="size-4 text-slate-500" />
             <input
               type="password"
@@ -100,13 +100,13 @@ export function RegisterForm() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Mind. 6 Zeichen"
-              className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
+              className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-500 outline-none"
             />
           </div>
         </label>
         <label className="block">
-          <span className="text-sm font-semibold text-slate-300">Passwort wiederholen</span>
-          <div className="mt-2 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3">
+          <span className="text-sm font-semibold text-slate-500">Passwort wiederholen</span>
+          <div className="mt-2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
             <KeyRound className="size-4 text-slate-500" />
             <input
               type="password"
@@ -115,32 +115,32 @@ export function RegisterForm() {
               value={passwordConfirm}
               onChange={(event) => setPasswordConfirm(event.target.value)}
               placeholder="Nochmal eingeben"
-              className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
+              className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-500 outline-none"
             />
           </div>
         </label>
       </div>
       <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
         <label className="block">
-          <span className="text-sm font-semibold text-slate-300">Gruppe</span>
-          <div className="mt-2 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3">
+          <span className="text-sm font-semibold text-slate-500">Gruppe</span>
+          <div className="mt-2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
             <Building2 className="size-4 text-slate-500" />
             <input
               required
               value={groupName}
               onChange={(event) => setGroupName(event.target.value)}
-              className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
+              className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-500 outline-none"
             />
           </div>
         </label>
         <label className="block">
-          <span className="text-sm font-semibold text-slate-300">Beitrag</span>
+          <span className="text-sm font-semibold text-slate-500">Beitrag</span>
           <input
             required
             inputMode="decimal"
             value={monthlyAmount}
             onChange={(event) => setMonthlyAmount(event.target.value)}
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-sm text-white outline-none"
+            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none"
           />
         </label>
       </div>
@@ -152,8 +152,8 @@ export function RegisterForm() {
         <div
           className={`rounded-2xl border p-4 text-sm font-medium ${
             state === "success"
-              ? "border-emerald-300/15 bg-emerald-400/10 text-emerald-100"
-              : "border-rose-300/15 bg-rose-400/10 text-rose-100"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border-rose-200 bg-rose-50 text-rose-700"
           }`}
         >
           {message}

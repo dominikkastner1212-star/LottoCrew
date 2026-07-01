@@ -12,12 +12,12 @@ export function PaymentsBoard({ payments, groupId, isAdmin }: { payments: AppPay
       {payments.map((payment) => (
         <Surface key={payment.id} className="grid gap-4 md:grid-cols-[1fr_auto_auto_auto_auto] md:items-center">
           <div>
-            <p className="font-semibold text-white">{payment.member}</p>
+            <p className="font-semibold text-slate-900">{payment.member}</p>
             <p className="mt-1 text-sm text-slate-500">{payment.month}</p>
           </div>
           <StatusPill status={payment.status} />
-          <p className="font-semibold text-white md:text-right">{formatCurrency(payment.amount)}</p>
-          <p className="text-sm text-slate-400 md:text-right">{payment.paidAt ? formatDate(payment.paidAt) : "Noch offen"}</p>
+          <p className="font-semibold text-slate-900 md:text-right">{formatCurrency(payment.amount)}</p>
+          <p className="text-sm text-slate-500 md:text-right">{payment.paidAt ? formatDate(payment.paidAt) : "Noch offen"}</p>
           {isAdmin ? (
             <form action={updatePaymentStatus}>
               <input type="hidden" name="group_id" value={groupId} />
