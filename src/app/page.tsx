@@ -1,8 +1,10 @@
 import { AlertCircle, CalendarClock, CreditCard, Euro, Trophy, Users } from "lucide-react";
 import { AppShell, PageHeader, QuickActionRail } from "@/components/app-shell";
+import { AnimatedBalls } from "@/components/animated-balls";
 import { ChartBars } from "@/components/chart-bars";
 import { DrawCountdown } from "@/components/draw-countdown";
 import { MetricCard } from "@/components/metric-card";
+import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { NumberRow } from "@/components/number-row";
 import { PaymentReminderButton } from "@/components/payment-reminder";
 import { StatusPill } from "@/components/status-pill";
@@ -24,23 +26,20 @@ export default async function DashboardPage() {
         description="Alles Wichtige fuer die naechste Runde: Jackpot, Tipps, offene Beitraege und Gewinne."
       />
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Aktueller Jackpot" value={formatCurrency(nextDraw?.jackpot ?? 0)} trend="Eurojackpot" icon={Euro} tone="gold" />
-        <MetricCard label="Naechste Ziehung" value={nextDraw ? formatDate(nextDraw.date) : "offen"} trend={`${app.tickets.length} Tippfelder`} icon={CalendarClock} tone="violet" />
-        <MetricCard label="Aktive Mitspieler" value={`${app.totals.activeMembers}`} trend={app.group?.name ?? "Noch keine Gruppe"} icon={Users} tone="green" />
-        <MetricCard label="Offene Zahlungen" value={formatCurrency(app.totals.openPayments)} trend={`${openPayments.length} offene Beitraege`} icon={CreditCard} tone="blue" />
-      </section>
+      <Stagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StaggerItem><MetricCard label="Aktueller Jackpot" value={formatCurrency(nextDraw?.jackpot ?? 0)} trend="Eurojackpot" icon={Euro} tone="gold" /></StaggerItem>
+        <StaggerItem><MetricCard label="Naechste Ziehung" value={nextDraw ? formatDate(nextDraw.date) : "offen"} trend={`${app.tickets.length} Tippfelder`} icon={CalendarClock} tone="violet" /></StaggerItem>
+        <StaggerItem><MetricCard label="Aktive Mitspieler" value={`${app.totals.activeMembers}`} trend={app.group?.name ?? "Noch keine Gruppe"} icon={Users} tone="green" /></StaggerItem>
+        <StaggerItem><MetricCard label="Offene Zahlungen" value={formatCurrency(app.totals.openPayments)} trend={`${openPayments.length} offene Beitraege`} icon={CreditCard} tone="blue" /></StaggerItem>
+      </Stagger>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
         <Panel className="premium-ring relative overflow-hidden">
-          <div className="pointer-events-none absolute right-5 top-5 hidden gap-1.5 sm:flex">
-            {(app.tickets[0]?.numbers?.length ? app.tickets[0].numbers.slice(0, 5) : [7, 12, 23, 34, 41]).map((n, i) => (
-              <span key={`hn-${i}`} className="number-ball">{n}</span>
-            ))}
-            {(app.tickets[0]?.euroNumbers?.length ? app.tickets[0].euroNumbers.slice(0, 2) : [3, 9]).map((n, i) => (
-              <span key={`he-${i}`} className="number-ball euro-ball">{n}</span>
-            ))}
-          </div>
+          <AnimatedBalls
+            numbers={app.tickets[0]?.numbers?.length ? app.tickets[0].numbers.slice(0, 5) : [7, 12, 23, 34, 41]}
+            euroNumbers={app.tickets[0]?.euroNumbers?.length ? app.tickets[0].euroNumbers.slice(0, 2) : [3, 9]}
+            className="pointer-events-none absolute right-5 top-5 hidden gap-1.5 sm:flex"
+          />
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-semibold text-amber-600">{app.group?.name ?? "LottoCrew"}</p>

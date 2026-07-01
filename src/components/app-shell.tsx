@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Command, LogOut, Menu, Search } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 import { signOut } from "@/app/actions";
 import { AppLogo } from "@/components/app-logo";
@@ -81,7 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </form>
             </div>
           </header>
-          {children}
+          <PageTransition pathname={pathname}>{children}</PageTransition>
         </main>
       </div>
 
@@ -146,5 +147,23 @@ export function QuickActionRail() {
         );
       })}
     </div>
+  );
+}
+
+function PageTransition({ pathname, children }: { pathname: string; children: ReactNode }) {
+  const reduce = useReducedMotion();
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={pathname}
+        initial={reduce ? { opacity: 0 } : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
+        transition={{ duration: 0.28, ease: [0.22, 0.8, 0.2, 1] }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
   );
 }
