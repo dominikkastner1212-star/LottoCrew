@@ -305,7 +305,14 @@ export async function getAppContext(): Promise<AppContext> {
     return empty;
   }
 
-  await ensureUserWorkspace(supabase, user);
+  try {
+    await ensureUserWorkspace(supabase, user);
+  } catch (error) {
+    // Falls die Workspace-Anlage fehlschlaegt (z. B. weil die Session direkt nach
+    // der E-Mail-Bestaetigung noch nicht als Cookie steht), darf das die Seite nicht
+    // abstuerzen lassen. Beim naechsten Aufruf wird die Anlage erneut versucht.
+    console.error("ensureUserWorkspace failed:", error);
+  }
   const profile = await ensureProfile(supabase, user);
 
   const { data: membershipRow } = await supabase
