@@ -33,7 +33,7 @@ export default async function SettingsPage() {
         </Panel>
 
         <Panel>
-          <Shield className="size-5 text-emerald-200" />
+          <Shield className="size-5 text-emerald-600" />
           <h2 className="mt-5 text-xl font-semibold text-slate-900">Rechte</h2>
           <div className="mt-5">
             {app.group ? (
