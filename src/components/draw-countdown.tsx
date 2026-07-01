@@ -26,11 +26,16 @@ export function DrawCountdown({ date }: { date: string | null }) {
   }, []);
 
   return (
-    <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+    <div className="mt-4 flex items-stretch justify-center gap-2">
       {parts.map((part, index) => (
-        <div key={index} className="rounded-2xl bg-slate-50 p-4">
-          <p className="font-mono text-2xl font-semibold text-slate-900">{part}</p>
-          <p className="mt-1 text-[0.65rem] text-slate-500">{["Tage", "Std", "Min"][index]}</p>
+        <div key={index} className="flex items-center gap-2">
+          <div className="min-w-[3.5rem] rounded-2xl bg-slate-50 p-4 text-center">
+            <p className="font-mono text-2xl font-semibold text-slate-900">{part}</p>
+            <p className="mt-1 text-[0.65rem] text-slate-500">{["Tage", "Std", "Min"][index]}</p>
+          </div>
+          {index < parts.length - 1 ? (
+            <span className="pb-4 text-2xl font-semibold text-amber-500">:</span>
+          ) : null}
         </div>
       ))}
     </div>

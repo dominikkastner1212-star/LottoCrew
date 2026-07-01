@@ -32,7 +32,15 @@ export default async function DashboardPage() {
       </section>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
-        <Panel className="premium-ring overflow-hidden">
+        <Panel className="premium-ring relative overflow-hidden">
+          <div className="pointer-events-none absolute right-5 top-5 hidden gap-1.5 sm:flex">
+            {(app.tickets[0]?.numbers?.length ? app.tickets[0].numbers.slice(0, 5) : [7, 12, 23, 34, 41]).map((n, i) => (
+              <span key={`hn-${i}`} className="number-ball">{n}</span>
+            ))}
+            {(app.tickets[0]?.euroNumbers?.length ? app.tickets[0].euroNumbers.slice(0, 2) : [3, 9]).map((n, i) => (
+              <span key={`he-${i}`} className="number-ball euro-ball">{n}</span>
+            ))}
+          </div>
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-semibold text-amber-600">{app.group?.name ?? "LottoCrew"}</p>

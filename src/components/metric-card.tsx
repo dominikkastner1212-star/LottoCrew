@@ -20,11 +20,17 @@ export function MetricCard({
     green: "from-emerald-400/22 to-emerald-800/8 text-emerald-700",
     blue: "from-sky-400/22 to-sky-900/8 text-sky-700",
   };
+  const iconTones = {
+    gold: "bg-amber-100 text-amber-700",
+    violet: "bg-violet-100 text-violet-700",
+    green: "bg-emerald-100 text-emerald-700",
+    blue: "bg-sky-100 text-sky-700",
+  };
   return (
     <div className={cn("rise-in rounded-[26px] border border-slate-200 bg-gradient-to-br p-5", tones[tone])}>
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-medium text-slate-500">{label}</p>
-        <span className="grid size-10 place-items-center rounded-2xl bg-slate-100">
+        <span className={cn("grid size-10 place-items-center rounded-2xl", iconTones[tone])}>
           <Icon className="size-4" />
         </span>
       </div>
