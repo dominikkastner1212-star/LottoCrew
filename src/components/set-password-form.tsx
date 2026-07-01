@@ -29,7 +29,10 @@ export function SetPasswordForm({ next }: { next: string }) {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.updateUser({ password });
+      const { error } = await supabase.auth.updateUser({
+        password,
+        data: { must_change_password: false },
+      });
 
       if (error) {
         setState("error");

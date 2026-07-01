@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 export default async function SetPasswordPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; first?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -18,8 +18,9 @@ export default async function SetPasswordPage({
     redirect("/login");
   }
 
-  const { next } = await searchParams;
+  const { next, first } = await searchParams;
   const safeNext = next && next.startsWith("/") ? next : "/";
+  const isFirstLogin = first === "1";
 
   return (
     <main className="relative grid min-h-screen place-items-center overflow-hidden px-4 py-10">
@@ -27,10 +28,13 @@ export default async function SetPasswordPage({
       <Panel className="relative w-full max-w-md p-6 md:p-8">
         <AppLogo />
         <div className="mt-10">
-          <h1 className="text-4xl font-semibold tracking-normal text-slate-900">Passwort festlegen</h1>
+          <h1 className="text-4xl font-semibold tracking-normal text-slate-900">
+            {isFirstLogin ? "Startpasswort aendern" : "Passwort festlegen"}
+          </h1>
           <p className="mt-3 text-sm leading-6 text-slate-500">
-            Du wurdest zu LottoCrew eingeladen. Lege einmalig ein Passwort fest, damit du dich kuenftig
-            jederzeit mit E-Mail und Passwort einloggen kannst.
+            {isFirstLogin
+              ? "Dein Konto wurde mit einem Startpasswort angelegt. Lege jetzt dein eigenes Passwort fest, das nur du kennst."
+              : "Du wurdest zu LottoCrew eingeladen. Lege einmalig ein Passwort fest, damit du dich kuenftig jederzeit mit E-Mail und Passwort einloggen kannst."}
           </p>
         </div>
         <SetPasswordForm next={safeNext} />

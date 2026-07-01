@@ -1,5 +1,4 @@
 import {
-  addMemberByEmail,
   createDraw,
   createInitialGroup,
   createMonthlyPayments,
@@ -12,6 +11,7 @@ import {
   updateProfile,
   uploadTicketDocument,
 } from "@/app/actions";
+import { AddMemberForm } from "@/components/add-member-form";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/panel";
 import type { AppContext, AppDraw, AppMember, AppTicket } from "@/lib/app-data";
@@ -106,32 +106,7 @@ export function MemberRoleList({ members, groupId, currentProfileId, isAdmin }: 
 
   return (
     <div className="space-y-3">
-      {isAdmin ? (
-        <Surface>
-          <form action={addMemberByEmail} className="space-y-3">
-            <input type="hidden" name="group_id" value={groupId} />
-            <label className="block">
-              <span className="text-sm font-semibold text-slate-500">Mitglied per E-Mail hinzufuegen</span>
-              <input
-                name="email"
-                type="email"
-                className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
-                placeholder="kollege@firma.de"
-                required
-              />
-            </label>
-            <select
-              name="role"
-              defaultValue="participant"
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-900 outline-none focus:border-amber-300/50"
-            >
-              <option value="participant">Teilnehmer</option>
-              <option value="admin">Admin</option>
-            </select>
-            <Button className="w-full">Hinzufuegen</Button>
-          </form>
-        </Surface>
-      ) : null}
+      {isAdmin ? <AddMemberForm groupId={groupId} /> : null}
       {members.map((member) => {
         const isSelf = member.profileId === currentProfileId;
         return (

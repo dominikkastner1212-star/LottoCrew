@@ -295,6 +295,88 @@ export async function updateMemberRole(formData: FormData) {
   revalidatePath("/teilnehmer");
 }
 
+export async function addMemberWithPassword(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const role = String(formData.get("role") ?? "participant");
+  const password = String(formData.get("password") ?? "");
+  const displayName = String(formData.get("display_name") ?? "").trim();
+
+  await assertAdmin(supabase, userId, groupId);
+
+  if (!email.includes("@")) {
+    throw new Error("Bitte eine gueltige E-Mail-Adresse eintragen.");
+  }
+
+  if (password.length < 6) {
+    throw new Error("Das Startpasswort muss mindestens 6 Zeichen haben.");
+  }
+
+  if (role !== "admin" && role !== "participant") {
+    throw new Error("Ungueltige Rolle.");
+  }
+
+  const admin = createAdminClient();
+  const { data: group } = await admin
+    .from("groups")
+    .select("monthly_amount")
+    .eq("id", groupId)
+    .single()
+    .throwOnError();
+
+  const { data: existingProfile } = await admin
+    .from("profiles")
+    .select("id")
+    .ilike("email", email)
+    .maybeSingle()
+    .throwOnError();
+
+  if (existingProfile?.id) {
+    throw new Error("Fuer diese E-Mail gibt es bereits ein Konto. Bitte den normalen Einladungsweg nutzen.");
+  }
+
+  // Konto direkt anlegen: E-Mail gilt sofort als bestaetigt (keine Mail noetig).
+  // Das Flag must_change_password fuehrt den Kollegen beim ersten Login zum
+  // Aendern des vom Admin vergebenen Startpassworts.
+  const { data: created, error: createError } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: {
+      display_name: displayName || email.split("@")[0],
+      must_change_password: true,
+    },
+  });
+
+  if (createError) {
+    throw createError;
+  }
+
+  const profileId = created.user?.id;
+
+  if (!profileId) {
+    throw new Error("Mitglied konnte nicht angelegt werden.");
+  }
+
+  await admin
+    .from("group_members")
+    .upsert(
+      {
+        group_id: groupId,
+        profile_id: profileId,
+        role,
+        status: "active",
+        monthly_amount: group?.monthly_amount ?? 24,
+      },
+      { onConflict: "group_id,profile_id" },
+    )
+    .throwOnError();
+
+  revalidatePath("/einstellungen");
+  revalidatePath("/teilnehmer");
+}
+
 export async function addMemberByEmail(formData: FormData) {
   const { supabase, userId } = await getUserId();
   const groupId = String(formData.get("group_id") ?? "");
