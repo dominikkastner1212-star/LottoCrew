@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import { updatePaymentStatus } from "@/app/actions";
+import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { StatusPill } from "@/components/status-pill";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/panel";
@@ -8,9 +9,10 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 
 export function PaymentsBoard({ payments, groupId, isAdmin }: { payments: AppPayment[]; groupId: string; isAdmin: boolean }) {
   return (
-    <div className="grid gap-3">
+    <Stagger className="grid gap-3">
       {payments.map((payment) => (
-        <Surface key={payment.id} className="grid gap-4 md:grid-cols-[1fr_auto_auto_auto_auto] md:items-center">
+        <StaggerItem key={payment.id}>
+        <Surface className="grid gap-4 md:grid-cols-[1fr_auto_auto_auto_auto] md:items-center">
           <div>
             <p className="font-semibold text-slate-900">{payment.member}</p>
             <p className="mt-1 text-sm text-slate-500">{payment.month}</p>
@@ -30,12 +32,13 @@ export function PaymentsBoard({ payments, groupId, isAdmin }: { payments: AppPay
             </form>
           ) : null}
         </Surface>
+        </StaggerItem>
       ))}
       {payments.length === 0 ? (
         <Surface className="py-10 text-center text-sm text-slate-500">
           Noch keine Zahlungen vorhanden.
         </Surface>
       ) : null}
-    </div>
+    </Stagger>
   );
 }

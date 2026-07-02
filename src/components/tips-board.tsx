@@ -3,6 +3,7 @@
 import { FileText, Search, SlidersHorizontal, Target } from "lucide-react";
 import { useMemo, useState } from "react";
 import { NumberRow } from "@/components/number-row";
+import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { StatusPill } from "@/components/status-pill";
 import { Surface } from "@/components/ui/panel";
 import type { AppTicket } from "@/lib/app-data";
@@ -56,9 +57,10 @@ export function TipsBoard({ tickets }: { tickets: AppTicket[] }) {
         </div>
       </div>
 
-      <div className="grid gap-4">
+      <Stagger key={`${status}-${query}`} className="grid gap-4">
         {filteredTickets.map((ticket) => (
-          <Surface key={ticket.id} className="transition hover:bg-slate-100">
+          <StaggerItem key={ticket.id}>
+          <Surface className="transition hover:bg-slate-100">
             <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-3">
@@ -106,13 +108,14 @@ export function TipsBoard({ tickets }: { tickets: AppTicket[] }) {
               ) : null}
             </div>
           </Surface>
+          </StaggerItem>
         ))}
         {filteredTickets.length === 0 ? (
           <Surface className="py-10 text-center text-sm text-slate-500">
             Keine Tipps vorhanden. Admins koennen neue Eurojackpot-Tipps anlegen.
           </Surface>
         ) : null}
-      </div>
+      </Stagger>
     </div>
   );
 }

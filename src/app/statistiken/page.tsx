@@ -1,6 +1,7 @@
 import { TrendingUp } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { ChartBars } from "@/components/chart-bars";
+import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { Panel, Surface } from "@/components/ui/panel";
 import { requireAppContext } from "@/lib/auth-guard";
 import { formatCurrency } from "@/lib/utils";
@@ -25,25 +26,31 @@ export default async function StatsPage() {
               <h2 className="text-xl font-semibold text-slate-900">Monatsverlauf</h2>
               <p className="mt-1 text-sm text-slate-500">Einsaetze gegen Gewinne.</p>
             </div>
-            <TrendingUp className="size-5 text-emerald-200" />
+            <TrendingUp className="size-5 text-emerald-600" />
           </div>
           <ChartBars monthlyStats={app.monthlyStats} />
         </Panel>
         <Panel>
-          <div className="grid gap-3">
+          <Stagger className="grid gap-3">
+            <StaggerItem>
             <Surface>
               <p className="text-sm text-slate-500">Gesamteinsaetze</p>
               <p className="mt-2 text-3xl font-semibold text-slate-900">{formatCurrency(totalStake)}</p>
             </Surface>
+            </StaggerItem>
+            <StaggerItem>
             <Surface>
               <p className="text-sm text-slate-500">Gewinnsumme</p>
               <p className="mt-2 text-3xl font-semibold text-emerald-700">{formatCurrency(app.totals.totalWinnings)}</p>
             </Surface>
+            </StaggerItem>
+            <StaggerItem>
             <Surface>
               <p className="text-sm text-slate-500">Rueckflussquote</p>
               <p className="mt-2 text-3xl font-semibold text-amber-700">{returnRate.toFixed(1)}%</p>
             </Surface>
-          </div>
+            </StaggerItem>
+          </Stagger>
         </Panel>
       </section>
     </AppShell>
