@@ -4,6 +4,8 @@ import { AnimatedBalls } from "@/components/animated-balls";
 import { ChartBars } from "@/components/chart-bars";
 import { CountUpCurrency } from "@/components/count-up-currency";
 import { DrawCountdown } from "@/components/draw-countdown";
+import { HeroRays } from "@/components/hero-rays";
+import { MemberAvatars } from "@/components/member-avatars";
 import { MetricCard } from "@/components/metric-card";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { NumberRow } from "@/components/number-row";
@@ -36,12 +38,13 @@ export default async function DashboardPage() {
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
         <Panel className="premium-ring relative overflow-hidden">
+          <HeroRays />
           <AnimatedBalls
             numbers={app.tickets[0]?.numbers?.length ? app.tickets[0].numbers.slice(0, 5) : [7, 12, 23, 34, 41]}
             euroNumbers={app.tickets[0]?.euroNumbers?.length ? app.tickets[0].euroNumbers.slice(0, 2) : [3, 9]}
             className="pointer-events-none absolute right-5 top-5 hidden gap-1.5 sm:flex"
           />
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-semibold text-amber-600">{app.group?.name ?? "LottoCrew"}</p>
               <h2 className="mt-2 max-w-xl text-3xl font-semibold tracking-normal text-slate-900 md:text-5xl">
@@ -50,6 +53,10 @@ export default async function DashboardPage() {
               <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
                 Alle Kennzahlen kommen direkt aus eurer Supabase-Gruppe.
               </p>
+              <div className="mt-5 flex items-center gap-3">
+                <MemberAvatars names={app.members.filter((member) => member.status === "active").map((member) => member.name)} />
+                <span className="text-xs font-semibold text-slate-500">{app.totals.activeMembers} Mitspieler dabei</span>
+              </div>
             </div>
             <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Live-Fokus</p>
