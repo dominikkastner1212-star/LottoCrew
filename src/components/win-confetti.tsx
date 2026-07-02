@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { useMemo } from "react";
+import { useState } from "react";
 
 const COLORS = ["#E8A600", "#1B8F5C", "#7C5CFF", "#F2B705", "#34D399"];
 
@@ -10,18 +10,18 @@ const COLORS = ["#E8A600", "#1B8F5C", "#7C5CFF", "#F2B705", "#34D399"];
 export function WinConfetti({ pieces = 34 }: { pieces?: number }) {
   const reduce = useReducedMotion();
 
-  const confetti = useMemo(
-    () =>
-      Array.from({ length: pieces }).map((_, i) => ({
-        id: i,
-        left: Math.random() * 100,
-        delay: Math.random() * 0.35,
-        duration: 1.6 + Math.random() * 1.2,
-        color: COLORS[i % COLORS.length],
-        size: 6 + Math.random() * 6,
-        rotate: Math.random() * 360,
-      })),
-    [pieces],
+  // Zufallswerte einmalig beim Mounten erzeugen (useState-Initializer laeuft nur
+  // einmal und ist damit render-rein, anders als Math.random in useMemo).
+  const [confetti] = useState(() =>
+    Array.from({ length: pieces }).map((_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.35,
+      duration: 1.6 + Math.random() * 1.2,
+      color: COLORS[i % COLORS.length],
+      size: 6 + Math.random() * 6,
+      rotate: Math.random() * 360,
+    })),
   );
 
   if (reduce) {
