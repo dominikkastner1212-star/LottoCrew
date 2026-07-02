@@ -2,7 +2,7 @@ import { Check } from "lucide-react";
 import { updatePaymentStatus } from "@/app/actions";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { StatusPill } from "@/components/status-pill";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Surface } from "@/components/ui/panel";
 import type { AppPayment } from "@/lib/app-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -25,10 +25,10 @@ export function PaymentsBoard({ payments, groupId, isAdmin }: { payments: AppPay
               <input type="hidden" name="group_id" value={groupId} />
               <input type="hidden" name="payment_id" value={payment.id} />
               <input type="hidden" name="status" value={payment.status === "paid" ? "open" : "paid"} />
-              <Button variant={payment.status === "paid" ? "secondary" : "primary"} className="min-w-36">
+              <SubmitButton variant={payment.status === "paid" ? "secondary" : "primary"} className="min-w-36" pendingLabel="...">
                 <Check className="size-4" />
                 {payment.status === "paid" ? "Bezahlt" : "Abhaken"}
-              </Button>
+              </SubmitButton>
             </form>
           ) : null}
         </Surface>

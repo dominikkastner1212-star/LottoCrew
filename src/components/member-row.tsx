@@ -4,6 +4,7 @@ import { Mail, Pencil, UserMinus, X } from "lucide-react";
 import { useState } from "react";
 import { deactivateMember, reactivateMember, updateMemberEmail, updateMemberRole } from "@/app/actions";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Surface } from "@/components/ui/panel";
 import type { AppMember } from "@/lib/app-data";
 import { formatCurrency } from "@/lib/utils";
@@ -61,7 +62,7 @@ export function MemberRow({
             required
             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-300/50"
           />
-          <Button variant="secondary" className="w-full">Neue E-Mail speichern</Button>
+          <SubmitButton variant="secondary" className="w-full" pendingLabel="Speichert...">Neue E-Mail speichern</SubmitButton>
         </form>
       ) : null}
 
@@ -79,7 +80,7 @@ export function MemberRow({
             <option value="participant">Teilnehmer</option>
             <option value="admin">Admin</option>
           </select>
-          <Button variant="secondary" disabled={!isAdmin || isSelf}>Speichern</Button>
+          <SubmitButton variant="secondary" disabled={!isAdmin || isSelf}>Speichern</SubmitButton>
         </form>
       </div>
 
@@ -94,7 +95,7 @@ export function MemberRow({
                 <input type="hidden" name="group_id" value={groupId} />
                 <input type="hidden" name="member_id" value={member.id} />
                 <input type="hidden" name="profile_id" value={member.profileId} />
-                <Button variant="danger" className="w-full">Ja, deaktivieren</Button>
+                <SubmitButton variant="danger" className="w-full" pendingLabel="...">Ja, deaktivieren</SubmitButton>
               </form>
               <Button variant="secondary" onClick={() => setConfirmingRemove(false)} type="button">
                 Abbrechen
@@ -116,7 +117,7 @@ export function MemberRow({
         <form action={reactivateMember} className="mt-2">
           <input type="hidden" name="group_id" value={groupId} />
           <input type="hidden" name="member_id" value={member.id} />
-          <Button variant="secondary" className="w-full">Wieder aktivieren</Button>
+          <SubmitButton variant="secondary" className="w-full" pendingLabel="...">Wieder aktivieren</SubmitButton>
         </form>
       ) : null}
     </Surface>

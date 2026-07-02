@@ -4,6 +4,7 @@ import { Dices, Save } from "lucide-react";
 import { useMemo, useState } from "react";
 import { createMemberTicket, createTicket } from "@/app/actions";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Surface } from "@/components/ui/panel";
 import type { AppDraw } from "@/lib/app-data";
 import { formatDate } from "@/lib/utils";
@@ -125,10 +126,10 @@ export function TicketEntryForm({
             <Dices className="size-4" />
             Zufall
           </Button>
-          <Button disabled={draws.length === 0}>
+          <SubmitButton disabled={draws.length === 0} pendingLabel="Speichert...">
             <Save className="size-4" />
             Tipp speichern
-          </Button>
+          </SubmitButton>
         </div>
       </form>
     </Surface>

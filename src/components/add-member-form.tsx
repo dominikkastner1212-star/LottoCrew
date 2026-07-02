@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { addMemberByEmail, addMemberWithPassword } from "@/app/actions";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Surface } from "@/components/ui/panel";
 
 type Mode = "invite" | "password";
@@ -54,7 +54,7 @@ export function AddMemberForm({ groupId }: { groupId: string }) {
             <option value="participant">Teilnehmer</option>
             <option value="admin">Admin</option>
           </select>
-          <Button className="w-full">Einladung senden</Button>
+          <SubmitButton className="w-full" pendingLabel="Wird gesendet...">Einladung senden</SubmitButton>
           <p className="text-xs leading-5 text-slate-500">
             Der Kollege bekommt eine E-Mail und legt sein Passwort selbst fest.
           </p>
@@ -99,7 +99,7 @@ export function AddMemberForm({ groupId }: { groupId: string }) {
             <option value="participant">Teilnehmer</option>
             <option value="admin">Admin</option>
           </select>
-          <Button className="w-full">Mitglied anlegen</Button>
+          <SubmitButton className="w-full" pendingLabel="Wird angelegt...">Mitglied anlegen</SubmitButton>
           <p className="text-xs leading-5 text-slate-500">
             Gib dem Kollegen dieses Startpasswort weiter. Beim ersten Login muss er es aendern.
           </p>
