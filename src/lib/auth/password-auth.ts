@@ -12,6 +12,7 @@ type PasswordAuthClient = {
           display_name: string;
           group_name: string;
           monthly_amount: number;
+          invite_code: string;
         };
       };
     }): AuthResponse;
@@ -24,6 +25,7 @@ type RegisterInput = {
   groupName: string;
   monthlyAmount: string;
   password: string;
+  inviteCode?: string;
 };
 
 export function normalizeMonthlyAmount(value: string) {
@@ -44,6 +46,7 @@ export function registerWithEmailPassword(client: PasswordAuthClient, input: Reg
         display_name: input.displayName.trim(),
         group_name: input.groupName.trim(),
         monthly_amount: normalizeMonthlyAmount(input.monthlyAmount),
+        invite_code: (input.inviteCode ?? "").trim().toUpperCase(),
       },
     },
   });

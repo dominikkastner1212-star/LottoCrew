@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getDefaultDisplayName } from "@/lib/app-data";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { generateInviteCode } from "@/lib/utils";
 
 async function getUserId() {
   const supabase = await createClient();
@@ -227,6 +228,7 @@ export async function createInitialGroup(formData: FormData) {
     .insert({
       name,
       slug: `${slug}-${userId.slice(0, 8)}`,
+      invite_code: generateInviteCode(),
       monthly_amount: Number.isFinite(monthlyAmount) ? monthlyAmount : 24,
       created_by: userId,
     })

@@ -19,3 +19,13 @@ export function formatDate(value: string) {
     year: "numeric",
   }).format(new Date(value));
 }
+
+// Erzeugt einen gut lesbaren Einladungscode (ohne verwechselbare Zeichen wie 0/O/1/I).
+export function generateInviteCode(length = 8) {
+  const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < length; i += 1) {
+    code += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return code;
+}

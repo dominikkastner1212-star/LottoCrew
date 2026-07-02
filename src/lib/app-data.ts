@@ -1,4 +1,6 @@
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { generateInviteCode } from "@/lib/utils";
 
 export type AppProfile = {
   id: string;
@@ -12,6 +14,7 @@ export type AppGroup = {
   name: string;
   monthlyAmount: number;
   currency: string;
+  inviteCode: string;
 };
 
 export type AppMembership = {
@@ -240,6 +243,40 @@ export async function ensureUserWorkspace(
     return;
   }
 
+  // Beitritt per Einladungscode: Wurde bei der Registrierung ein Code angegeben,
+  // tritt der Nutzer der bestehenden Gruppe bei. Es wird dann NIE automatisch
+  // eine eigene Gruppe erstellt — auch nicht bei ungueltigem Code, damit keine
+  // verwaisten Einzelgruppen entstehen.
+  const inviteCode =
+    typeof user.user_metadata?.invite_code === "string" ? user.user_metadata.invite_code.trim().toUpperCase() : "";
+
+  if (inviteCode) {
+    const admin = createAdminClient();
+    const { data: inviteGroup } = await admin
+      .from("groups")
+      .select("id,monthly_amount")
+      .eq("invite_code", inviteCode)
+      .maybeSingle();
+
+    if (inviteGroup) {
+      await admin
+        .from("group_members")
+        .upsert(
+          {
+            group_id: inviteGroup.id,
+            profile_id: user.id,
+            role: "participant",
+            status: "active",
+            monthly_amount: inviteGroup.monthly_amount ?? 24,
+          },
+          { onConflict: "group_id,profile_id" },
+        )
+        .throwOnError();
+    }
+
+    return;
+  }
+
   const metadataGroupName = typeof user.user_metadata?.group_name === "string" ? user.user_metadata.group_name.trim() : "";
   const metadataMonthlyAmount =
     typeof user.user_metadata?.monthly_amount === "number"
@@ -255,6 +292,7 @@ export async function ensureUserWorkspace(
     .insert({
       name: groupName,
       slug,
+      invite_code: generateInviteCode(),
       monthly_amount: monthlyAmount,
       created_by: user.id,
     })
@@ -317,7 +355,7 @@ export async function getAppContext(): Promise<AppContext> {
 
   const { data: membershipRow } = await supabase
     .from("group_members")
-    .select("id,group_id,role,status,monthly_amount,groups(id,name,monthly_amount,currency)")
+    .select("id,group_id,role,status,monthly_amount,groups(id,name,monthly_amount,currency,invite_code)")
     .eq("profile_id", user.id)
     .eq("status", "active")
     .limit(1)
@@ -337,6 +375,7 @@ export async function getAppContext(): Promise<AppContext> {
     name: rawGroup?.name ?? "LottoCrew",
     monthlyAmount: toNumber(rawGroup?.monthly_amount),
     currency: rawGroup?.currency ?? "EUR",
+    inviteCode: rawGroup?.invite_code ?? "",
   };
   const membership: AppMembership = {
     id: membershipRow.id,

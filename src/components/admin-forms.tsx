@@ -94,6 +94,15 @@ export function GroupSettingsForm({ app }: { app: AppContext }) {
         />
       </label>
       <Button className="w-full" disabled={!app.isAdmin}>Gruppe speichern</Button>
+      {app.group.inviteCode ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">Einladungscode</p>
+          <p className="mt-2 select-all font-mono text-2xl font-bold tracking-[0.2em] text-slate-900">{app.group.inviteCode}</p>
+          <p className="mt-2 text-xs leading-5 text-amber-800/80">
+            Gib diesen Code an Kollegen weiter. Bei der Registrierung waehlen sie &quot;Gruppe beitreten&quot; und landen direkt in eurer Runde.
+          </p>
+        </div>
+      ) : null}
     </form>
   );
 }
