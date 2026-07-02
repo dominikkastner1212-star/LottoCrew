@@ -86,7 +86,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         </main>
       </div>
 
-      <nav className="glass-panel fixed inset-x-3 bottom-3 z-40 flex gap-1 overflow-x-auto rounded-[28px] p-2 lg:hidden">
+      <nav
+        className="fixed inset-x-3 bottom-3 z-40 flex gap-1 overflow-x-auto rounded-[28px] border border-white/60 bg-white/70 p-2 shadow-[0_18px_45px_rgba(26,29,36,0.16)] backdrop-blur-xl lg:hidden"
+        style={{ WebkitBackdropFilter: "blur(20px)" }}
+      >
         {navigation.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
@@ -95,12 +98,25 @@ export function AppShell({ children }: { children: ReactNode }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex min-h-14 min-w-20 flex-col items-center justify-center gap-1 rounded-2xl text-[0.68rem] font-semibold transition",
-                active ? "bg-amber-100 text-slate-900" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
+                "relative flex min-h-14 min-w-20 select-none touch-manipulation flex-col items-center justify-center gap-1 rounded-2xl text-[0.68rem] font-semibold transition active:scale-95",
+                active ? "text-slate-900" : "text-slate-500",
               )}
             >
-              <Icon className="size-4" />
-              {item.label}
+              {active ? (
+                <motion.span
+                  layoutId="dock-active"
+                  className="absolute inset-0 rounded-2xl bg-amber-100"
+                  transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                />
+              ) : null}
+              <motion.span
+                className="relative"
+                animate={{ scale: active ? 1.18 : 1, y: active ? -1 : 0 }}
+                transition={{ type: "spring", stiffness: 420, damping: 20 }}
+              >
+                <Icon className={cn("size-4", active ? "text-amber-600" : "")} />
+              </motion.span>
+              <span className="relative">{item.label}</span>
             </Link>
           );
         })}

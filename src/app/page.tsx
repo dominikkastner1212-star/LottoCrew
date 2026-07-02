@@ -2,6 +2,7 @@ import { AlertCircle, CalendarClock, CreditCard, Euro, Trophy, Users } from "luc
 import { AppShell, PageHeader, QuickActionRail } from "@/components/app-shell";
 import { AnimatedBalls } from "@/components/animated-balls";
 import { ChartBars } from "@/components/chart-bars";
+import { CountUpCurrency } from "@/components/count-up-currency";
 import { DrawCountdown } from "@/components/draw-countdown";
 import { MetricCard } from "@/components/metric-card";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
@@ -44,7 +45,7 @@ export default async function DashboardPage() {
             <div>
               <p className="text-sm font-semibold text-amber-600">{app.group?.name ?? "LottoCrew"}</p>
               <h2 className="mt-2 max-w-xl text-3xl font-semibold tracking-normal text-slate-900 md:text-5xl">
-                {formatCurrency(nextDraw?.jackpot ?? 0)} fuer eure naechste Eurojackpot-Runde.
+                <CountUpCurrency value={nextDraw?.jackpot ?? 0} /> fuer eure naechste Eurojackpot-Runde.
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
                 Alle Kennzahlen kommen direkt aus eurer Supabase-Gruppe.
