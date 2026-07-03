@@ -896,6 +896,32 @@ export async function evaluateDraw(formData: FormData) {
     }
   }
 
+  // Optional beim Auswerten direkt den Gesamtgewinn erfassen: Er wird
+  // centgenau auf die erkannten Gewinn-Tipps verteilt (Reihenfolge egal,
+  // da am Ende ohnehin alles gleichmaessig durch alle Mitglieder geht).
+  const totalAmount = parseAmount(formData.get("total_amount"));
+
+  if (totalAmount > 0) {
+    if (automaticWinnings.length === 0) {
+      throw new Error(
+        "Es wurde ein Gewinnbetrag angegeben, aber kein Tipp hat laut Zahlen eine Gewinnklasse erreicht. Bitte Zahlen pruefen.",
+      );
+    }
+
+    const totalCents = Math.round(totalAmount * 100);
+    const baseCents = Math.floor(totalCents / automaticWinnings.length);
+    let remainder = totalCents - baseCents * automaticWinnings.length;
+
+    for (const winning of automaticWinnings) {
+      let cents = baseCents;
+      if (remainder > 0) {
+        cents += 1;
+        remainder -= 1;
+      }
+      winning.amount = cents / 100;
+    }
+  }
+
   if (automaticWinnings.length) {
     await supabase.from("winnings").insert(automaticWinnings).throwOnError();
   }

@@ -345,7 +345,7 @@ export function EvaluateDrawForm({ groupId, draws, isAdmin }: { groupId: string;
 
   return (
     <Surface>
-      <form action={evaluateDraw} className="grid gap-3 xl:grid-cols-[1fr_1fr_1fr_auto] xl:items-end">
+      <form action={evaluateDraw} className="grid gap-3 xl:grid-cols-[1fr_1fr_1fr_1fr_auto] xl:items-end">
         <input type="hidden" name="group_id" value={groupId} />
         <label className="block">
           <span className="text-sm font-semibold text-slate-500">Ziehung auswerten</span>
@@ -365,6 +365,10 @@ export function EvaluateDrawForm({ groupId, draws, isAdmin }: { groupId: string;
         <label className="block">
           <span className="text-sm font-semibold text-slate-500">Eurozahlen</span>
           <input name="result_extra_numbers" required placeholder="5 10" className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50" />
+        </label>
+        <label className="block">
+          <span className="text-sm font-semibold text-slate-500">Gesamtgewinn € (optional)</span>
+          <input name="total_amount" inputMode="decimal" placeholder="z. B. 42,50" className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50" />
         </label>
         <Button disabled={draws.length === 0}>Automatisch auswerten</Button>
       </form>
