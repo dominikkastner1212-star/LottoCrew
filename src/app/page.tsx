@@ -21,6 +21,8 @@ export default async function DashboardPage() {
   const app = await requireAppContext();
   const openPayments = app.payments.filter((payment) => payment.status === "open");
   const nextDraw = app.draws.find((draw) => new Date(draw.date) >= new Date()) ?? app.draws[0];
+  const totalStake = app.tickets.reduce((sum, ticket) => sum + ticket.stake, 0);
+  const returnRate = totalStake > 0 ? (app.totals.totalWinnings / totalStake) * 100 : 0;
 
   return (
     <AppShell>
@@ -139,6 +141,14 @@ export default async function DashboardPage() {
             <Surface>
               <p className="text-sm text-slate-500">Gesamt historisch</p>
               <p className="mt-2 text-2xl font-semibold text-slate-900">{formatCurrency(app.totals.totalWinnings)}</p>
+            </Surface>
+            <Surface>
+              <p className="text-sm text-slate-500">Gesamteinsaetze</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-900">{formatCurrency(totalStake)}</p>
+            </Surface>
+            <Surface>
+              <p className="text-sm text-slate-500">Rueckflussquote</p>
+              <p className="mt-2 text-2xl font-semibold text-amber-700">{returnRate.toFixed(1)}%</p>
             </Surface>
           </div>
         </Panel>

@@ -205,7 +205,7 @@ export async function updateProfile(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/einstellungen");
-  revalidatePath("/teilnehmer");
+  revalidatePath("/");
 }
 
 export async function createInitialGroup(formData: FormData) {
@@ -271,7 +271,7 @@ export async function updateGroupSettings(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/einstellungen");
-  revalidatePath("/teilnehmer");
+  revalidatePath("/");
 }
 
 export async function updateMemberRole(formData: FormData) {
@@ -294,7 +294,7 @@ export async function updateMemberRole(formData: FormData) {
   await supabase.from("group_members").update({ role }).eq("id", memberId).eq("group_id", groupId).throwOnError();
 
   revalidatePath("/einstellungen");
-  revalidatePath("/teilnehmer");
+  revalidatePath("/");
 }
 
 export async function reactivateMember(formData: FormData) {
@@ -313,7 +313,7 @@ export async function reactivateMember(formData: FormData) {
     .throwOnError();
 
   revalidatePath("/einstellungen");
-  revalidatePath("/teilnehmer");
+  revalidatePath("/");
 }
 
 export async function deactivateMember(formData: FormData) {
@@ -366,7 +366,7 @@ export async function deactivateMember(formData: FormData) {
     .throwOnError();
 
   revalidatePath("/einstellungen");
-  revalidatePath("/teilnehmer");
+  revalidatePath("/");
 }
 
 export async function updateMemberEmail(formData: FormData) {
@@ -422,7 +422,7 @@ export async function updateMemberEmail(formData: FormData) {
   await admin.from("profiles").update({ email: newEmail }).eq("id", memberProfileId).throwOnError();
 
   revalidatePath("/einstellungen");
-  revalidatePath("/teilnehmer");
+  revalidatePath("/");
 }
 
 export async function addMemberWithPassword(formData: FormData) {
@@ -504,7 +504,7 @@ export async function addMemberWithPassword(formData: FormData) {
     .throwOnError();
 
   revalidatePath("/einstellungen");
-  revalidatePath("/teilnehmer");
+  revalidatePath("/");
 }
 
 export async function addMemberByEmail(formData: FormData) {
@@ -572,7 +572,7 @@ export async function addMemberByEmail(formData: FormData) {
     .throwOnError();
 
   revalidatePath("/einstellungen");
-  revalidatePath("/teilnehmer");
+  revalidatePath("/");
 }
 
 export async function updatePaymentStatus(formData: FormData) {
@@ -596,7 +596,7 @@ export async function updatePaymentStatus(formData: FormData) {
     .throwOnError();
 
   revalidatePath("/");
-  revalidatePath("/zahlungen");
+  revalidatePath("/kasse");
 }
 
 export async function createDraw(formData: FormData) {
@@ -690,7 +690,7 @@ export async function createPayment(formData: FormData) {
     .throwOnError();
 
   revalidatePath("/");
-  revalidatePath("/zahlungen");
+  revalidatePath("/kasse");
 }
 
 export async function createMonthlyPayments(formData: FormData) {
@@ -734,7 +734,7 @@ export async function createMonthlyPayments(formData: FormData) {
   }
 
   revalidatePath("/");
-  revalidatePath("/zahlungen");
+  revalidatePath("/kasse");
 }
 
 export async function createWinning(formData: FormData) {
@@ -781,8 +781,8 @@ export async function createWinning(formData: FormData) {
   ]);
 
   revalidatePath("/");
-  revalidatePath("/gewinne");
-  revalidatePath("/statistiken");
+  revalidatePath("/kasse");
+  revalidatePath("/");
   revalidatePath("/tipps");
   revalidatePath("/ziehungen");
 }
@@ -901,8 +901,8 @@ export async function evaluateDraw(formData: FormData) {
   }
 
   revalidatePath("/");
-  revalidatePath("/gewinne");
-  revalidatePath("/statistiken");
+  revalidatePath("/kasse");
+  revalidatePath("/");
   revalidatePath("/tipps");
   revalidatePath("/ziehungen");
 }

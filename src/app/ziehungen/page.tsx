@@ -1,8 +1,7 @@
-import { CalendarPlus } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { AdminDisclosure } from "@/components/admin-disclosure";
 import { CreateDrawForm, EvaluateDrawForm } from "@/components/admin-forms";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
-import { Button } from "@/components/ui/button";
 import { Panel, Surface } from "@/components/ui/panel";
 import { requireAppContext } from "@/lib/auth-guard";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -17,13 +16,16 @@ export default async function DrawsPage() {
       <PageHeader
         title="Ziehungen"
         description="Eurojackpot-Jackpots, Ziehungsdaten und Auswertung der gespielten Runden."
-        action={<Button disabled={!app.isAdmin}><CalendarPlus className="size-4" />Ziehung anlegen</Button>}
       />
       <Panel>
-        {app.group ? (
-          <div className="mb-5 grid gap-4">
-            <CreateDrawForm groupId={app.group.id} isAdmin={app.isAdmin} />
-            <EvaluateDrawForm groupId={app.group.id} draws={app.draws} isAdmin={app.isAdmin} />
+        {app.group && app.isAdmin ? (
+          <div className="mb-5 grid gap-3">
+            <AdminDisclosure label="Ziehung anlegen">
+              <CreateDrawForm groupId={app.group.id} isAdmin={app.isAdmin} />
+            </AdminDisclosure>
+            <AdminDisclosure label="Ziehung auswerten">
+              <EvaluateDrawForm groupId={app.group.id} draws={app.draws} isAdmin={app.isAdmin} />
+            </AdminDisclosure>
           </div>
         ) : null}
         <Stagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
