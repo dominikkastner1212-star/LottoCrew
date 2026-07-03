@@ -20,8 +20,8 @@ export const navigation = [
 ] as const;
 
 export const quickActions = [
-  { label: "Tipp anlegen", icon: Ticket },
-  { label: "Zahlung abhaken", icon: CreditCard },
-  { label: "Gewinn erfassen", icon: Sparkles },
-  { label: "Mitglied einladen", icon: Crown },
+  { label: "Tipp anlegen", icon: Ticket, href: "/tipps" },
+  { label: "Zahlung abhaken", icon: CreditCard, href: "/kasse" },
+  { label: "Gewinn erfassen", icon: Sparkles, href: "/kasse" },
+  { label: "Mitglied einladen", icon: Crown, href: "/einstellungen" },
 ];

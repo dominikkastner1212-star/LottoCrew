@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Command, LogOut, Menu, Search } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 import { signOut } from "@/app/actions";
@@ -55,26 +55,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="relative flex min-w-0 flex-1 flex-col pb-24 lg:pb-4">
           <header className="glass-panel sticky top-4 z-30 mb-5 flex items-center gap-3 rounded-[28px] px-4 py-3 lg:top-4">
             <div className="lg:hidden">
-              <Button variant="ghost" className="size-11 rounded-2xl p-0" aria-label="Menue">
-                <Menu className="size-5" />
-              </Button>
-            </div>
-            <div className="hidden min-w-0 flex-1 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 md:flex">
-              <Search className="size-4 text-slate-500" />
-              <input
-                aria-label="Suchen"
-                placeholder="Suchen nach Tipp, Mitglied, Zahlung..."
-                className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-500 outline-none"
-              />
-              <kbd className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[0.68rem] text-slate-500">
-                <Command className="mr-1 inline size-3" />K
-              </kbd>
+              <AppLogo />
             </div>
             <div className="ml-auto flex items-center gap-2">
-              <Button variant="secondary" className="hidden sm:inline-flex">
-                <Bell className="size-4" />
-                Hinweise
-              </Button>
               <form action={signOut}>
                 <Button variant="ghost" className="size-11 rounded-2xl p-0" aria-label="Abmelden">
                   <LogOut className="size-5" />
@@ -151,15 +134,16 @@ export function QuickActionRail() {
       {quickActions.map((action) => {
         const Icon = action.icon;
         return (
-          <button
+          <Link
             key={action.label}
-            className="group flex items-center justify-between rounded-3xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:-translate-y-0.5 hover:bg-slate-100"
+            href={action.href}
+            className="group flex select-none touch-manipulation items-center justify-between rounded-3xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:-translate-y-0.5 hover:bg-slate-100 active:scale-[0.98]"
           >
             <span className="text-sm font-semibold text-slate-900">{action.label}</span>
             <span className="grid size-10 place-items-center rounded-2xl bg-amber-100 text-amber-600 transition group-hover:bg-amber-300 group-hover:text-slate-950">
               <Icon className="size-4" />
             </span>
-          </button>
+          </Link>
         );
       })}
     </div>
