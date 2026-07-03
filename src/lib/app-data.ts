@@ -56,6 +56,7 @@ export type AppTicket = {
   stake: number;
   winnings: number;
   createdBy: string | null;
+  createdByName: string;
   mainMatches: number;
   euroMatches: number;
   prizeRank: string | null;
@@ -77,6 +78,7 @@ export type AppWinning = {
   id: string;
   date: string;
   ticket: string;
+  tippedBy: string;
   amount: number;
   perMember: number;
   rank: string;
@@ -467,10 +469,13 @@ export async function getAppContext(): Promise<AppContext> {
     winningsByTicket.set(winning.ticket_id, (winningsByTicket.get(winning.ticket_id) ?? 0) + toNumber(winning.amount));
   });
 
+  const profileNames = new Map(members.map((member) => [member.profileId, member.name]));
   const ticketLabels = new Map<string, string>();
+  const ticketCreators = new Map<string, string>();
   const tickets: AppTicket[] = await Promise.all(ticketRows.map(async (ticket) => {
     const draw = Array.isArray(ticket.draws) ? ticket.draws[0] : ticket.draws;
     ticketLabels.set(ticket.id, ticket.label);
+    ticketCreators.set(ticket.id, profileNames.get(ticket.created_by ?? "") ?? "");
     const imagePath = ticket.ticket_image_path ?? null;
     let imageUrl: string | null = null;
 
@@ -490,6 +495,7 @@ export async function getAppContext(): Promise<AppContext> {
       stake: toNumber(ticket.stake_amount),
       winnings: winningsByTicket.get(ticket.id) ?? 0,
       createdBy: ticket.created_by ?? null,
+      createdByName: profileNames.get(ticket.created_by ?? "") ?? "",
       mainMatches: toNumber(ticket.main_matches),
       euroMatches: toNumber(ticket.euro_matches),
       prizeRank: ticket.prize_rank ?? null,
@@ -517,6 +523,7 @@ export async function getAppContext(): Promise<AppContext> {
       id: winning.id,
       date: winning.recorded_at,
       ticket: ticketLabels.get(winning.ticket_id) ?? "Tipp",
+      tippedBy: ticketCreators.get(winning.ticket_id) ?? "",
       amount,
       perMember: activeMemberCount ? amount / activeMemberCount : 0,
       rank: winning.prize_rank ?? "Gewinn",

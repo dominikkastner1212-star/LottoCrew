@@ -44,7 +44,10 @@ export default async function KassePage() {
             <Surface>
               <p className="text-sm font-semibold text-emerald-700">{winning.rank}</p>
               <h3 className="mt-4 text-3xl font-semibold text-slate-900">{formatCurrency(winning.amount)}</h3>
-              <p className="mt-2 text-sm text-slate-500">{winning.ticket}</p>
+              <p className="mt-2 text-sm text-slate-500">
+                {winning.ticket}
+                {winning.tippedBy ? <span className="text-slate-400"> · getippt von {winning.tippedBy}</span> : null}
+              </p>
               <div className="mt-6 rounded-2xl bg-slate-50 p-3">
                 <p className="text-xs text-slate-500">Anteil pro Teilnehmer</p>
                 <p className="mt-1 font-semibold text-amber-700">{formatCurrency(winning.perMember)}</p>

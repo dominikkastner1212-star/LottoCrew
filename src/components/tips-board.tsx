@@ -68,7 +68,7 @@ export function TipsBoard({ tickets }: { tickets: AppTicket[] }) {
                   <StatusPill status={ticket.status as "planned" | "submitted" | "evaluated"} />
                 </div>
                 <p className="mt-2 text-sm text-slate-500">
-                  {ticket.id} - Ziehung {ticket.date ? formatDate(ticket.date) : "noch nicht zugeordnet"}
+                  {ticket.createdByName ? `von ${ticket.createdByName}` : "Gemeinschaftstipp"} · Ziehung {ticket.date ? formatDate(ticket.date) : "noch nicht zugeordnet"}
                 </p>
               </div>
               <NumberRow numbers={ticket.numbers} euroNumbers={ticket.euroNumbers} />
