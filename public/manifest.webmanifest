@@ -1,17 +1,33 @@
 {
   "name": "LottoCrew",
   "short_name": "LottoCrew",
-  "description": "Premium-App fur Lotto-Tippgemeinschaften.",
+  "description": "Eure Eurojackpot-Tippgemeinschaft: Tipps, Beiträge und Gewinne an einem Ort.",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#faf7f0",
   "theme_color": "#faf7f0",
+  "lang": "de",
   "icons": [
     {
-      "src": "/icons/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
