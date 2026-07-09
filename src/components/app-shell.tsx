@@ -7,6 +7,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 import { signOut } from "@/app/actions";
 import { AppLogo } from "@/components/app-logo";
+import { InstallHint } from "@/components/install-hint";
 import { Button, LinkButton } from "@/components/ui/button";
 import { navigation, quickActions } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
@@ -65,6 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </form>
             </div>
           </header>
+          <InstallHint />
           <PageTransition pathname={pathname}>{children}</PageTransition>
         </main>
       </div>
