@@ -12,55 +12,47 @@ import {
 } from "@/app/actions";
 import { AddMemberForm } from "@/components/add-member-form";
 import { MemberRow } from "@/components/member-row";
-import { Button } from "@/components/ui/button";
+import { ActionForm } from "@/components/ui/action-form";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Surface } from "@/components/ui/panel";
 import type { AppContext, AppDraw, AppMember, AppTicket } from "@/lib/app-data";
 
+// Einheitlicher Stil fuer Eingabefelder und Labels.
+// text-base statt text-sm und slate-600 statt slate-500: besser lesbar,
+// gerade fuer aeltere Kollegen.
+const inputStyle =
+  "mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 outline-none focus:border-amber-400";
+const labelStyle = "text-sm font-semibold text-slate-600";
+
 export function ProfileForm({ profile }: { profile: AppContext["profile"] }) {
   return (
-    <form action={updateProfile} className="space-y-4">
+    <ActionForm action={updateProfile} successMessage="Profil gespeichert." resetOnSuccess={false} className="space-y-4">
       <label className="block">
-        <span className="text-sm font-semibold text-slate-500">Anzeigename</span>
-        <input
-          name="display_name"
-          className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
-          defaultValue={profile?.displayName ?? ""}
-          required
-        />
+        <span className={labelStyle}>Anzeigename</span>
+        <input name="display_name" className={inputStyle} defaultValue={profile?.displayName ?? ""} required />
       </label>
       <div>
         <p className="text-xs text-slate-500">E-Mail</p>
         <p className="mt-1 text-sm font-semibold text-slate-600">{profile?.email ?? "Nicht angemeldet"}</p>
       </div>
-      <Button className="w-full">Profil speichern</Button>
-    </form>
+      <SubmitButton className="w-full" pendingLabel="Wird gespeichert...">Profil speichern</SubmitButton>
+    </ActionForm>
   );
 }
 
 export function CreateGroupForm() {
   return (
-    <form action={createInitialGroup} className="space-y-4">
+    <ActionForm action={createInitialGroup} successMessage="Gruppe erstellt! Du bist jetzt Admin." resetOnSuccess={false} className="space-y-4">
       <label className="block">
-        <span className="text-sm font-semibold text-slate-500">Gruppenname</span>
-        <input
-          name="name"
-          className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
-          defaultValue="AbteilungsJackpot"
-          required
-        />
+        <span className={labelStyle}>Gruppenname</span>
+        <input name="name" className={inputStyle} defaultValue="AbteilungsJackpot" required />
       </label>
       <label className="block">
-        <span className="text-sm font-semibold text-slate-500">Monatsbeitrag</span>
-        <input
-          name="monthly_amount"
-          inputMode="decimal"
-          className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
-          defaultValue="24"
-          required
-        />
+        <span className={labelStyle}>Monatsbeitrag (€)</span>
+        <input name="monthly_amount" inputMode="decimal" className={inputStyle} defaultValue="24" required />
       </label>
-      <Button className="w-full">Gruppe erstellen und mich als Admin setzen</Button>
-    </form>
+      <SubmitButton className="w-full" pendingLabel="Wird erstellt...">Gruppe erstellen und mich als Admin setzen</SubmitButton>
+    </ActionForm>
   );
 }
 
@@ -70,30 +62,24 @@ export function GroupSettingsForm({ app }: { app: AppContext }) {
   }
 
   return (
-    <form action={updateGroupSettings} className="space-y-4">
+    <ActionForm action={updateGroupSettings} successMessage="Gruppe gespeichert." resetOnSuccess={false} className="space-y-4">
       <input type="hidden" name="group_id" value={app.group.id} />
       <label className="block">
-        <span className="text-sm font-semibold text-slate-500">Name</span>
-        <input
-          name="name"
-          className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
-          defaultValue={app.group.name}
-          disabled={!app.isAdmin}
-          required
-        />
+        <span className={labelStyle}>Name</span>
+        <input name="name" className={inputStyle} defaultValue={app.group.name} disabled={!app.isAdmin} required />
       </label>
       <label className="block">
-        <span className="text-sm font-semibold text-slate-500">Monatsbeitrag</span>
+        <span className={labelStyle}>Monatsbeitrag (€)</span>
         <input
           name="monthly_amount"
           inputMode="decimal"
-          className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
+          className={inputStyle}
           defaultValue={app.group.monthlyAmount}
           disabled={!app.isAdmin}
           required
         />
       </label>
-      <Button className="w-full" disabled={!app.isAdmin}>Gruppe speichern</Button>
+      <SubmitButton className="w-full" disabled={!app.isAdmin} pendingLabel="Wird gespeichert...">Gruppe speichern</SubmitButton>
       {app.group.inviteCode ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">Einladungscode</p>
@@ -103,7 +89,7 @@ export function GroupSettingsForm({ app }: { app: AppContext }) {
           </p>
         </div>
       ) : null}
-    </form>
+    </ActionForm>
   );
 }
 
@@ -138,29 +124,20 @@ export function CreateDrawForm({ groupId, isAdmin }: { groupId: string; isAdmin:
 
   return (
     <Surface>
-      <form action={createDraw} className="grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end">
-        <input type="hidden" name="group_id" value={groupId} />
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Ziehungsdatum</span>
-          <input
-            name="draw_date"
-            type="date"
-            required
-            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
-          />
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Jackpot</span>
-          <input
-            name="jackpot_amount"
-            inputMode="decimal"
-            required
-            placeholder="0"
-            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
-          />
-        </label>
-        <Button>Ziehung anlegen</Button>
-      </form>
+      <ActionForm action={createDraw} successMessage="Ziehung angelegt.">
+        <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end">
+          <input type="hidden" name="group_id" value={groupId} />
+          <label className="block">
+            <span className={labelStyle}>Ziehungsdatum</span>
+            <input name="draw_date" type="date" required className={inputStyle} />
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Jackpot (€)</span>
+            <input name="jackpot_amount" inputMode="decimal" required placeholder="0" className={inputStyle} />
+          </label>
+          <SubmitButton pendingLabel="Wird angelegt...">Ziehung anlegen</SubmitButton>
+        </div>
+      </ActionForm>
     </Surface>
   );
 }
@@ -172,26 +149,17 @@ export function CreateTicketForm({ groupId, draws, isAdmin }: { groupId: string;
 
   return (
     <Surface>
-      <form action={createTicket} className="space-y-4">
+      <ActionForm action={createTicket} successMessage="Tipp gespeichert." className="space-y-4">
         <input type="hidden" name="group_id" value={groupId} />
         <div className="grid gap-3 md:grid-cols-[1fr_1fr_10rem]">
           <label className="block">
-            <span className="text-sm font-semibold text-slate-500">Tippname</span>
-            <input
-              name="label"
-              required
-              placeholder="Eurojackpot Runde"
-              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
-            />
+            <span className={labelStyle}>Tippname</span>
+            <input name="label" required placeholder="Eurojackpot Runde" className={inputStyle} />
           </label>
           <label className="block">
-            <span className="text-sm font-semibold text-slate-500">Ziehung</span>
-            <select
-              name="draw_id"
-              required
-              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
-            >
-              <option value="">Auswaehlen</option>
+            <span className={labelStyle}>Ziehung</span>
+            <select name="draw_id" required className={inputStyle}>
+              <option value="">Auswählen</option>
               {draws.map((draw) => (
                 <option key={draw.id} value={draw.id}>
                   {draw.date}
@@ -200,14 +168,8 @@ export function CreateTicketForm({ groupId, draws, isAdmin }: { groupId: string;
             </select>
           </label>
           <label className="block">
-            <span className="text-sm font-semibold text-slate-500">Einsatz</span>
-            <input
-              name="stake_amount"
-              inputMode="decimal"
-              required
-              placeholder="0"
-              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
-            />
+            <span className={labelStyle}>Einsatz (€)</span>
+            <input name="stake_amount" inputMode="decimal" required placeholder="0" className={inputStyle} />
           </label>
         </div>
         <div className="grid gap-3 sm:grid-cols-5">
@@ -218,7 +180,7 @@ export function CreateTicketForm({ groupId, draws, isAdmin }: { groupId: string;
               inputMode="numeric"
               required
               placeholder={`Zahl ${position}`}
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 outline-none focus:border-amber-400"
             />
           ))}
         </div>
@@ -230,12 +192,12 @@ export function CreateTicketForm({ groupId, draws, isAdmin }: { groupId: string;
               inputMode="numeric"
               required
               placeholder={`Eurozahl ${position}`}
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 outline-none focus:border-amber-400"
             />
           ))}
-          <Button disabled={draws.length === 0}>Tipp speichern</Button>
+          <SubmitButton disabled={draws.length === 0} pendingLabel="Wird gespeichert...">Tipp speichern</SubmitButton>
         </div>
-      </form>
+      </ActionForm>
     </Surface>
   );
 }
@@ -247,29 +209,31 @@ export function CreatePaymentForm({ groupId, members, isAdmin }: { groupId: stri
 
   return (
     <Surface>
-      <form action={createPayment} className="grid gap-3 md:grid-cols-[1fr_10rem_10rem_auto] md:items-end">
-        <input type="hidden" name="group_id" value={groupId} />
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Mitglied</span>
-          <select name="member_id" required className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50">
-            <option value="">Auswaehlen</option>
-            {members.map((member) => (
-              <option key={member.id} value={member.id}>
-                {member.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Monat</span>
-          <input name="due_month" type="month" required className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50" />
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Betrag</span>
-          <input name="amount" inputMode="decimal" required placeholder="24" className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50" />
-        </label>
-        <Button disabled={members.length === 0}>Zahlung anlegen</Button>
-      </form>
+      <ActionForm action={createPayment} successMessage="Zahlung angelegt.">
+        <div className="grid gap-3 md:grid-cols-[1fr_10rem_10rem_auto] md:items-end">
+          <input type="hidden" name="group_id" value={groupId} />
+          <label className="block">
+            <span className={labelStyle}>Mitglied</span>
+            <select name="member_id" required className={inputStyle}>
+              <option value="">Auswählen</option>
+              {members.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Monat</span>
+            <input name="due_month" type="month" required className={inputStyle} />
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Betrag (€)</span>
+            <input name="amount" inputMode="decimal" required placeholder="24" className={inputStyle} />
+          </label>
+          <SubmitButton disabled={members.length === 0} pendingLabel="Wird angelegt...">Zahlung anlegen</SubmitButton>
+        </div>
+      </ActionForm>
     </Surface>
   );
 }
@@ -281,14 +245,23 @@ export function CreateMonthlyPaymentsForm({ groupId, isAdmin }: { groupId: strin
 
   return (
     <Surface>
-      <form action={createMonthlyPayments} className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
-        <input type="hidden" name="group_id" value={groupId} />
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Monat fuer alle aktiven Mitglieder</span>
-          <input name="due_month" type="month" required className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50" />
-        </label>
-        <Button>Monatsbeitraege erzeugen</Button>
-      </form>
+      <ActionForm
+        action={createMonthlyPayments}
+        successMessage="Monatsbeiträge für alle aktiven Mitglieder angelegt."
+        confirm={{
+          question: "Beiträge für ALLE aktiven Mitglieder in diesem Monat anlegen? Das lässt sich nicht mit einem Klick rückgängig machen.",
+          confirmLabel: "Ja, Beiträge anlegen",
+        }}
+      >
+        <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+          <input type="hidden" name="group_id" value={groupId} />
+          <label className="block">
+            <span className={labelStyle}>Monat für alle aktiven Mitglieder</span>
+            <input name="due_month" type="month" required className={inputStyle} />
+          </label>
+          <SubmitButton pendingLabel="Wird angelegt...">Monatsbeiträge erzeugen</SubmitButton>
+        </div>
+      </ActionForm>
     </Surface>
   );
 }
@@ -300,40 +273,42 @@ export function CreateWinningForm({ groupId, draws, tickets, isAdmin }: { groupI
 
   return (
     <Surface>
-      <form action={createWinning} className="grid gap-3 md:grid-cols-[1fr_1fr_9rem_1fr_auto] md:items-end">
-        <input type="hidden" name="group_id" value={groupId} />
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Ziehung</span>
-          <select name="draw_id" required className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50">
-            <option value="">Auswaehlen</option>
-            {draws.map((draw) => (
-              <option key={draw.id} value={draw.id}>
-                {draw.date}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Tipp</span>
-          <select name="ticket_id" required className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50">
-            <option value="">Auswaehlen</option>
-            {tickets.map((ticket) => (
-              <option key={ticket.id} value={ticket.id}>
-                {ticket.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Betrag</span>
-          <input name="amount" inputMode="decimal" required placeholder="0" className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50" />
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Gewinnrang</span>
-          <input name="prize_rank" placeholder="z. B. 3 + 1" className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50" />
-        </label>
-        <Button disabled={draws.length === 0 || tickets.length === 0}>Gewinn speichern</Button>
-      </form>
+      <ActionForm action={createWinning} successMessage="Gewinn gespeichert. Glückwunsch an die Runde! 🎉">
+        <div className="grid gap-3 md:grid-cols-[1fr_1fr_9rem_1fr_auto] md:items-end">
+          <input type="hidden" name="group_id" value={groupId} />
+          <label className="block">
+            <span className={labelStyle}>Ziehung</span>
+            <select name="draw_id" required className={inputStyle}>
+              <option value="">Auswählen</option>
+              {draws.map((draw) => (
+                <option key={draw.id} value={draw.id}>
+                  {draw.date}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Tipp</span>
+            <select name="ticket_id" required className={inputStyle}>
+              <option value="">Auswählen</option>
+              {tickets.map((ticket) => (
+                <option key={ticket.id} value={ticket.id}>
+                  {ticket.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Betrag (€)</span>
+            <input name="amount" inputMode="decimal" required placeholder="0" className={inputStyle} />
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Gewinnrang</span>
+            <input name="prize_rank" placeholder="z. B. 3 + 1" className={inputStyle} />
+          </label>
+          <SubmitButton disabled={draws.length === 0 || tickets.length === 0} pendingLabel="Wird gespeichert...">Gewinn speichern</SubmitButton>
+        </div>
+      </ActionForm>
     </Surface>
   );
 }
@@ -345,33 +320,35 @@ export function EvaluateDrawForm({ groupId, draws, isAdmin }: { groupId: string;
 
   return (
     <Surface>
-      <form action={evaluateDraw} className="grid gap-3 xl:grid-cols-[1fr_1fr_1fr_1fr_auto] xl:items-end">
-        <input type="hidden" name="group_id" value={groupId} />
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Ziehung auswerten</span>
-          <select name="draw_id" required className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50">
-            <option value="">Auswaehlen</option>
-            {draws.map((draw) => (
-              <option key={draw.id} value={draw.id}>
-                {draw.date}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Hauptzahlen</span>
-          <input name="result_numbers" required placeholder="5 12 23 34 49" className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50" />
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Eurozahlen</span>
-          <input name="result_extra_numbers" required placeholder="5 10" className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50" />
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Gesamtgewinn € (optional)</span>
-          <input name="total_amount" inputMode="decimal" placeholder="z. B. 42,50" className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50" />
-        </label>
-        <Button disabled={draws.length === 0}>Automatisch auswerten</Button>
-      </form>
+      <ActionForm action={evaluateDraw} successMessage="Ziehung ausgewertet. Treffer wurden automatisch als Gewinne erfasst.">
+        <div className="grid gap-3 xl:grid-cols-[1fr_1fr_1fr_1fr_auto] xl:items-end">
+          <input type="hidden" name="group_id" value={groupId} />
+          <label className="block">
+            <span className={labelStyle}>Ziehung auswerten</span>
+            <select name="draw_id" required className={inputStyle}>
+              <option value="">Auswählen</option>
+              {draws.map((draw) => (
+                <option key={draw.id} value={draw.id}>
+                  {draw.date}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Hauptzahlen</span>
+            <input name="result_numbers" required placeholder="5 12 23 34 49" className={inputStyle} />
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Eurozahlen</span>
+            <input name="result_extra_numbers" required placeholder="5 10" className={inputStyle} />
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Gesamtgewinn € (optional)</span>
+            <input name="total_amount" inputMode="decimal" placeholder="z. B. 42,50" className={inputStyle} />
+          </label>
+          <SubmitButton disabled={draws.length === 0} pendingLabel="Wertet aus...">Automatisch auswerten</SubmitButton>
+        </div>
+      </ActionForm>
     </Surface>
   );
 }
@@ -383,25 +360,33 @@ export function TicketDocumentUploadForm({ groupId, tickets, isAdmin }: { groupI
 
   return (
     <Surface>
-      <form action={uploadTicketDocument} className="grid gap-3 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
-        <input type="hidden" name="group_id" value={groupId} />
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Tipp</span>
-          <select name="ticket_id" required className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50">
-            <option value="">Auswaehlen</option>
-            {tickets.map((ticket) => (
-              <option key={ticket.id} value={ticket.id}>
-                {ticket.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-sm font-semibold text-slate-500">Spielschein-Datei</span>
-          <input name="file" type="file" accept="image/*,application/pdf" required className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 outline-none file:mr-3 file:rounded-xl file:border-0 file:bg-amber-300 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-950 focus:border-amber-300/50" />
-        </label>
-        <Button disabled={tickets.length === 0}>Spielschein hochladen</Button>
-      </form>
+      <ActionForm action={uploadTicketDocument} successMessage="Spielschein hochgeladen.">
+        <div className="grid gap-3 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
+          <input type="hidden" name="group_id" value={groupId} />
+          <label className="block">
+            <span className={labelStyle}>Tipp</span>
+            <select name="ticket_id" required className={inputStyle}>
+              <option value="">Auswählen</option>
+              {tickets.map((ticket) => (
+                <option key={ticket.id} value={ticket.id}>
+                  {ticket.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Spielschein-Datei</span>
+            <input
+              name="file"
+              type="file"
+              accept="image/*,application/pdf"
+              required
+              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-500 outline-none file:mr-3 file:rounded-xl file:border-0 file:bg-amber-300 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-950 focus:border-amber-400"
+            />
+          </label>
+          <SubmitButton disabled={tickets.length === 0} pendingLabel="Lädt hoch...">Spielschein hochladen</SubmitButton>
+        </div>
+      </ActionForm>
     </Surface>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { addMemberByEmail, addMemberWithPassword } from "@/app/actions";
+import { ActionForm } from "@/components/ui/action-form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Surface } from "@/components/ui/panel";
 
@@ -34,14 +35,18 @@ export function AddMemberForm({ groupId }: { groupId: string }) {
       </div>
 
       {mode === "invite" ? (
-        <form action={addMemberByEmail} className="space-y-3">
+        <ActionForm
+          action={addMemberByEmail}
+          successMessage="Einladung gesendet! Der Kollege bekommt eine E-Mail und legt sein Passwort selbst fest."
+          className="space-y-3"
+        >
           <input type="hidden" name="group_id" value={groupId} />
           <label className="block">
-            <span className="text-sm font-semibold text-slate-500">Mitglied per E-Mail hinzufuegen</span>
+            <span className="text-sm font-semibold text-slate-600">Mitglied per E-Mail hinzufügen</span>
             <input
               name="email"
               type="email"
-              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
+              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 outline-none focus:border-amber-400"
               placeholder="kollege@firma.de"
               required
             />
@@ -49,44 +54,45 @@ export function AddMemberForm({ groupId }: { groupId: string }) {
           <select
             name="role"
             defaultValue="participant"
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-900 outline-none focus:border-amber-300/50"
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-900 outline-none focus:border-amber-400"
           >
             <option value="participant">Teilnehmer</option>
             <option value="admin">Admin</option>
           </select>
           <SubmitButton className="w-full" pendingLabel="Wird gesendet...">Einladung senden</SubmitButton>
-          <p className="text-xs leading-5 text-slate-500">
-            Der Kollege bekommt eine E-Mail und legt sein Passwort selbst fest.
-          </p>
-        </form>
+        </ActionForm>
       ) : (
-        <form action={addMemberWithPassword} className="space-y-3">
+        <ActionForm
+          action={addMemberWithPassword}
+          successMessage="Mitglied angelegt! Gib dem Kollegen das Startpasswort weiter – beim ersten Login muss er es ändern."
+          className="space-y-3"
+        >
           <input type="hidden" name="group_id" value={groupId} />
           <label className="block">
-            <span className="text-sm font-semibold text-slate-500">Name</span>
+            <span className="text-sm font-semibold text-slate-600">Name</span>
             <input
               name="display_name"
-              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
+              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 outline-none focus:border-amber-400"
               placeholder="Vorname"
             />
           </label>
           <label className="block">
-            <span className="text-sm font-semibold text-slate-500">E-Mail</span>
+            <span className="text-sm font-semibold text-slate-600">E-Mail</span>
             <input
               name="email"
               type="email"
-              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
+              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 outline-none focus:border-amber-400"
               placeholder="kollege@firma.de"
               required
             />
           </label>
           <label className="block">
-            <span className="text-sm font-semibold text-slate-500">Startpasswort</span>
+            <span className="text-sm font-semibold text-slate-600">Startpasswort</span>
             <input
               name="password"
               type="text"
               minLength={6}
-              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-300/50"
+              className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 outline-none focus:border-amber-400"
               placeholder="Mind. 6 Zeichen"
               required
             />
@@ -94,16 +100,13 @@ export function AddMemberForm({ groupId }: { groupId: string }) {
           <select
             name="role"
             defaultValue="participant"
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-900 outline-none focus:border-amber-300/50"
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold text-slate-900 outline-none focus:border-amber-400"
           >
             <option value="participant">Teilnehmer</option>
             <option value="admin">Admin</option>
           </select>
           <SubmitButton className="w-full" pendingLabel="Wird angelegt...">Mitglied anlegen</SubmitButton>
-          <p className="text-xs leading-5 text-slate-500">
-            Gib dem Kollegen dieses Startpasswort weiter. Beim ersten Login muss er es aendern.
-          </p>
-        </form>
+        </ActionForm>
       )}
     </Surface>
   );

@@ -3,6 +3,7 @@
 import { Mail, Pencil, UserMinus, X } from "lucide-react";
 import { useState } from "react";
 import { deactivateMember, reactivateMember, updateMemberEmail, updateMemberRole } from "@/app/actions";
+import { ActionForm } from "@/components/ui/action-form";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Surface } from "@/components/ui/panel";
@@ -49,10 +50,15 @@ export function MemberRow({
       </div>
 
       {editingEmail && isAdmin ? (
-        <form action={updateMemberEmail} className="mt-3 space-y-2 rounded-2xl bg-slate-50 p-3">
+        <ActionForm
+          action={updateMemberEmail}
+          successMessage="Neue E-Mail gespeichert."
+          resetOnSuccess={false}
+          className="mt-3 space-y-2 rounded-2xl bg-slate-50 p-3"
+        >
           <input type="hidden" name="group_id" value={groupId} />
           <input type="hidden" name="profile_id" value={member.profileId} />
-          <span className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <span className="flex items-center gap-2 text-xs font-semibold text-slate-600">
             <Mail className="size-3.5" /> E-Mail korrigieren
           </span>
           <input
@@ -60,28 +66,40 @@ export function MemberRow({
             type="email"
             defaultValue={member.email ?? ""}
             required
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-300/50"
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-400"
           />
           <SubmitButton variant="secondary" className="w-full" pendingLabel="Speichert...">Neue E-Mail speichern</SubmitButton>
-        </form>
+        </ActionForm>
       ) : null}
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <form action={updateMemberRole} className="flex flex-1 items-center gap-2">
-          <input type="hidden" name="group_id" value={groupId} />
-          <input type="hidden" name="member_id" value={member.id} />
-          <input type="hidden" name="profile_id" value={member.profileId} />
-          <select
-            name="role"
-            defaultValue={member.role}
-            disabled={!isAdmin || isSelf}
-            className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-900 outline-none focus:border-amber-300/50 disabled:opacity-60"
-          >
-            <option value="participant">Teilnehmer</option>
-            <option value="admin">Admin</option>
-          </select>
-          <SubmitButton variant="secondary" disabled={!isAdmin || isSelf}>Speichern</SubmitButton>
-        </form>
+      <div className="mt-3">
+        {/* Rollenwechsel mit Rueckfrage: Admin-Rechte zu vergeben oder zu
+            entziehen ist folgenreich – ein Versehen-Klick soll nicht reichen. */}
+        <ActionForm
+          action={updateMemberRole}
+          successMessage={`Rolle von ${member.name} gespeichert.`}
+          resetOnSuccess={false}
+          confirm={{
+            question: `Rolle von ${member.name} wirklich ändern? Admins können Mitglieder, Zahlungen und Gewinne verwalten.`,
+            confirmLabel: "Ja, Rolle ändern",
+          }}
+        >
+          <div className="flex flex-1 items-center gap-2">
+            <input type="hidden" name="group_id" value={groupId} />
+            <input type="hidden" name="member_id" value={member.id} />
+            <input type="hidden" name="profile_id" value={member.profileId} />
+            <select
+              name="role"
+              defaultValue={member.role}
+              disabled={!isAdmin || isSelf}
+              className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-900 outline-none focus:border-amber-400 disabled:opacity-60"
+            >
+              <option value="participant">Teilnehmer</option>
+              <option value="admin">Admin</option>
+            </select>
+            <SubmitButton variant="secondary" disabled={!isAdmin || isSelf}>Speichern</SubmitButton>
+          </div>
+        </ActionForm>
       </div>
 
       {isAdmin && !isSelf && !isInactive ? (
@@ -91,12 +109,12 @@ export function MemberRow({
               {member.name} deaktivieren? Die bisherigen Tipps und Zahlungen bleiben erhalten.
             </p>
             <div className="mt-2 flex gap-2">
-              <form action={deactivateMember} className="flex-1">
+              <ActionForm action={deactivateMember} successMessage={`${member.name} wurde deaktiviert.`} className="flex-1">
                 <input type="hidden" name="group_id" value={groupId} />
                 <input type="hidden" name="member_id" value={member.id} />
                 <input type="hidden" name="profile_id" value={member.profileId} />
                 <SubmitButton variant="danger" className="w-full" pendingLabel="...">Ja, deaktivieren</SubmitButton>
-              </form>
+              </ActionForm>
               <Button variant="secondary" onClick={() => setConfirmingRemove(false)} type="button">
                 Abbrechen
               </Button>
@@ -114,11 +132,11 @@ export function MemberRow({
       ) : null}
 
       {isAdmin && isInactive ? (
-        <form action={reactivateMember} className="mt-2">
+        <ActionForm action={reactivateMember} successMessage={`${member.name} ist wieder aktiv.`} className="mt-2">
           <input type="hidden" name="group_id" value={groupId} />
           <input type="hidden" name="member_id" value={member.id} />
           <SubmitButton variant="secondary" className="w-full" pendingLabel="...">Wieder aktivieren</SubmitButton>
-        </form>
+        </ActionForm>
       ) : null}
     </Surface>
   );
