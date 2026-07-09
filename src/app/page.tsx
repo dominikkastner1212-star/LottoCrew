@@ -9,6 +9,7 @@ import { MemberAvatars } from "@/components/member-avatars";
 import { MetricCard } from "@/components/metric-card";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { NumberRow } from "@/components/number-row";
+import { OnboardingChecklist } from "@/components/onboarding-checklist";
 import { PaymentReminderButton } from "@/components/payment-reminder";
 import { StatusPill } from "@/components/status-pill";
 import { Panel, Surface } from "@/components/ui/panel";
@@ -30,6 +31,8 @@ export default async function DashboardPage() {
         title="Dashboard"
         description="Alles Wichtige fuer die naechste Runde: Jackpot, Tipps, offene Beitraege und Gewinne."
       />
+
+      <OnboardingChecklist app={app} />
 
       <Stagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StaggerItem><MetricCard label="Aktueller Jackpot" value={formatCurrency(nextDraw?.jackpot ?? 0)} trend="Eurojackpot" icon={Euro} tone="gold" /></StaggerItem>
