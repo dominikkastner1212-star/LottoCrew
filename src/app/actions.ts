@@ -2,21 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getDefaultDisplayName, toNumber } from "@/lib/app-data";
+import { getDefaultDisplayName } from "@/lib/app-data";
 import {
-  buildWinningShareTransactions,
   evaluateTicketsForDraw,
   fetchEurojackpotResult,
   splitAmountByMember,
   type EurojackpotResult,
-  type WinningShareSource,
 } from "@/lib/eurojackpot";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { generateInviteCode } from "@/lib/utils";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
-type TransactionType = "deposit" | "ticket_stake" | "winning_share" | "correction";
 
 async function getUserId() {
   const supabase = await createClient();
@@ -95,133 +92,6 @@ async function assertActiveMember(supabase: SupabaseServerClient, userId: string
   return data;
 }
 
-async function getActiveMemberIds(supabase: SupabaseServerClient, groupId: string) {
-  const { data } = await supabase
-    .from("group_members")
-    .select("id")
-    .eq("group_id", groupId)
-    .eq("status", "active")
-    .order("joined_at", { ascending: true })
-    .throwOnError();
-
-  return (data ?? []).map((member) => member.id);
-}
-
-async function createMemberTransaction(
-  supabase: SupabaseServerClient,
-  payload: {
-    groupId: string;
-    memberId: string;
-    type: TransactionType;
-    amount: number;
-    description?: string;
-    relatedPaymentId?: string | null;
-    relatedTicketId?: string | null;
-    relatedWinningId?: string | null;
-    createdBy: string;
-  },
-) {
-  await supabase
-    .from("member_transactions")
-    .insert({
-      group_id: payload.groupId,
-      member_id: payload.memberId,
-      type: payload.type,
-      amount: payload.amount,
-      description: payload.description ?? null,
-      related_payment_id: payload.relatedPaymentId ?? null,
-      related_ticket_id: payload.relatedTicketId ?? null,
-      related_winning_id: payload.relatedWinningId ?? null,
-      created_by: payload.createdBy,
-    })
-    .throwOnError();
-}
-
-async function createSharedTransactions(
-  supabase: SupabaseServerClient,
-  payload: {
-    groupId: string;
-    type: Extract<TransactionType, "ticket_stake" | "winning_share">;
-    amount: number;
-    description: string;
-    relatedTicketId?: string | null;
-    relatedWinningId?: string | null;
-    createdBy: string;
-  },
-) {
-  const memberIds = await getActiveMemberIds(supabase, payload.groupId);
-  const shares = splitAmountByMember(payload.amount, memberIds.length);
-
-  if (shares.length === 0) {
-    return;
-  }
-
-  await supabase
-    .from("member_transactions")
-    .insert(
-      shares.map((share, index) => ({
-        group_id: payload.groupId,
-        member_id: memberIds[index],
-        type: payload.type,
-        amount: share,
-        description: payload.description,
-        related_ticket_id: payload.relatedTicketId ?? null,
-        related_winning_id: payload.relatedWinningId ?? null,
-        created_by: payload.createdBy,
-      })),
-    )
-    .throwOnError();
-}
-
-async function deleteTransactionsForWinnings(supabase: SupabaseServerClient, groupId: string, winningIds: string[]) {
-  if (winningIds.length === 0) {
-    return;
-  }
-
-  await supabase
-    .from("member_transactions")
-    .delete()
-    .eq("group_id", groupId)
-    .in("related_winning_id", winningIds)
-    .throwOnError();
-}
-
-async function createWinningShareTransactions(
-  supabase: SupabaseServerClient,
-  payload: {
-    groupId: string;
-    winnings: WinningShareSource[];
-    createdBy: string;
-  },
-) {
-  const memberIds = await getActiveMemberIds(supabase, payload.groupId);
-  const { data: existingRows } = payload.winnings.length
-    ? await supabase
-        .from("member_transactions")
-        .select("related_winning_id")
-        .eq("group_id", payload.groupId)
-        .eq("type", "winning_share")
-        .in("related_winning_id", payload.winnings.map((winning) => winning.id))
-        .throwOnError()
-    : { data: [] };
-  const existingRelatedWinningIds = new Set(
-    (existingRows ?? [])
-      .map((row) => row.related_winning_id)
-      .filter((id): id is string => typeof id === "string"),
-  );
-  const rows = buildWinningShareTransactions({
-    groupId: payload.groupId,
-    memberIds,
-    winnings: payload.winnings,
-    createdBy: payload.createdBy,
-    existingRelatedWinningIds,
-  });
-
-  if (rows.length) {
-    await supabase.from("member_transactions").insert(rows).throwOnError();
-  }
-}
-
 async function insertTicket(
   supabase: SupabaseServerClient,
   userId: string,
@@ -284,15 +154,6 @@ async function insertTicket(
       })),
     ])
     .throwOnError();
-
-  await createSharedTransactions(supabase, {
-    groupId: payload.groupId,
-    type: "ticket_stake",
-    amount: payload.stakeAmount,
-    description: `Einsatz: ${payload.label}`,
-    relatedTicketId: ticket.id,
-    createdBy: userId,
-  });
 
   await supabase
     .from("draws")
@@ -733,30 +594,6 @@ export async function updatePaymentStatus(formData: FormData) {
     .eq("group_id", groupId)
     .throwOnError();
 
-  const amount = parseAmount(payment.amount);
-  if (status === "paid" && payment.status !== "paid" && amount > 0) {
-    await createMemberTransaction(supabase, {
-      groupId,
-      memberId: payment.member_id,
-      type: "deposit",
-      amount,
-      description: `Monatsbeitrag ${String(payment.due_month).slice(0, 7)}`,
-      relatedPaymentId: paymentId,
-      createdBy: userId,
-    });
-  }
-
-  if (status === "open" && payment.status === "paid" && amount > 0) {
-    await createMemberTransaction(supabase, {
-      groupId,
-      memberId: payment.member_id,
-      type: "correction",
-      amount: -amount,
-      description: `Zahlung zurueckgesetzt ${String(payment.due_month).slice(0, 7)}`,
-      createdBy: userId,
-    });
-  }
-
   revalidatePath("/");
   revalidatePath("/kasse");
 }
@@ -855,57 +692,6 @@ export async function createPayment(formData: FormData) {
   revalidatePath("/kasse");
 }
 
-export async function createLedgerTransaction(formData: FormData) {
-  const { supabase, userId } = await getUserId();
-  const groupId = String(formData.get("group_id") ?? "");
-  const memberId = String(formData.get("member_id") ?? "");
-  const type = String(formData.get("type") ?? "deposit");
-  const amount = parseAmount(formData.get("amount"));
-  const description = String(formData.get("description") ?? "").trim();
-
-  await assertAdmin(supabase, userId, groupId);
-
-  if (type !== "deposit" && type !== "correction") {
-    throw new Error("Nur Einzahlungen und Korrekturen duerfen manuell angelegt werden.");
-  }
-
-  if (!memberId) {
-    throw new Error("Mitglied ist erforderlich.");
-  }
-
-  if (type === "deposit" && amount <= 0) {
-    throw new Error("Einzahlungen muessen positiv sein.");
-  }
-
-  if (type === "correction" && amount === 0) {
-    throw new Error("Korrekturen duerfen nicht 0 sein.");
-  }
-
-  const { data: member } = await supabase
-    .from("group_members")
-    .select("id")
-    .eq("id", memberId)
-    .eq("group_id", groupId)
-    .maybeSingle()
-    .throwOnError();
-
-  if (!member) {
-    throw new Error("Mitglied gehoert nicht zu dieser Gruppe.");
-  }
-
-  await createMemberTransaction(supabase, {
-    groupId,
-    memberId,
-    type,
-    amount,
-    description: description || (type === "deposit" ? "Einzahlung" : "Korrektur"),
-    createdBy: userId,
-  });
-
-  revalidatePath("/");
-  revalidatePath("/kasse");
-}
-
 export async function createMonthlyPayments(formData: FormData) {
   const { supabase, userId } = await getUserId();
   const groupId = String(formData.get("group_id") ?? "");
@@ -967,21 +753,6 @@ export async function createWinning(formData: FormData) {
   // Entfernt einen eventuell von der automatischen Auswertung angelegten
   // Platzhalter (source "auto", Betrag 0) fuer denselben Tipp, damit der
   // manuell erfasste Betrag ihn ersetzt statt einen Doppeleintrag zu erzeugen.
-  const { data: autoWinningsToReplace } = await supabase
-    .from("winnings")
-    .select("id")
-    .eq("group_id", groupId)
-    .eq("draw_id", drawId)
-    .eq("ticket_id", ticketId)
-    .eq("source", "auto")
-    .throwOnError();
-
-  await deleteTransactionsForWinnings(
-    supabase,
-    groupId,
-    (autoWinningsToReplace ?? []).map((winning) => winning.id),
-  );
-
   await supabase
     .from("winnings")
     .delete()
@@ -990,7 +761,7 @@ export async function createWinning(formData: FormData) {
     .eq("ticket_id", ticketId)
     .eq("source", "auto");
 
-  const { data: winning } = await supabase
+  await supabase
     .from("winnings")
     .insert({
       group_id: groupId,
@@ -1001,22 +772,7 @@ export async function createWinning(formData: FormData) {
       source: "manual",
       recorded_by: userId,
     })
-    .select("id,amount,prize_rank")
-    .single()
     .throwOnError();
-
-  await createWinningShareTransactions(supabase, {
-    groupId,
-    winnings: [
-      {
-        id: winning.id,
-        ticketId,
-        amount: toNumber(winning.amount),
-        prizeRank: winning.prize_rank ?? "Gewinn",
-      },
-    ],
-    createdBy: userId,
-  });
 
   await Promise.all([
     supabase.from("tickets").update({ status: "evaluated", updated_at: new Date().toISOString() }).eq("id", ticketId).eq("group_id", groupId),
@@ -1078,20 +834,6 @@ async function evaluateDrawResult(
     .eq("id", payload.drawId)
     .eq("group_id", payload.groupId)
     .throwOnError();
-
-  const { data: autoWinningsToRecalculate } = await supabase
-    .from("winnings")
-    .select("id")
-    .eq("group_id", payload.groupId)
-    .eq("draw_id", payload.drawId)
-    .eq("source", "auto")
-    .throwOnError();
-
-  await deleteTransactionsForWinnings(
-    supabase,
-    payload.groupId,
-    (autoWinningsToRecalculate ?? []).map((winning) => winning.id),
-  );
 
   await supabase
     .from("winnings")
@@ -1158,22 +900,10 @@ async function evaluateDrawResult(
   }
 
   if (automaticWinnings.length) {
-    const { data: insertedWinnings } = await supabase
+    await supabase
       .from("winnings")
       .insert(automaticWinnings)
-      .select("id,ticket_id,amount,prize_rank")
       .throwOnError();
-
-    await createWinningShareTransactions(supabase, {
-      groupId: payload.groupId,
-      winnings: (insertedWinnings ?? []).map((winning) => ({
-        id: winning.id,
-        ticketId: winning.ticket_id,
-        amount: toNumber(winning.amount),
-        prizeRank: winning.prize_rank ?? "Gewinn",
-      })),
-      createdBy: payload.userId,
-    });
   }
 }
 

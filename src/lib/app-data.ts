@@ -84,39 +84,6 @@ export type AppWinning = {
   rank: string;
 };
 
-export type AppTransactionType = "deposit" | "ticket_stake" | "winning_share" | "correction";
-
-export type AppMemberTransaction = {
-  id: string;
-  memberId: string;
-  member: string;
-  type: AppTransactionType;
-  amount: number;
-  effect: number;
-  description: string | null;
-  ticket: string | null;
-  winning: string | null;
-  createdAt: string;
-};
-
-export type AppMemberBalance = {
-  memberId: string;
-  member: string;
-  balance: number;
-  deposits: number;
-  ticketStakes: number;
-  winningShares: number;
-  corrections: number;
-};
-
-export type AppTransactionTotals = {
-  deposits: number;
-  ticketStakes: number;
-  winningShares: number;
-  corrections: number;
-  balance: number;
-};
-
 export type MonthlyStat = {
   month: string;
   stake: number;
@@ -134,8 +101,6 @@ export type AppContext = {
   tickets: AppTicket[];
   payments: AppPayment[];
   winnings: AppWinning[];
-  transactions: AppMemberTransaction[];
-  memberBalances: AppMemberBalance[];
   monthlyStats: MonthlyStat[];
   totals: {
     activeMembers: number;
@@ -143,9 +108,6 @@ export type AppContext = {
     openPayments: number;
     lastWinnings: number;
     totalWinnings: number;
-    groupBalance: number;
-    ownBalance: number;
-    transactions: AppTransactionTotals;
   };
 };
 
@@ -179,77 +141,6 @@ function toRole(value: unknown): "admin" | "participant" {
 
 function toPaymentStatus(value: unknown): "open" | "paid" {
   return value === "paid" ? "paid" : "open";
-}
-
-function toTransactionType(value: unknown): AppTransactionType {
-  if (value === "ticket_stake" || value === "winning_share" || value === "correction") {
-    return value;
-  }
-  return "deposit";
-}
-
-function getTransactionEffect(type: AppTransactionType, amount: number) {
-  if (type === "ticket_stake") {
-    return -Math.abs(amount);
-  }
-  if (type === "correction") {
-    return amount;
-  }
-  return Math.abs(amount);
-}
-
-function buildTransactionTotals(transactions: Array<{ type: AppTransactionType; amount: number }>): AppTransactionTotals {
-  const totals: AppTransactionTotals = {
-    deposits: 0,
-    ticketStakes: 0,
-    winningShares: 0,
-    corrections: 0,
-    balance: 0,
-  };
-
-  transactions.forEach((transaction) => {
-    const effect = getTransactionEffect(transaction.type, transaction.amount);
-    totals.balance += effect;
-
-    if (transaction.type === "deposit") {
-      totals.deposits += Math.abs(transaction.amount);
-    } else if (transaction.type === "ticket_stake") {
-      totals.ticketStakes += Math.abs(transaction.amount);
-    } else if (transaction.type === "winning_share") {
-      totals.winningShares += Math.abs(transaction.amount);
-    } else {
-      totals.corrections += transaction.amount;
-    }
-  });
-
-  return totals;
-}
-
-function emptyTransactionTotals(): AppTransactionTotals {
-  return { deposits: 0, ticketStakes: 0, winningShares: 0, corrections: 0, balance: 0 };
-}
-
-async function getGroupTransactionTotals(groupId: string, fallback: AppTransactionTotals) {
-  try {
-    const admin = createAdminClient();
-    const { data, error } = await admin
-      .from("member_transactions")
-      .select("type,amount")
-      .eq("group_id", groupId);
-
-    if (error) {
-      throw error;
-    }
-
-    return buildTransactionTotals(
-      (data ?? []).map((transaction) => ({
-        type: toTransactionType(transaction.type),
-        amount: toNumber(transaction.amount),
-      })),
-    );
-  } catch {
-    return fallback;
-  }
 }
 
 function buildMonthlyStats(payments: AppPayment[], winnings: AppWinning[]) {
@@ -435,8 +326,6 @@ export async function getAppContext(): Promise<AppContext> {
     tickets: [],
     payments: [],
     winnings: [],
-    transactions: [],
-    memberBalances: [],
     monthlyStats: [],
     totals: {
       activeMembers: 0,
@@ -444,9 +333,6 @@ export async function getAppContext(): Promise<AppContext> {
       openPayments: 0,
       lastWinnings: 0,
       totalWinnings: 0,
-      groupBalance: 0,
-      ownBalance: 0,
-      transactions: emptyTransactionTotals(),
     },
   };
 
@@ -501,7 +387,7 @@ export async function getAppContext(): Promise<AppContext> {
     monthlyAmount: membershipRow.monthly_amount ? toNumber(membershipRow.monthly_amount) : null,
   };
 
-  const [membersResult, drawsResult, ticketsResult, paymentsResult, winningsResult, transactionsResult] = await Promise.all([
+  const [membersResult, drawsResult, ticketsResult, paymentsResult, winningsResult] = await Promise.all([
     supabase
       .from("group_members")
       .select("id,profile_id,role,status,monthly_amount,joined_at,profiles(id,email,display_name)")
@@ -527,11 +413,6 @@ export async function getAppContext(): Promise<AppContext> {
       .select("id,amount,prize_rank,recorded_at,ticket_id")
       .eq("group_id", group.id)
       .order("recorded_at", { ascending: false }),
-    supabase
-      .from("member_transactions")
-      .select("id,member_id,type,amount,description,related_ticket_id,related_winning_id,created_at")
-      .eq("group_id", group.id)
-      .order("created_at", { ascending: false }),
   ]);
 
   const memberRows = membersResult.data ?? [];
@@ -636,11 +517,9 @@ export async function getAppContext(): Promise<AppContext> {
 
   const activeMemberCount = members.filter((member) => member.status === "active").length;
 
-  const winningLabels = new Map<string, string>();
   const winnings: AppWinning[] = (winningsResult.data ?? []).map((winning) => {
     const amount = toNumber(winning.amount);
     const rank = winning.prize_rank ?? "Gewinn";
-    winningLabels.set(winning.id, rank);
     return {
       id: winning.id,
       date: winning.recorded_at,
@@ -652,45 +531,9 @@ export async function getAppContext(): Promise<AppContext> {
     };
   });
 
-  const transactions: AppMemberTransaction[] = (transactionsResult.data ?? []).map((transaction) => {
-    const type = toTransactionType(transaction.type);
-    const amount = toNumber(transaction.amount);
-
-    return {
-      id: transaction.id,
-      memberId: transaction.member_id,
-      member: memberNames.get(transaction.member_id) ?? "Mitglied",
-      type,
-      amount,
-      effect: getTransactionEffect(type, amount),
-      description: transaction.description ?? null,
-      ticket: ticketLabels.get(transaction.related_ticket_id ?? "") ?? null,
-      winning: winningLabels.get(transaction.related_winning_id ?? "") ?? null,
-      createdAt: transaction.created_at,
-    };
-  });
-
-  const visibleTransactionTotals = buildTransactionTotals(transactions);
-  const groupTransactionTotals = await getGroupTransactionTotals(group.id, visibleTransactionTotals);
-  const balanceMembers = membership.role === "admin" ? members : members.filter((member) => member.id === membership.id);
-  const memberBalances: AppMemberBalance[] = balanceMembers.map((member) => {
-    const memberTransactions = transactions.filter((transaction) => transaction.memberId === member.id);
-    const totals = buildTransactionTotals(memberTransactions);
-
-    return {
-      memberId: member.id,
-      member: member.name,
-      balance: totals.balance,
-      deposits: totals.deposits,
-      ticketStakes: totals.ticketStakes,
-      winningShares: totals.winningShares,
-      corrections: totals.corrections,
-    };
-  });
-  const ownBalance = memberBalances.find((balance) => balance.memberId === membership.id)?.balance ?? 0;
-
   const monthlyStats = buildMonthlyStats(payments, winnings);
   const totalWinnings = winnings.reduce((sum, winning) => sum + winning.amount, 0);
+  const totalStake = tickets.reduce((sum, ticket) => sum + ticket.stake, 0);
 
   return {
     userId: user.id,
@@ -703,18 +546,13 @@ export async function getAppContext(): Promise<AppContext> {
     tickets,
     payments,
     winnings,
-    transactions,
-    memberBalances,
     monthlyStats,
     totals: {
       activeMembers: members.filter((member) => member.status === "active").length,
-      totalStake: groupTransactionTotals.ticketStakes,
+      totalStake,
       openPayments: payments.filter((payment) => payment.status === "open").reduce((sum, payment) => sum + payment.amount, 0),
       lastWinnings: winnings[0]?.amount ?? 0,
       totalWinnings,
-      groupBalance: groupTransactionTotals.balance,
-      ownBalance,
-      transactions: groupTransactionTotals,
     },
   };
 }

@@ -2,7 +2,6 @@ import {
   autoEvaluateDraw,
   createDraw,
   createInitialGroup,
-  createLedgerTransaction,
   createMonthlyPayments,
   createPayment,
   createTicket,
@@ -19,9 +18,6 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { Surface } from "@/components/ui/panel";
 import type { AppContext, AppDraw, AppMember, AppTicket } from "@/lib/app-data";
 
-// Einheitlicher Stil fuer Eingabefelder und Labels.
-// text-base statt text-sm und slate-600 statt slate-500: besser lesbar,
-// gerade fuer aeltere Kollegen.
 const inputStyle =
   "mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 outline-none focus:border-amber-400";
 const labelStyle = "text-sm font-semibold text-slate-600";
@@ -50,7 +46,7 @@ export function CreateGroupForm() {
         <input name="name" className={inputStyle} defaultValue="AbteilungsJackpot" required />
       </label>
       <label className="block">
-        <span className={labelStyle}>Monatsbeitrag (€)</span>
+        <span className={labelStyle}>Monatsbeitrag (EUR)</span>
         <input name="monthly_amount" inputMode="decimal" className={inputStyle} defaultValue="24" required />
       </label>
       <SubmitButton className="w-full" pendingLabel="Wird erstellt...">Gruppe erstellen und mich als Admin setzen</SubmitButton>
@@ -71,7 +67,7 @@ export function GroupSettingsForm({ app }: { app: AppContext }) {
         <input name="name" className={inputStyle} defaultValue={app.group.name} disabled={!app.isAdmin} required />
       </label>
       <label className="block">
-        <span className={labelStyle}>Monatsbeitrag (€)</span>
+        <span className={labelStyle}>Monatsbeitrag (EUR)</span>
         <input
           name="monthly_amount"
           inputMode="decimal"
@@ -87,7 +83,7 @@ export function GroupSettingsForm({ app }: { app: AppContext }) {
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">Einladungscode</p>
           <p className="mt-2 select-all font-mono text-2xl font-bold tracking-[0.2em] text-slate-900">{app.group.inviteCode}</p>
           <p className="mt-2 text-xs leading-5 text-amber-800/80">
-            Gib diesen Code an Kollegen weiter. Bei der Registrierung waehlen sie &quot;Gruppe beitreten&quot; und landen direkt in eurer Runde.
+            Gib diesen Code weiter. Bei der Registrierung waehlen Mitglieder &quot;Gruppe beitreten&quot; und landen direkt in eurer Runde.
           </p>
         </div>
       ) : null}
@@ -95,7 +91,17 @@ export function GroupSettingsForm({ app }: { app: AppContext }) {
   );
 }
 
-export function MemberRoleList({ members, groupId, currentProfileId, isAdmin }: { members: AppMember[]; groupId: string; currentProfileId: string | null; isAdmin: boolean }) {
+export function MemberRoleList({
+  members,
+  groupId,
+  currentProfileId,
+  isAdmin,
+}: {
+  members: AppMember[];
+  groupId: string;
+  currentProfileId: string | null;
+  isAdmin: boolean;
+}) {
   if (members.length === 0) {
     return <Surface className="text-sm text-slate-500">Noch keine Mitglieder vorhanden.</Surface>;
   }
@@ -103,18 +109,15 @@ export function MemberRoleList({ members, groupId, currentProfileId, isAdmin }: 
   return (
     <div className="space-y-3">
       {isAdmin ? <AddMemberForm groupId={groupId} /> : null}
-      {members.map((member) => {
-        const isSelf = member.profileId === currentProfileId;
-        return (
-          <MemberRow
-            key={member.id}
-            member={member}
-            groupId={groupId}
-            isAdmin={isAdmin}
-            isSelf={isSelf}
-          />
-        );
-      })}
+      {members.map((member) => (
+        <MemberRow
+          key={member.id}
+          member={member}
+          groupId={groupId}
+          isAdmin={isAdmin}
+          isSelf={member.profileId === currentProfileId}
+        />
+      ))}
     </div>
   );
 }
@@ -134,7 +137,7 @@ export function CreateDrawForm({ groupId, isAdmin }: { groupId: string; isAdmin:
             <input name="draw_date" type="date" required className={inputStyle} />
           </label>
           <label className="block">
-            <span className={labelStyle}>Jackpot (€)</span>
+            <span className={labelStyle}>Jackpot (EUR)</span>
             <input name="jackpot_amount" inputMode="decimal" required placeholder="0" className={inputStyle} />
           </label>
           <SubmitButton pendingLabel="Wird angelegt...">Ziehung anlegen</SubmitButton>
@@ -161,7 +164,7 @@ export function CreateTicketForm({ groupId, draws, isAdmin }: { groupId: string;
           <label className="block">
             <span className={labelStyle}>Ziehung</span>
             <select name="draw_id" required className={inputStyle}>
-              <option value="">Auswählen</option>
+              <option value="">Auswaehlen</option>
               {draws.map((draw) => (
                 <option key={draw.id} value={draw.id}>
                   {draw.date}
@@ -170,7 +173,7 @@ export function CreateTicketForm({ groupId, draws, isAdmin }: { groupId: string;
             </select>
           </label>
           <label className="block">
-            <span className={labelStyle}>Einsatz (€)</span>
+            <span className={labelStyle}>Einsatz (EUR)</span>
             <input name="stake_amount" inputMode="decimal" required placeholder="0" className={inputStyle} />
           </label>
         </div>
@@ -217,7 +220,7 @@ export function CreatePaymentForm({ groupId, members, isAdmin }: { groupId: stri
           <label className="block">
             <span className={labelStyle}>Mitglied</span>
             <select name="member_id" required className={inputStyle}>
-              <option value="">Auswählen</option>
+              <option value="">Auswaehlen</option>
               {members.map((member) => (
                 <option key={member.id} value={member.id}>
                   {member.name}
@@ -230,53 +233,10 @@ export function CreatePaymentForm({ groupId, members, isAdmin }: { groupId: stri
             <input name="due_month" type="month" required className={inputStyle} />
           </label>
           <label className="block">
-            <span className={labelStyle}>Betrag (€)</span>
+            <span className={labelStyle}>Betrag (EUR)</span>
             <input name="amount" inputMode="decimal" required placeholder="24" className={inputStyle} />
           </label>
           <SubmitButton disabled={members.length === 0} pendingLabel="Wird angelegt...">Zahlung anlegen</SubmitButton>
-        </div>
-      </ActionForm>
-    </Surface>
-  );
-}
-
-export function CreateLedgerTransactionForm({ groupId, members, isAdmin }: { groupId: string; members: AppMember[]; isAdmin: boolean }) {
-  if (!isAdmin) {
-    return null;
-  }
-
-  return (
-    <Surface>
-      <ActionForm action={createLedgerTransaction} successMessage="Transaktion gebucht.">
-        <div className="grid gap-3 xl:grid-cols-[1fr_11rem_10rem_1fr_auto] xl:items-end">
-          <input type="hidden" name="group_id" value={groupId} />
-          <label className="block">
-            <span className={labelStyle}>Mitglied</span>
-            <select name="member_id" required className={inputStyle}>
-              <option value="">Auswählen</option>
-              {members.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className={labelStyle}>Typ</span>
-            <select name="type" required className={inputStyle}>
-              <option value="deposit">Einzahlung</option>
-              <option value="correction">Korrektur</option>
-            </select>
-          </label>
-          <label className="block">
-            <span className={labelStyle}>Betrag (€)</span>
-            <input name="amount" inputMode="decimal" required placeholder="24,00 oder -5,00" className={inputStyle} />
-          </label>
-          <label className="block">
-            <span className={labelStyle}>Beschreibung</span>
-            <input name="description" placeholder="z. B. Nachzahlung" className={inputStyle} />
-          </label>
-          <SubmitButton disabled={members.length === 0} pendingLabel="Wird gebucht...">Buchen</SubmitButton>
         </div>
       </ActionForm>
     </Surface>
@@ -292,39 +252,49 @@ export function CreateMonthlyPaymentsForm({ groupId, isAdmin }: { groupId: strin
     <Surface>
       <ActionForm
         action={createMonthlyPayments}
-        successMessage="Monatsbeiträge für alle aktiven Mitglieder angelegt."
+        successMessage="Monatsbeitraege fuer alle aktiven Mitglieder angelegt."
         confirm={{
-          question: "Beiträge für ALLE aktiven Mitglieder in diesem Monat anlegen? Das lässt sich nicht mit einem Klick rückgängig machen.",
-          confirmLabel: "Ja, Beiträge anlegen",
+          question: "Beitraege fuer alle aktiven Mitglieder in diesem Monat anlegen?",
+          confirmLabel: "Ja, Beitraege anlegen",
         }}
       >
         <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
           <input type="hidden" name="group_id" value={groupId} />
           <label className="block">
-            <span className={labelStyle}>Monat für alle aktiven Mitglieder</span>
+            <span className={labelStyle}>Monat fuer alle aktiven Mitglieder</span>
             <input name="due_month" type="month" required className={inputStyle} />
           </label>
-          <SubmitButton pendingLabel="Wird angelegt...">Monatsbeiträge erzeugen</SubmitButton>
+          <SubmitButton pendingLabel="Wird angelegt...">Monatsbeitraege erzeugen</SubmitButton>
         </div>
       </ActionForm>
     </Surface>
   );
 }
 
-export function CreateWinningForm({ groupId, draws, tickets, isAdmin }: { groupId: string; draws: AppDraw[]; tickets: AppTicket[]; isAdmin: boolean }) {
+export function CreateWinningForm({
+  groupId,
+  draws,
+  tickets,
+  isAdmin,
+}: {
+  groupId: string;
+  draws: AppDraw[];
+  tickets: AppTicket[];
+  isAdmin: boolean;
+}) {
   if (!isAdmin) {
     return null;
   }
 
   return (
     <Surface>
-      <ActionForm action={createWinning} successMessage="Gewinn gespeichert. Glückwunsch an die Runde! 🎉">
+      <ActionForm action={createWinning} successMessage="Gewinn gespeichert.">
         <div className="grid gap-3 md:grid-cols-[1fr_1fr_9rem_1fr_auto] md:items-end">
           <input type="hidden" name="group_id" value={groupId} />
           <label className="block">
             <span className={labelStyle}>Ziehung</span>
             <select name="draw_id" required className={inputStyle}>
-              <option value="">Auswählen</option>
+              <option value="">Auswaehlen</option>
               {draws.map((draw) => (
                 <option key={draw.id} value={draw.id}>
                   {draw.date}
@@ -335,7 +305,7 @@ export function CreateWinningForm({ groupId, draws, tickets, isAdmin }: { groupI
           <label className="block">
             <span className={labelStyle}>Tipp</span>
             <select name="ticket_id" required className={inputStyle}>
-              <option value="">Auswählen</option>
+              <option value="">Auswaehlen</option>
               {tickets.map((ticket) => (
                 <option key={ticket.id} value={ticket.id}>
                   {ticket.label}
@@ -344,7 +314,7 @@ export function CreateWinningForm({ groupId, draws, tickets, isAdmin }: { groupI
             </select>
           </label>
           <label className="block">
-            <span className={labelStyle}>Betrag (€)</span>
+            <span className={labelStyle}>Betrag (EUR)</span>
             <input name="amount" inputMode="decimal" required placeholder="0" className={inputStyle} />
           </label>
           <label className="block">
@@ -365,13 +335,13 @@ export function EvaluateDrawForm({ groupId, draws, isAdmin }: { groupId: string;
 
   return (
     <Surface>
-      <ActionForm action={evaluateDraw} successMessage="Ziehung ausgewertet. Treffer wurden automatisch als Gewinne erfasst.">
+      <ActionForm action={evaluateDraw} successMessage="Ziehung ausgewertet. Treffer und Gewinnklassen wurden gespeichert.">
         <div className="grid gap-3 xl:grid-cols-[1fr_1fr_1fr_1fr_auto] xl:items-end">
           <input type="hidden" name="group_id" value={groupId} />
           <label className="block">
             <span className={labelStyle}>Ziehung auswerten</span>
             <select name="draw_id" required className={inputStyle}>
-              <option value="">Auswählen</option>
+              <option value="">Auswaehlen</option>
               {draws.map((draw) => (
                 <option key={draw.id} value={draw.id}>
                   {draw.date}
@@ -388,7 +358,7 @@ export function EvaluateDrawForm({ groupId, draws, isAdmin }: { groupId: string;
             <input name="result_extra_numbers" required placeholder="5 10" className={inputStyle} />
           </label>
           <label className="block">
-            <span className={labelStyle}>Gesamtgewinn € (optional)</span>
+            <span className={labelStyle}>Gesamtgewinn EUR (optional)</span>
             <input name="total_amount" inputMode="decimal" placeholder="z. B. 42,50" className={inputStyle} />
           </label>
           <SubmitButton disabled={draws.length === 0} pendingLabel="Wertet aus...">Manuell auswerten</SubmitButton>
@@ -411,7 +381,7 @@ export function AutoEvaluateDrawForm({ groupId, draws, isAdmin }: { groupId: str
           <label className="block">
             <span className={labelStyle}>Ziehung automatisch pruefen</span>
             <select name="draw_id" required className={inputStyle}>
-              <option value="">Auswählen</option>
+              <option value="">Auswaehlen</option>
               {draws.map((draw) => (
                 <option key={draw.id} value={draw.id}>
                   {draw.date}
@@ -439,7 +409,7 @@ export function TicketDocumentUploadForm({ groupId, tickets, isAdmin }: { groupI
           <label className="block">
             <span className={labelStyle}>Tipp</span>
             <select name="ticket_id" required className={inputStyle}>
-              <option value="">Auswählen</option>
+              <option value="">Auswaehlen</option>
               {tickets.map((ticket) => (
                 <option key={ticket.id} value={ticket.id}>
                   {ticket.label}
@@ -457,7 +427,7 @@ export function TicketDocumentUploadForm({ groupId, tickets, isAdmin }: { groupI
               className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-500 outline-none file:mr-3 file:rounded-xl file:border-0 file:bg-amber-300 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-950 focus:border-amber-400"
             />
           </label>
-          <SubmitButton disabled={tickets.length === 0} pendingLabel="Lädt hoch...">Spielschein hochladen</SubmitButton>
+          <SubmitButton disabled={tickets.length === 0} pendingLabel="Laedt hoch...">Spielschein hochladen</SubmitButton>
         </div>
       </ActionForm>
     </Surface>

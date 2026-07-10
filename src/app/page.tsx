@@ -1,5 +1,6 @@
-import { AlertCircle, CalendarClock, CreditCard, Euro, Trophy, Users, Wallet } from "lucide-react";
+import { AlertCircle, CalendarClock, CreditCard, Euro, ListChecks, Target, Trophy, Users } from "lucide-react";
 import { AppShell, PageHeader, QuickActionRail } from "@/components/app-shell";
+import { AdminWorkflowChecklist } from "@/components/admin-workflow-checklist";
 import { AnimatedBalls } from "@/components/animated-balls";
 import { ChartBars } from "@/components/chart-bars";
 import { CountUpCurrency } from "@/components/count-up-currency";
@@ -9,7 +10,6 @@ import { MemberAvatars } from "@/components/member-avatars";
 import { MetricCard } from "@/components/metric-card";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { NumberRow } from "@/components/number-row";
-import { OnboardingChecklist } from "@/components/onboarding-checklist";
 import { PaymentReminderButton } from "@/components/payment-reminder";
 import { StatusPill } from "@/components/status-pill";
 import { Panel, Surface } from "@/components/ui/panel";
@@ -21,36 +21,48 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   const app = await requireAppContext();
   const openPayments = app.payments.filter((payment) => payment.status === "open");
-  const nextDraw = app.draws.find((draw) => new Date(draw.date) >= new Date()) ?? app.draws[0];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const nextOpenDraw =
+    app.draws.find((draw) => draw.status !== "evaluated" && new Date(draw.date) >= today) ??
+    app.draws.find((draw) => draw.status !== "evaluated") ??
+    null;
+  const nextDraw = nextOpenDraw ?? app.draws[0];
+  const nextDrawTickets = nextDraw ? app.tickets.filter((ticket) => ticket.drawId === nextDraw.id) : [];
+  const unevaluatedDraws = app.draws.filter((draw) => draw.status !== "evaluated" && new Date(draw.date) <= today);
+  const openAmountWinnings = app.winnings.filter((winning) => winning.amount <= 0);
   const totalStake = app.tickets.reduce((sum, ticket) => sum + ticket.stake, 0);
   const returnRate = totalStake > 0 ? (app.totals.totalWinnings / totalStake) * 100 : 0;
+  const heroTicket = nextDrawTickets[0] ?? app.tickets[0] ?? null;
 
   return (
     <AppShell>
       <PageHeader
         title="Dashboard"
-        description="Alles Wichtige fuer die naechste Runde: Jackpot, Tipps, Guthaben, offene Beitraege und Gewinne."
+        description="Alles Wichtige fuer die naechste Runde: Ziehung, Tipps, offene Beitraege und Gewinne."
       />
 
-      <OnboardingChecklist app={app} />
+      <AdminWorkflowChecklist app={app} />
 
       <Stagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StaggerItem><MetricCard label="Aktueller Jackpot" value={formatCurrency(nextDraw?.jackpot ?? 0)} trend="Eurojackpot" icon={Euro} tone="gold" /></StaggerItem>
-        <StaggerItem><MetricCard label="Naechste Ziehung" value={nextDraw ? formatDate(nextDraw.date) : "offen"} trend={`${app.tickets.length} Tippfelder`} icon={CalendarClock} tone="violet" /></StaggerItem>
-        <StaggerItem><MetricCard label="Gruppenguthaben" value={formatCurrency(app.totals.groupBalance)} trend="Kasse gesamt" icon={Wallet} tone="green" /></StaggerItem>
-        <StaggerItem><MetricCard label="Mein Guthaben" value={formatCurrency(app.totals.ownBalance)} trend={app.profile?.displayName ?? "Mitglied"} icon={Wallet} tone="blue" /></StaggerItem>
+        <StaggerItem><MetricCard label="Naechste offene Ziehung" value={nextOpenDraw ? formatDate(nextOpenDraw.date) : "keine"} trend={nextOpenDraw?.status ?? "alles ausgewertet"} icon={CalendarClock} tone="violet" /></StaggerItem>
+        <StaggerItem><MetricCard label="Tipps naechste Ziehung" value={`${nextDrawTickets.length}`} trend={nextDraw ? formatDate(nextDraw.date) : "keine Ziehung"} icon={Target} tone="green" /></StaggerItem>
         <StaggerItem><MetricCard label="Aktive Mitspieler" value={`${app.totals.activeMembers}`} trend={app.group?.name ?? "Noch keine Gruppe"} icon={Users} tone="green" /></StaggerItem>
         <StaggerItem><MetricCard label="Offene Zahlungen" value={formatCurrency(app.totals.openPayments)} trend={`${openPayments.length} offene Beitraege`} icon={CreditCard} tone="blue" /></StaggerItem>
+        <StaggerItem><MetricCard label="Auswertung offen" value={`${unevaluatedDraws.length}`} trend={openAmountWinnings.length ? `${openAmountWinnings.length} Gewinnbetrag offen` : "keine Betraege offen"} icon={ListChecks} tone="violet" /></StaggerItem>
       </Stagger>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
         <Panel className="premium-ring relative overflow-hidden">
           <HeroRays />
-          <AnimatedBalls
-            numbers={app.tickets[0]?.numbers?.length ? app.tickets[0].numbers.slice(0, 5) : [7, 12, 23, 34, 41]}
-            euroNumbers={app.tickets[0]?.euroNumbers?.length ? app.tickets[0].euroNumbers.slice(0, 2) : [3, 9]}
-            className="pointer-events-none absolute right-5 top-5 hidden gap-1.5 sm:flex"
-          />
+          {heroTicket ? (
+            <AnimatedBalls
+              numbers={heroTicket.numbers.slice(0, 5)}
+              euroNumbers={heroTicket.euroNumbers.slice(0, 2)}
+              className="pointer-events-none absolute right-5 top-5 hidden gap-1.5 sm:flex"
+            />
+          ) : null}
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-semibold text-amber-600">{app.group?.name ?? "LottoCrew"}</p>
@@ -58,7 +70,7 @@ export default async function DashboardPage() {
                 <CountUpCurrency value={nextDraw?.jackpot ?? 0} /> fuer eure naechste Eurojackpot-Runde.
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
-                Alle Kennzahlen kommen direkt aus eurer Supabase-Gruppe.
+                Alle Kennzahlen kommen direkt aus eurer Gruppe.
               </p>
               <div className="mt-5 flex items-center gap-3">
                 <MemberAvatars names={app.members.filter((member) => member.status === "active").map((member) => member.name)} />
@@ -104,12 +116,12 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-semibold text-slate-900">Aktive Tipps</h2>
-              <p className="mt-1 text-sm text-slate-500">Mehrere Tipps pro Ziehung, sauber getrennt.</p>
+              <p className="mt-1 text-sm text-slate-500">Fuer die naechste relevante Ziehung.</p>
             </div>
-            <StatusPill status="submitted" />
+            <StatusPill status={nextDraw?.status === "evaluated" ? "evaluated" : "submitted"} />
           </div>
           <div className="mt-5 space-y-3">
-            {app.tickets.slice(0, 3).map((ticket) => (
+            {nextDrawTickets.slice(0, 3).map((ticket) => (
               <Surface key={ticket.id}>
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
@@ -123,8 +135,8 @@ export default async function DashboardPage() {
                 </div>
               </Surface>
             ))}
-            {app.tickets.length === 0 ? (
-              <Surface className="py-10 text-center text-sm text-slate-500">Noch keine Tipps vorhanden.</Surface>
+            {nextDrawTickets.length === 0 ? (
+              <Surface className="py-10 text-center text-sm text-slate-500">Noch keine Tipps fuer diese Ziehung vorhanden.</Surface>
             ) : null}
           </div>
         </Panel>

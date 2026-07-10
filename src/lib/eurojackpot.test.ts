@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   buildEurojackpotResultUrl,
-  buildWinningShareTransactions,
   countMatches,
   evaluateTicketsForDraw,
   fetchEurojackpotResult,
@@ -72,42 +71,5 @@ describe("eurojackpot helpers", () => {
     );
 
     expect(plan.autoWinningDrafts[0]?.amount).toBe(0);
-  });
-
-  it("only builds winning-share ledger rows for positive amounts and skips existing rows", () => {
-    const rows = buildWinningShareTransactions({
-      groupId: "group-1",
-      memberIds: ["member-1", "member-2"],
-      createdBy: "admin-1",
-      winnings: [
-        { id: "winning-open", ticketId: "ticket-1", amount: 0, prizeRank: "Gewinnklasse 1" },
-        { id: "winning-existing", ticketId: "ticket-2", amount: 10, prizeRank: "Gewinnklasse 2" },
-        { id: "winning-new", ticketId: "ticket-3", amount: 10, prizeRank: "Gewinnklasse 3" },
-      ],
-      existingRelatedWinningIds: new Set(["winning-existing"]),
-    });
-
-    expect(rows).toEqual([
-      {
-        group_id: "group-1",
-        member_id: "member-1",
-        type: "winning_share",
-        amount: 5,
-        description: "Gewinnanteil: Gewinnklasse 3",
-        related_ticket_id: "ticket-3",
-        related_winning_id: "winning-new",
-        created_by: "admin-1",
-      },
-      {
-        group_id: "group-1",
-        member_id: "member-2",
-        type: "winning_share",
-        amount: 5,
-        description: "Gewinnanteil: Gewinnklasse 3",
-        related_ticket_id: "ticket-3",
-        related_winning_id: "winning-new",
-        created_by: "admin-1",
-      },
-    ]);
   });
 });

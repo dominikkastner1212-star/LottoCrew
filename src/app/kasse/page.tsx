@@ -1,8 +1,7 @@
-import { Download, FileDown } from "lucide-react";
+import { CheckCircle2, Clock3, Download, FileDown, Trophy } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { AdminDisclosure } from "@/components/admin-disclosure";
-import { CreateLedgerTransactionForm, CreateMonthlyPaymentsForm, CreatePaymentForm, CreateWinningForm } from "@/components/admin-forms";
-import { CashSummary, MemberBalanceBoard, TransactionHistory } from "@/components/cash-ledger";
+import { CreateMonthlyPaymentsForm, CreatePaymentForm, CreateWinningForm } from "@/components/admin-forms";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { PaymentsBoard } from "@/components/payments-board";
 import { WinConfetti } from "@/components/win-confetti";
@@ -15,12 +14,18 @@ export const dynamic = "force-dynamic";
 
 export default async function KassePage() {
   const app = await requireAppContext();
+  const openPayments = app.payments.filter((payment) => payment.status === "open");
+  const paidPayments = app.payments.filter((payment) => payment.status === "paid");
+  const openPaymentAmount = openPayments.reduce((sum, payment) => sum + payment.amount, 0);
+  const paidPaymentAmount = paidPayments.reduce((sum, payment) => sum + payment.amount, 0);
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentMonthPayments = app.payments.filter((payment) => payment.month.slice(0, 7) === currentMonth);
 
   return (
     <AppShell>
       <PageHeader
         title="Kasse"
-        description="Guthaben, Beitraege und Gewinne an einem Ort - transparent fuer die ganze Runde."
+        description="Beitraege, offene Zahlungen und Gewinne an einem Ort - im bestehenden Zahlungsmodell."
         action={
           <>
             <LinkButton href="/api/export/payments.csv" variant="secondary"><Download className="size-4" />Beitraege CSV</LinkButton>
@@ -30,30 +35,57 @@ export default async function KassePage() {
       />
 
       <Panel>
-        <h2 className="text-lg font-semibold text-slate-900">Kassenstand</h2>
-        <div className="mt-5">
-          <CashSummary totals={app.totals.transactions} />
-        </div>
+        <h2 className="text-lg font-semibold text-slate-900">Beitragsuebersicht</h2>
+        <Stagger className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <StaggerItem>
+            <Surface>
+              <Clock3 className="size-5 text-amber-600" />
+              <p className="mt-3 text-sm text-slate-500">Offene Beitraege</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-900">{formatCurrency(openPaymentAmount)}</p>
+              <p className="mt-1 text-xs text-slate-500">{openPayments.length} Zahlung{openPayments.length === 1 ? "" : "en"} offen</p>
+            </Surface>
+          </StaggerItem>
+          <StaggerItem>
+            <Surface>
+              <CheckCircle2 className="size-5 text-emerald-600" />
+              <p className="mt-3 text-sm text-slate-500">Bezahlt</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-900">{formatCurrency(paidPaymentAmount)}</p>
+              <p className="mt-1 text-xs text-slate-500">{paidPayments.length} Zahlung{paidPayments.length === 1 ? "" : "en"} bezahlt</p>
+            </Surface>
+          </StaggerItem>
+          <StaggerItem>
+            <Surface>
+              <Clock3 className="size-5 text-sky-600" />
+              <p className="mt-3 text-sm text-slate-500">Aktueller Monat</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-900">{currentMonthPayments.length}</p>
+              <p className="mt-1 text-xs text-slate-500">Beitraege angelegt</p>
+            </Surface>
+          </StaggerItem>
+          <StaggerItem>
+            <Surface>
+              <Trophy className="size-5 text-amber-600" />
+              <p className="mt-3 text-sm text-slate-500">Gewinne gesamt</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-900">{formatCurrency(app.totals.totalWinnings)}</p>
+              <p className="mt-1 text-xs text-slate-500">{app.winnings.length} Gewinn{app.winnings.length === 1 ? "" : "e"} erfasst</p>
+            </Surface>
+          </StaggerItem>
+        </Stagger>
       </Panel>
 
       <Panel className="mt-5">
-        <h2 className="text-lg font-semibold text-slate-900">{app.isAdmin ? "Guthaben je Mitglied" : "Mein Guthaben"}</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Beitraege und Zahlungen</h2>
         {app.group && app.isAdmin ? (
-          <div className="mt-4">
-            <AdminDisclosure label="Einzahlung oder Korrektur buchen">
-              <CreateLedgerTransactionForm groupId={app.group.id} members={app.members} isAdmin={app.isAdmin} />
+          <div className="mt-4 grid gap-3">
+            <AdminDisclosure label="Monatsbeitraege erzeugen">
+              <CreateMonthlyPaymentsForm groupId={app.group.id} isAdmin={app.isAdmin} />
+            </AdminDisclosure>
+            <AdminDisclosure label="Einzelne Zahlung anlegen">
+              <CreatePaymentForm groupId={app.group.id} members={app.members} isAdmin={app.isAdmin} />
             </AdminDisclosure>
           </div>
         ) : null}
         <div className="mt-5">
-          <MemberBalanceBoard balances={app.memberBalances} />
-        </div>
-      </Panel>
-
-      <Panel className="mt-5">
-        <h2 className="text-lg font-semibold text-slate-900">Transaktionshistorie</h2>
-        <div className="mt-5">
-          <TransactionHistory transactions={app.transactions} />
+          <PaymentsBoard payments={app.payments} groupId={app.group?.id ?? ""} isAdmin={app.isAdmin} />
         </div>
       </Panel>
 
@@ -80,7 +112,7 @@ export default async function KassePage() {
               ) : null}
               <p className="mt-2 text-sm text-slate-500">
                 {winning.ticket}
-                {winning.tippedBy ? <span className="text-slate-400"> · getippt von {winning.tippedBy}</span> : null}
+                {winning.tippedBy ? <span className="text-slate-400"> - getippt von {winning.tippedBy}</span> : null}
               </p>
               <div className="mt-6 rounded-2xl bg-slate-50 p-3">
                 <p className="text-xs text-slate-500">Anteil pro Teilnehmer</p>
@@ -94,23 +126,6 @@ export default async function KassePage() {
             <Surface className="py-8 text-center text-sm text-slate-500 md:col-span-2 xl:col-span-4">Noch keine Gewinne vorhanden.</Surface>
           ) : null}
         </Stagger>
-      </Panel>
-
-      <Panel className="mt-5">
-        <h2 className="text-lg font-semibold text-slate-900">Beitraege</h2>
-        {app.group && app.isAdmin ? (
-          <div className="mt-4 grid gap-3">
-            <AdminDisclosure label="Monatsbeitraege fuer alle erzeugen">
-              <CreateMonthlyPaymentsForm groupId={app.group.id} isAdmin={app.isAdmin} />
-            </AdminDisclosure>
-            <AdminDisclosure label="Einzelne Zahlung anlegen">
-              <CreatePaymentForm groupId={app.group.id} members={app.members} isAdmin={app.isAdmin} />
-            </AdminDisclosure>
-          </div>
-        ) : null}
-        <div className="mt-5">
-          <PaymentsBoard payments={app.payments} groupId={app.group?.id ?? ""} isAdmin={app.isAdmin} />
-        </div>
       </Panel>
     </AppShell>
   );

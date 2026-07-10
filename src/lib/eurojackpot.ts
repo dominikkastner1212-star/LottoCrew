@@ -43,24 +43,6 @@ export type WinningDraft = {
   prizeRank: string;
 };
 
-export type WinningShareSource = {
-  id: string;
-  ticketId: string;
-  amount: number;
-  prizeRank: string | null;
-};
-
-export type WinningShareTransactionRow = {
-  group_id: string;
-  member_id: string;
-  type: "winning_share";
-  amount: number;
-  description: string;
-  related_ticket_id: string;
-  related_winning_id: string;
-  created_by: string;
-};
-
 const prizeRanks: Record<string, string> = {
   "5+2": "Gewinnklasse 1",
   "5+1": "Gewinnklasse 2",
@@ -183,37 +165,6 @@ export function splitAmountByMember(amount: number, memberCount: number) {
     }
     return cents / 100;
   }).filter((share) => share > 0);
-}
-
-export function buildWinningShareTransactions({
-  groupId,
-  memberIds,
-  winnings,
-  createdBy,
-  existingRelatedWinningIds = new Set<string>(),
-}: {
-  groupId: string;
-  memberIds: string[];
-  winnings: WinningShareSource[];
-  createdBy: string;
-  existingRelatedWinningIds?: Set<string>;
-}) {
-  return winnings.flatMap((winning) => {
-    if (winning.amount <= 0 || existingRelatedWinningIds.has(winning.id)) {
-      return [];
-    }
-
-    return splitAmountByMember(winning.amount, memberIds.length).map((share, index) => ({
-      group_id: groupId,
-      member_id: memberIds[index],
-      type: "winning_share" as const,
-      amount: share,
-      description: `Gewinnanteil: ${winning.prizeRank ?? "Gewinn"}`,
-      related_ticket_id: winning.ticketId,
-      related_winning_id: winning.id,
-      created_by: createdBy,
-    }));
-  });
 }
 
 function normalizeEurojackpotResult(payload: unknown, fallbackDate: string): EurojackpotResult {

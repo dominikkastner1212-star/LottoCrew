@@ -2,6 +2,7 @@ import { AppShell, PageHeader } from "@/components/app-shell";
 import { AdminDisclosure } from "@/components/admin-disclosure";
 import { CreateDrawForm, EvaluateDrawForm } from "@/components/admin-forms";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
+import { StatusPill } from "@/components/status-pill";
 import { Panel, Surface } from "@/components/ui/panel";
 import { requireAppContext } from "@/lib/auth-guard";
 import type { AppDraw, AppTicket } from "@/lib/app-data";
@@ -12,21 +13,34 @@ export const dynamic = "force-dynamic";
 function getDrawCheckStatus(draw: AppDraw, tickets: AppTicket[]) {
   const checked = draw.status === "evaluated" || draw.resultNumbers.length > 0 || draw.resultEuroNumbers.length > 0;
   if (!checked) {
-    return { label: "noch nicht geprueft", className: "border-slate-200 bg-slate-50 text-slate-600" };
+    return "unchecked" as const;
   }
 
   const drawTickets = tickets.filter((ticket) => ticket.drawId === draw.id);
   const prizeTickets = drawTickets.filter((ticket) => ticket.prizeRank);
 
   if (prizeTickets.length === 0) {
-    return { label: "kein Gewinn", className: "border-slate-200 bg-slate-50 text-slate-600" };
+    return "no_win" as const;
   }
 
   if (prizeTickets.some((ticket) => ticket.winnings <= 0)) {
-    return { label: "Gewinnklasse erkannt, Betrag offen", className: "border-amber-200 bg-amber-50 text-amber-800" };
+    return "amount_open" as const;
   }
 
-  return { label: "geprueft", className: "border-emerald-200 bg-emerald-50 text-emerald-700" };
+  return "evaluated" as const;
+}
+
+function getAdminHint(draw: AppDraw, drawTickets: AppTicket[]) {
+  if (drawTickets.length === 0) {
+    return "Noch keine Tipps fuer diese Ziehung eingetragen.";
+  }
+  if (draw.status !== "evaluated") {
+    return "Tipps sind vorhanden. Nach der Ziehung manuell auswerten.";
+  }
+  if (drawTickets.some((ticket) => ticket.prizeRank && ticket.winnings <= 0)) {
+    return "Gewinnklasse erkannt. Betrag noch unter Kasse erfassen.";
+  }
+  return "Diese Ziehung ist abgearbeitet.";
 }
 
 export default async function DrawsPage() {
@@ -51,16 +65,24 @@ export default async function DrawsPage() {
         ) : null}
         <Stagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {app.draws.map((draw) => {
+            const drawTickets = app.tickets.filter((ticket) => ticket.drawId === draw.id);
             const checkStatus = getDrawCheckStatus(draw, app.tickets);
+            const openTickets = drawTickets.filter((ticket) => ticket.status !== "evaluated").length;
+            const evaluatedTickets = drawTickets.length - openTickets;
             return (
               <StaggerItem key={draw.id}>
             <Surface className="min-h-52">
-              <p className="text-sm font-semibold text-amber-600">Eurojackpot</p>
-              <h2 className="mt-4 text-3xl font-semibold text-slate-900">{formatCurrency(draw.jackpot)}</h2>
-              <p className="mt-3 text-sm text-slate-500">{formatDate(draw.date)}</p>
-              <span className={`mt-4 inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${checkStatus.className}`}>
-                {checkStatus.label}
-              </span>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-amber-600">Eurojackpot</p>
+                  <h2 className="mt-3 text-3xl font-semibold text-slate-900">{formatCurrency(draw.jackpot)}</h2>
+                  <p className="mt-2 text-sm text-slate-500">{formatDate(draw.date)}</p>
+                </div>
+                <StatusPill status={draw.status as "planned" | "submitted" | "evaluated"} />
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <StatusPill status={checkStatus} />
+              </div>
               {draw.resultNumbers.length ? (
                 <div className="mt-5 rounded-2xl bg-slate-50 p-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Gezogen</p>
@@ -69,10 +91,21 @@ export default async function DrawsPage() {
                   </p>
                 </div>
               ) : null}
-              <div className="mt-8 h-2 rounded-full bg-slate-100">
-                <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-amber-300 to-violet-500" />
+              <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-3 text-center">
+                <div>
+                  <p className="text-lg font-semibold text-slate-900">{drawTickets.length}</p>
+                  <p className="text-xs text-slate-500">Tipps</p>
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-slate-900">{openTickets}</p>
+                  <p className="text-xs text-slate-500">offen</p>
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-slate-900">{evaluatedTickets}</p>
+                  <p className="text-xs text-slate-500">geprueft</p>
+                </div>
               </div>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{draw.status}</p>
+              {app.isAdmin ? <p className="mt-4 text-sm leading-5 text-slate-600">{getAdminHint(draw, drawTickets)}</p> : null}
             </Surface>
             </StaggerItem>
             );
