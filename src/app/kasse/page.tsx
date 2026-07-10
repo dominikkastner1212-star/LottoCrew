@@ -1,7 +1,8 @@
 import { Download, FileDown } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { AdminDisclosure } from "@/components/admin-disclosure";
-import { CreateMonthlyPaymentsForm, CreatePaymentForm, CreateWinningForm } from "@/components/admin-forms";
+import { CreateLedgerTransactionForm, CreateMonthlyPaymentsForm, CreatePaymentForm, CreateWinningForm } from "@/components/admin-forms";
+import { CashSummary, MemberBalanceBoard, TransactionHistory } from "@/components/cash-ledger";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { PaymentsBoard } from "@/components/payments-board";
 import { WinConfetti } from "@/components/win-confetti";
@@ -19,7 +20,7 @@ export default async function KassePage() {
     <AppShell>
       <PageHeader
         title="Kasse"
-        description="Beitraege und Gewinne an einem Ort - wer hat eingezahlt, was kam zurueck."
+        description="Guthaben, Beitraege und Gewinne an einem Ort - transparent fuer die ganze Runde."
         action={
           <>
             <LinkButton href="/api/export/payments.csv" variant="secondary"><Download className="size-4" />Beitraege CSV</LinkButton>
@@ -28,7 +29,35 @@ export default async function KassePage() {
         }
       />
 
-      <Panel className="relative overflow-hidden">
+      <Panel>
+        <h2 className="text-lg font-semibold text-slate-900">Kassenstand</h2>
+        <div className="mt-5">
+          <CashSummary totals={app.totals.transactions} />
+        </div>
+      </Panel>
+
+      <Panel className="mt-5">
+        <h2 className="text-lg font-semibold text-slate-900">{app.isAdmin ? "Guthaben je Mitglied" : "Mein Guthaben"}</h2>
+        {app.group && app.isAdmin ? (
+          <div className="mt-4">
+            <AdminDisclosure label="Einzahlung oder Korrektur buchen">
+              <CreateLedgerTransactionForm groupId={app.group.id} members={app.members} isAdmin={app.isAdmin} />
+            </AdminDisclosure>
+          </div>
+        ) : null}
+        <div className="mt-5">
+          <MemberBalanceBoard balances={app.memberBalances} />
+        </div>
+      </Panel>
+
+      <Panel className="mt-5">
+        <h2 className="text-lg font-semibold text-slate-900">Transaktionshistorie</h2>
+        <div className="mt-5">
+          <TransactionHistory transactions={app.transactions} />
+        </div>
+      </Panel>
+
+      <Panel className="relative mt-5 overflow-hidden">
         {app.winnings.length > 0 ? <WinConfetti /> : null}
         <h2 className="text-lg font-semibold text-slate-900">Gewinne</h2>
         {app.group && app.isAdmin ? (

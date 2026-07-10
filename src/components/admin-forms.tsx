@@ -1,6 +1,7 @@
 import {
   createDraw,
   createInitialGroup,
+  createLedgerTransaction,
   createMonthlyPayments,
   createPayment,
   createTicket,
@@ -232,6 +233,49 @@ export function CreatePaymentForm({ groupId, members, isAdmin }: { groupId: stri
             <input name="amount" inputMode="decimal" required placeholder="24" className={inputStyle} />
           </label>
           <SubmitButton disabled={members.length === 0} pendingLabel="Wird angelegt...">Zahlung anlegen</SubmitButton>
+        </div>
+      </ActionForm>
+    </Surface>
+  );
+}
+
+export function CreateLedgerTransactionForm({ groupId, members, isAdmin }: { groupId: string; members: AppMember[]; isAdmin: boolean }) {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <Surface>
+      <ActionForm action={createLedgerTransaction} successMessage="Transaktion gebucht.">
+        <div className="grid gap-3 xl:grid-cols-[1fr_11rem_10rem_1fr_auto] xl:items-end">
+          <input type="hidden" name="group_id" value={groupId} />
+          <label className="block">
+            <span className={labelStyle}>Mitglied</span>
+            <select name="member_id" required className={inputStyle}>
+              <option value="">Auswählen</option>
+              {members.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Typ</span>
+            <select name="type" required className={inputStyle}>
+              <option value="deposit">Einzahlung</option>
+              <option value="correction">Korrektur</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Betrag (€)</span>
+            <input name="amount" inputMode="decimal" required placeholder="24,00 oder -5,00" className={inputStyle} />
+          </label>
+          <label className="block">
+            <span className={labelStyle}>Beschreibung</span>
+            <input name="description" placeholder="z. B. Nachzahlung" className={inputStyle} />
+          </label>
+          <SubmitButton disabled={members.length === 0} pendingLabel="Wird gebucht...">Buchen</SubmitButton>
         </div>
       </ActionForm>
     </Surface>

@@ -1,4 +1,4 @@
-import { AlertCircle, CalendarClock, CreditCard, Euro, Trophy, Users } from "lucide-react";
+import { AlertCircle, CalendarClock, CreditCard, Euro, Trophy, Users, Wallet } from "lucide-react";
 import { AppShell, PageHeader, QuickActionRail } from "@/components/app-shell";
 import { AnimatedBalls } from "@/components/animated-balls";
 import { ChartBars } from "@/components/chart-bars";
@@ -29,14 +29,16 @@ export default async function DashboardPage() {
     <AppShell>
       <PageHeader
         title="Dashboard"
-        description="Alles Wichtige fuer die naechste Runde: Jackpot, Tipps, offene Beitraege und Gewinne."
+        description="Alles Wichtige fuer die naechste Runde: Jackpot, Tipps, Guthaben, offene Beitraege und Gewinne."
       />
 
       <OnboardingChecklist app={app} />
 
-      <Stagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <Stagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StaggerItem><MetricCard label="Aktueller Jackpot" value={formatCurrency(nextDraw?.jackpot ?? 0)} trend="Eurojackpot" icon={Euro} tone="gold" /></StaggerItem>
         <StaggerItem><MetricCard label="Naechste Ziehung" value={nextDraw ? formatDate(nextDraw.date) : "offen"} trend={`${app.tickets.length} Tippfelder`} icon={CalendarClock} tone="violet" /></StaggerItem>
+        <StaggerItem><MetricCard label="Gruppenguthaben" value={formatCurrency(app.totals.groupBalance)} trend="Kasse gesamt" icon={Wallet} tone="green" /></StaggerItem>
+        <StaggerItem><MetricCard label="Mein Guthaben" value={formatCurrency(app.totals.ownBalance)} trend={app.profile?.displayName ?? "Mitglied"} icon={Wallet} tone="blue" /></StaggerItem>
         <StaggerItem><MetricCard label="Aktive Mitspieler" value={`${app.totals.activeMembers}`} trend={app.group?.name ?? "Noch keine Gruppe"} icon={Users} tone="green" /></StaggerItem>
         <StaggerItem><MetricCard label="Offene Zahlungen" value={formatCurrency(app.totals.openPayments)} trend={`${openPayments.length} offene Beitraege`} icon={CreditCard} tone="blue" /></StaggerItem>
       </Stagger>
