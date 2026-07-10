@@ -3,6 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getDefaultDisplayName, toNumber } from "@/lib/app-data";
+import {
+  buildWinningShareTransactions,
+  evaluateTicketsForDraw,
+  fetchEurojackpotResult,
+  splitAmountByMember,
+  type EurojackpotResult,
+  type WinningShareSource,
+} from "@/lib/eurojackpot";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { generateInviteCode } from "@/lib/utils";
@@ -71,31 +79,6 @@ function assertEurojackpotNumbers(mainNumbers: number[], euroNumbers: number[]) 
   }
 }
 
-function getEurojackpotPrizeRank(mainMatches: number, euroMatches: number) {
-  const key = `${mainMatches}+${euroMatches}`;
-  const classes: Record<string, string> = {
-    "5+2": "Gewinnklasse 1",
-    "5+1": "Gewinnklasse 2",
-    "5+0": "Gewinnklasse 3",
-    "4+2": "Gewinnklasse 4",
-    "4+1": "Gewinnklasse 5",
-    "3+2": "Gewinnklasse 6",
-    "4+0": "Gewinnklasse 7",
-    "2+2": "Gewinnklasse 8",
-    "3+1": "Gewinnklasse 9",
-    "3+0": "Gewinnklasse 10",
-    "1+2": "Gewinnklasse 11",
-    "2+1": "Gewinnklasse 12",
-  };
-
-  return classes[key] ?? null;
-}
-
-function countMatches(ticketNumbers: number[], resultNumbers: number[]) {
-  const resultSet = new Set(resultNumbers);
-  return ticketNumbers.filter((number) => resultSet.has(number)).length;
-}
-
 async function assertActiveMember(supabase: SupabaseServerClient, userId: string, groupId: string) {
   const { data } = await supabase
     .from("group_members")
@@ -110,25 +93,6 @@ async function assertActiveMember(supabase: SupabaseServerClient, userId: string
   }
 
   return data;
-}
-
-function splitAmountByMember(amount: number, memberCount: number) {
-  if (memberCount <= 0 || amount <= 0) {
-    return [];
-  }
-
-  const totalCents = Math.round(amount * 100);
-  const baseCents = Math.floor(totalCents / memberCount);
-  let remainder = totalCents - baseCents * memberCount;
-
-  return Array.from({ length: memberCount }, () => {
-    let cents = baseCents;
-    if (remainder > 0) {
-      cents += 1;
-      remainder -= 1;
-    }
-    return cents / 100;
-  }).filter((share) => share > 0);
 }
 
 async function getActiveMemberIds(supabase: SupabaseServerClient, groupId: string) {
@@ -220,6 +184,42 @@ async function deleteTransactionsForWinnings(supabase: SupabaseServerClient, gro
     .eq("group_id", groupId)
     .in("related_winning_id", winningIds)
     .throwOnError();
+}
+
+async function createWinningShareTransactions(
+  supabase: SupabaseServerClient,
+  payload: {
+    groupId: string;
+    winnings: WinningShareSource[];
+    createdBy: string;
+  },
+) {
+  const memberIds = await getActiveMemberIds(supabase, payload.groupId);
+  const { data: existingRows } = payload.winnings.length
+    ? await supabase
+        .from("member_transactions")
+        .select("related_winning_id")
+        .eq("group_id", payload.groupId)
+        .eq("type", "winning_share")
+        .in("related_winning_id", payload.winnings.map((winning) => winning.id))
+        .throwOnError()
+    : { data: [] };
+  const existingRelatedWinningIds = new Set(
+    (existingRows ?? [])
+      .map((row) => row.related_winning_id)
+      .filter((id): id is string => typeof id === "string"),
+  );
+  const rows = buildWinningShareTransactions({
+    groupId: payload.groupId,
+    memberIds,
+    winnings: payload.winnings,
+    createdBy: payload.createdBy,
+    existingRelatedWinningIds,
+  });
+
+  if (rows.length) {
+    await supabase.from("member_transactions").insert(rows).throwOnError();
+  }
 }
 
 async function insertTicket(
@@ -1005,13 +1005,16 @@ export async function createWinning(formData: FormData) {
     .single()
     .throwOnError();
 
-  await createSharedTransactions(supabase, {
+  await createWinningShareTransactions(supabase, {
     groupId,
-    type: "winning_share",
-    amount: toNumber(winning.amount),
-    description: `Gewinnanteil: ${winning.prize_rank ?? "Gewinn"}`,
-    relatedTicketId: ticketId,
-    relatedWinningId: winning.id,
+    winnings: [
+      {
+        id: winning.id,
+        ticketId,
+        amount: toNumber(winning.amount),
+        prizeRank: winning.prize_rank ?? "Gewinn",
+      },
+    ],
     createdBy: userId,
   });
 
@@ -1027,25 +1030,21 @@ export async function createWinning(formData: FormData) {
   revalidatePath("/ziehungen");
 }
 
-export async function evaluateDraw(formData: FormData) {
-  const { supabase, userId } = await getUserId();
-  const groupId = String(formData.get("group_id") ?? "");
-  const drawId = String(formData.get("draw_id") ?? "");
-  const mainNumbers = parseIntegerList(formData.get("result_numbers"));
-  const euroNumbers = parseIntegerList(formData.get("result_extra_numbers"));
-
-  await assertAdmin(supabase, userId, groupId);
-  assertEurojackpotNumbers(mainNumbers, euroNumbers);
-
-  if (!drawId) {
-    throw new Error("Ziehung fehlt.");
-  }
-
+async function evaluateDrawResult(
+  supabase: SupabaseServerClient,
+  payload: {
+    groupId: string;
+    drawId: string;
+    result: EurojackpotResult;
+    totalAmount?: number;
+    userId: string;
+  },
+) {
   const { data: tickets } = await supabase
     .from("tickets")
     .select("id")
-    .eq("group_id", groupId)
-    .eq("draw_id", drawId)
+    .eq("group_id", payload.groupId)
+    .eq("draw_id", payload.drawId)
     .throwOnError();
 
   const ticketIds = (tickets ?? []).map((ticket) => ticket.id);
@@ -1071,109 +1070,91 @@ export async function evaluateDraw(formData: FormData) {
   await supabase
     .from("draws")
     .update({
-      result_numbers: mainNumbers,
-      result_extra_numbers: euroNumbers,
+      result_numbers: payload.result.numbers,
+      result_extra_numbers: payload.result.euroNumbers,
       status: "evaluated",
       updated_at: new Date().toISOString(),
     })
-    .eq("id", drawId)
-    .eq("group_id", groupId)
+    .eq("id", payload.drawId)
+    .eq("group_id", payload.groupId)
     .throwOnError();
 
   const { data: autoWinningsToRecalculate } = await supabase
     .from("winnings")
     .select("id")
-    .eq("group_id", groupId)
-    .eq("draw_id", drawId)
+    .eq("group_id", payload.groupId)
+    .eq("draw_id", payload.drawId)
     .eq("source", "auto")
     .throwOnError();
 
   await deleteTransactionsForWinnings(
     supabase,
-    groupId,
+    payload.groupId,
     (autoWinningsToRecalculate ?? []).map((winning) => winning.id),
   );
 
-  await supabase.from("winnings").delete().eq("group_id", groupId).eq("draw_id", drawId).eq("source", "auto");
+  await supabase
+    .from("winnings")
+    .delete()
+    .eq("group_id", payload.groupId)
+    .eq("draw_id", payload.drawId)
+    .eq("source", "auto")
+    .throwOnError();
 
-  // Tipps, fuer die bereits ein Betrag manuell erfasst wurde, bekommen keinen
-  // Auto-Platzhalter mehr, damit die manuelle Eingabe nicht ueberschrieben oder
-  // dupliziert wird.
   const { data: manualWinnings } = await supabase
     .from("winnings")
     .select("ticket_id")
-    .eq("group_id", groupId)
-    .eq("draw_id", drawId)
+    .eq("group_id", payload.groupId)
+    .eq("draw_id", payload.drawId)
     .eq("source", "manual")
     .throwOnError();
   const manuallyRecorded = new Set((manualWinnings ?? []).map((row) => row.ticket_id));
 
-  const automaticWinnings: Array<{
-    group_id: string;
-    draw_id: string;
-    ticket_id: string;
-    amount: number;
-    prize_rank: string;
-    source: "auto";
-    recorded_by: string;
-  }> = [];
-  for (const ticket of tickets ?? []) {
-    const ticketNumbers = numbersByTicket.get(ticket.id) ?? { main: [], extra: [] };
-    const mainMatches = countMatches(ticketNumbers.main, mainNumbers);
-    const euroMatches = countMatches(ticketNumbers.extra, euroNumbers);
-    const prizeRank = getEurojackpotPrizeRank(mainMatches, euroMatches);
+  const plan = evaluateTicketsForDraw(
+    (tickets ?? []).map((ticket) => {
+      const ticketNumbers = numbersByTicket.get(ticket.id) ?? { main: [], extra: [] };
+      return { id: ticket.id, numbers: ticketNumbers.main, euroNumbers: ticketNumbers.extra };
+    }),
+    payload.result,
+    manuallyRecorded,
+  );
 
+  for (const evaluation of plan.ticketEvaluations) {
     await supabase
       .from("tickets")
       .update({
-        main_matches: mainMatches,
-        euro_matches: euroMatches,
-        prize_rank: prizeRank,
+        main_matches: evaluation.mainMatches,
+        euro_matches: evaluation.euroMatches,
+        prize_rank: evaluation.prizeRank,
         evaluated_at: new Date().toISOString(),
         status: "evaluated",
         updated_at: new Date().toISOString(),
       })
-      .eq("id", ticket.id)
-      .eq("group_id", groupId)
+      .eq("id", evaluation.ticketId)
+      .eq("group_id", payload.groupId)
       .throwOnError();
-
-    if (prizeRank && !manuallyRecorded.has(ticket.id)) {
-      automaticWinnings.push({
-        group_id: groupId,
-        draw_id: drawId,
-        ticket_id: ticket.id,
-        amount: 0,
-        prize_rank: `${prizeRank} (${mainMatches}+${euroMatches})`,
-        source: "auto",
-        recorded_by: userId,
-      });
-    }
   }
 
-  // Optional beim Auswerten direkt den Gesamtgewinn erfassen: Er wird
-  // centgenau auf die erkannten Gewinn-Tipps verteilt (Reihenfolge egal,
-  // da am Ende ohnehin alles gleichmaessig durch alle Mitglieder geht).
-  const totalAmount = parseAmount(formData.get("total_amount"));
+  const automaticWinnings = plan.autoWinningDrafts.map((winning) => ({
+    group_id: payload.groupId,
+    draw_id: payload.drawId,
+    ticket_id: winning.ticketId,
+    amount: winning.amount,
+    prize_rank: `${winning.prizeRank} (${winning.mainMatches}+${winning.euroMatches})`,
+    source: "auto" as const,
+    recorded_by: payload.userId,
+  }));
 
-  if (totalAmount > 0) {
+  if (payload.totalAmount && payload.totalAmount > 0) {
     if (automaticWinnings.length === 0) {
       throw new Error(
         "Es wurde ein Gewinnbetrag angegeben, aber kein Tipp hat laut Zahlen eine Gewinnklasse erreicht. Bitte Zahlen pruefen.",
       );
     }
 
-    const totalCents = Math.round(totalAmount * 100);
-    const baseCents = Math.floor(totalCents / automaticWinnings.length);
-    let remainder = totalCents - baseCents * automaticWinnings.length;
-
-    for (const winning of automaticWinnings) {
-      let cents = baseCents;
-      if (remainder > 0) {
-        cents += 1;
-        remainder -= 1;
-      }
-      winning.amount = cents / 100;
-    }
+    splitAmountByMember(payload.totalAmount, automaticWinnings.length).forEach((share, index) => {
+      automaticWinnings[index].amount = share;
+    });
   }
 
   if (automaticWinnings.length) {
@@ -1183,22 +1164,82 @@ export async function evaluateDraw(formData: FormData) {
       .select("id,ticket_id,amount,prize_rank")
       .throwOnError();
 
-    for (const winning of insertedWinnings ?? []) {
-      await createSharedTransactions(supabase, {
-        groupId,
-        type: "winning_share",
+    await createWinningShareTransactions(supabase, {
+      groupId: payload.groupId,
+      winnings: (insertedWinnings ?? []).map((winning) => ({
+        id: winning.id,
+        ticketId: winning.ticket_id,
         amount: toNumber(winning.amount),
-        description: `Gewinnanteil: ${winning.prize_rank ?? "Gewinn"}`,
-        relatedTicketId: winning.ticket_id,
-        relatedWinningId: winning.id,
-        createdBy: userId,
-      });
-    }
+        prizeRank: winning.prize_rank ?? "Gewinn",
+      })),
+      createdBy: payload.userId,
+    });
   }
+}
+
+export async function evaluateDraw(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const drawId = String(formData.get("draw_id") ?? "");
+  const mainNumbers = parseIntegerList(formData.get("result_numbers"));
+  const euroNumbers = parseIntegerList(formData.get("result_extra_numbers"));
+  const totalAmount = parseAmount(formData.get("total_amount"));
+
+  await assertAdmin(supabase, userId, groupId);
+  assertEurojackpotNumbers(mainNumbers, euroNumbers);
+
+  if (!drawId) {
+    throw new Error("Ziehung fehlt.");
+  }
+
+  await evaluateDrawResult(supabase, {
+    groupId,
+    drawId,
+    result: { drawDate: "", numbers: mainNumbers, euroNumbers },
+    totalAmount,
+    userId,
+  });
 
   revalidatePath("/");
   revalidatePath("/kasse");
+  revalidatePath("/tipps");
+  revalidatePath("/ziehungen");
+}
+
+export async function autoEvaluateDraw(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const drawId = String(formData.get("draw_id") ?? "");
+
+  await assertAdmin(supabase, userId, groupId);
+
+  if (!drawId) {
+    throw new Error("Ziehung fehlt.");
+  }
+
+  const { data: draw } = await supabase
+    .from("draws")
+    .select("draw_date")
+    .eq("id", drawId)
+    .eq("group_id", groupId)
+    .maybeSingle()
+    .throwOnError();
+
+  if (!draw) {
+    throw new Error("Ziehung nicht gefunden.");
+  }
+
+  const result = await fetchEurojackpotResult(draw.draw_date);
+
+  await evaluateDrawResult(supabase, {
+    groupId,
+    drawId,
+    result,
+    userId,
+  });
+
   revalidatePath("/");
+  revalidatePath("/kasse");
   revalidatePath("/tipps");
   revalidatePath("/ziehungen");
 }

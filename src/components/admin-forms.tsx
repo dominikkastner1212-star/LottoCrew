@@ -1,4 +1,5 @@
 import {
+  autoEvaluateDraw,
   createDraw,
   createInitialGroup,
   createLedgerTransaction,
@@ -390,7 +391,35 @@ export function EvaluateDrawForm({ groupId, draws, isAdmin }: { groupId: string;
             <span className={labelStyle}>Gesamtgewinn € (optional)</span>
             <input name="total_amount" inputMode="decimal" placeholder="z. B. 42,50" className={inputStyle} />
           </label>
-          <SubmitButton disabled={draws.length === 0} pendingLabel="Wertet aus...">Automatisch auswerten</SubmitButton>
+          <SubmitButton disabled={draws.length === 0} pendingLabel="Wertet aus...">Manuell auswerten</SubmitButton>
+        </div>
+      </ActionForm>
+    </Surface>
+  );
+}
+
+export function AutoEvaluateDrawForm({ groupId, draws, isAdmin }: { groupId: string; draws: AppDraw[]; isAdmin: boolean }) {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <Surface>
+      <ActionForm action={autoEvaluateDraw} successMessage="Ziehung automatisch geprueft.">
+        <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+          <input type="hidden" name="group_id" value={groupId} />
+          <label className="block">
+            <span className={labelStyle}>Ziehung automatisch pruefen</span>
+            <select name="draw_id" required className={inputStyle}>
+              <option value="">Auswählen</option>
+              {draws.map((draw) => (
+                <option key={draw.id} value={draw.id}>
+                  {draw.date}
+                </option>
+              ))}
+            </select>
+          </label>
+          <SubmitButton disabled={draws.length === 0} pendingLabel="Prueft...">Automatisch pruefen</SubmitButton>
         </div>
       </ActionForm>
     </Surface>

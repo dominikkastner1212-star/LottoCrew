@@ -73,6 +73,11 @@ export default async function KassePage() {
             <Surface>
               <p className="text-sm font-semibold text-emerald-700">{winning.rank}</p>
               <h3 className="mt-4 text-3xl font-semibold text-slate-900">{formatCurrency(winning.amount)}</h3>
+              {winning.amount <= 0 ? (
+                <p className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800">
+                  Gewinnklasse erkannt, Betrag noch offen
+                </p>
+              ) : null}
               <p className="mt-2 text-sm text-slate-500">
                 {winning.ticket}
                 {winning.tippedBy ? <span className="text-slate-400"> · getippt von {winning.tippedBy}</span> : null}

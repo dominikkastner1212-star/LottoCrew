@@ -39,6 +39,8 @@ Neue Admins starten ueber `/registrieren`: Name, E-Mail, Passwort, Gruppenname u
 
 Geschuetzte App-Seiten leiten ohne Session zu `/login` weiter. Admins koennen Ziehungen, Tipps, Zahlungen, Gewinne und Rollen direkt in der App pflegen.
 
+Automatische Ziehungspruefung nutzt serverseitig `EUROJACKPOT_RESULTS_API_URL`. Die URL kann `{date}` enthalten, sonst haengt die App `?date=YYYY-MM-DD` an. Erwartet wird JSON mit 5 Hauptzahlen und 2 Eurozahlen, optional mit Gewinnbetraegen pro Gewinnklasse.
+
 ## Railway Deployment
 
 1. Repository mit Railway verbinden.
