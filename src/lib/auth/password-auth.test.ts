@@ -34,6 +34,7 @@ describe("password auth helpers", () => {
           display_name: "Dominik",
           group_name: "LottoCrew",
           monthly_amount: 24.5,
+          invite_code: "",
         },
       },
     });

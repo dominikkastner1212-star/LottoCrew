@@ -50,8 +50,8 @@ export function InstallHint() {
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
     if (isIos) {
-      setMode("ios");
-      return;
+      const timeoutId = window.setTimeout(() => setMode("ios"), 0);
+      return () => window.clearTimeout(timeoutId);
     }
 
     // Android/Chrome: auf das Install-Event warten.
@@ -131,13 +131,13 @@ export function InstallHint() {
                   <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-800">2</span>
                   <span>
                     <SquarePlus className="mx-0.5 inline size-4 align-[-2px] text-slate-600" aria-hidden />{" "}
-                    <strong>„Zum Home-Bildschirm"</strong> wählen
+                    <strong>&quot;Zum Home-Bildschirm&quot;</strong> wählen
                   </span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-800">3</span>
                   <span>
-                    Oben rechts <strong>„Hinzufügen"</strong> tippen – fertig!
+                    Oben rechts <strong>&quot;Hinzufügen&quot;</strong> tippen – fertig!
                   </span>
                 </li>
               </ol>

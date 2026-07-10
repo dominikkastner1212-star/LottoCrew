@@ -26,7 +26,7 @@ Danach `http://localhost:3000` offnen.
 ## Supabase einrichten
 
 1. Neues Supabase-Projekt erstellen.
-2. SQL aus `supabase/migrations/001_initial_schema.sql` im SQL Editor ausfuhren.
+2. Alle SQL-Dateien aus `supabase/migrations` in Reihenfolge ausfuhren, oder mit Supabase CLI `supabase db push` verwenden. Nur `001_initial_schema.sql` reicht nicht aus.
 3. `NEXT_PUBLIC_SUPABASE_URL` und `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env.local` setzen.
 4. In Supabase Auth E-Mail-Login aktivieren.
 
