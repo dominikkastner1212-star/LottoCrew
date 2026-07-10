@@ -12,6 +12,13 @@ export type EurojackpotResult = {
   prizeAmounts?: Map<string, number>;
 };
 
+export type SerializableEurojackpotResult = {
+  drawDate: string;
+  numbers: number[];
+  euroNumbers: number[];
+  prizeAmounts?: Record<string, number>;
+};
+
 export type TicketNumberSet = {
   id: string;
   numbers: number[];
@@ -110,6 +117,15 @@ export async function fetchEurojackpotResult(
   }
 
   return normalizeEurojackpotResult(await response.json(), drawDate);
+}
+
+export function serializeEurojackpotResult(result: EurojackpotResult): SerializableEurojackpotResult {
+  return {
+    drawDate: result.drawDate,
+    numbers: result.numbers,
+    euroNumbers: result.euroNumbers,
+    prizeAmounts: result.prizeAmounts ? Object.fromEntries(result.prizeAmounts) : undefined,
+  };
 }
 
 export function evaluateTicketsForDraw(
