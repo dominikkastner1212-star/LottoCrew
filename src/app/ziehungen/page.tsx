@@ -1,6 +1,6 @@
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { AdminDisclosure } from "@/components/admin-disclosure";
-import { AutoEvaluateDrawForm, CreateDrawForm, EvaluateDrawForm } from "@/components/admin-forms";
+import { CreateDrawForm, EvaluateDrawForm } from "@/components/admin-forms";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { Panel, Surface } from "@/components/ui/panel";
 import { requireAppContext } from "@/lib/auth-guard";
@@ -43,9 +43,6 @@ export default async function DrawsPage() {
           <div className="mb-5 grid gap-3">
             <AdminDisclosure label="Ziehung anlegen">
               <CreateDrawForm groupId={app.group.id} isAdmin={app.isAdmin} />
-            </AdminDisclosure>
-            <AdminDisclosure label="Automatisch pruefen">
-              <AutoEvaluateDrawForm groupId={app.group.id} draws={app.draws} isAdmin={app.isAdmin} />
             </AdminDisclosure>
             <AdminDisclosure label="Manuell auswerten">
               <EvaluateDrawForm groupId={app.group.id} draws={app.draws} isAdmin={app.isAdmin} />
