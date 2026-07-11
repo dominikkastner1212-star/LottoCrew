@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  ClipboardList,
   CreditCard,
   Crown,
   Gauge,
@@ -16,6 +17,7 @@ export const navigation = [
   { href: "/tipps", label: "Tipps", icon: Ticket },
   { href: "/ziehungen", label: "Ziehungen", icon: CalendarDays },
   { href: "/kasse", label: "Kasse", icon: Wallet },
+  { href: "/berichte", label: "Berichte", icon: ClipboardList },
   { href: "/einstellungen", label: "Admin", icon: Settings },
 ] as const;
 
@@ -23,5 +25,6 @@ export const quickActions = [
   { label: "Tipp anlegen", icon: Ticket, href: "/tipps" },
   { label: "Zahlung abhaken", icon: CreditCard, href: "/kasse" },
   { label: "Gewinn erfassen", icon: Sparkles, href: "/kasse" },
+  { label: "Bericht ansehen", icon: ClipboardList, href: "/berichte" },
   { label: "Mitglied einladen", icon: Crown, href: "/einstellungen" },
 ];
