@@ -5,7 +5,7 @@ import { fetchProxiedEurojackpotResult } from "./eurojackpot-proxy";
 describe("eurojackpot results proxy", () => {
   it("rejects missing or invalid draw dates", async () => {
     await expect(fetchProxiedEurojackpotResult("2026/07/10")).rejects.toMatchObject({
-      message: "Bitte ein gueltiges Ziehungsdatum als date=YYYY-MM-DD uebergeben.",
+      message: "Bitte ein gültiges Ziehungsdatum als date=YYYY-MM-DD übergeben.",
       status: 400,
     });
   });

@@ -119,7 +119,7 @@ export function PrintSheet({ draws, tickets }: { draws: AppDraw[]; tickets: AppT
         </div>
       </div>
       <p className="print-controls mt-4 text-center text-sm text-slate-500">
-        {printTickets.length} Tippfelder fuer diesen Schein. Maximal 14 passen auf eine Druckseite.
+        {printTickets.length} Tippfelder für diesen Schein. Maximal 14 passen auf eine Druckseite.
       </p>
     </div>
   );

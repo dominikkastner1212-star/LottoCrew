@@ -3,7 +3,7 @@
 import { animate, useReducedMotion } from "motion/react";
 import { useEffect, useRef } from "react";
 
-// Zaehlt einen Euro-Betrag beim Erscheinen weich hoch (Premium-Moment fuer
+// Zählt einen Euro-Betrag beim Erscheinen weich hoch (Premium-Moment für
 // den Jackpot). Respektiert Reduced Motion: dann steht der Endwert sofort da.
 export function CountUpCurrency({ value, className }: { value: number; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);

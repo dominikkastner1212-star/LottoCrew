@@ -83,7 +83,7 @@ export function GroupSettingsForm({ app }: { app: AppContext }) {
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">Einladungscode</p>
           <p className="mt-2 select-all font-mono text-2xl font-bold tracking-[0.2em] text-slate-900">{app.group.inviteCode}</p>
           <p className="mt-2 text-xs leading-5 text-amber-800/80">
-            Gib diesen Code weiter. Bei der Registrierung waehlen Mitglieder &quot;Gruppe beitreten&quot; und landen direkt in eurer Runde.
+            Gib diesen Code weiter. Bei der Registrierung wählen Mitglieder &quot;Gruppe beitreten&quot; und landen direkt in eurer Runde.
           </p>
         </div>
       ) : null}
@@ -164,7 +164,7 @@ export function CreateTicketForm({ groupId, draws, isAdmin }: { groupId: string;
           <label className="block">
             <span className={labelStyle}>Ziehung</span>
             <select name="draw_id" required className={inputStyle}>
-              <option value="">Auswaehlen</option>
+              <option value="">Auswählen</option>
               {draws.map((draw) => (
                 <option key={draw.id} value={draw.id}>
                   {draw.date}
@@ -220,7 +220,7 @@ export function CreatePaymentForm({ groupId, members, isAdmin }: { groupId: stri
           <label className="block">
             <span className={labelStyle}>Mitglied</span>
             <select name="member_id" required className={inputStyle}>
-              <option value="">Auswaehlen</option>
+              <option value="">Auswählen</option>
               {members.map((member) => (
                 <option key={member.id} value={member.id}>
                   {member.name}
@@ -252,19 +252,19 @@ export function CreateMonthlyPaymentsForm({ groupId, isAdmin }: { groupId: strin
     <Surface>
       <ActionForm
         action={createMonthlyPayments}
-        successMessage="Monatsbeitraege fuer alle aktiven Mitglieder angelegt."
+        successMessage="Monatsbeiträge für alle aktiven Mitglieder angelegt."
         confirm={{
-          question: "Beitraege fuer alle aktiven Mitglieder in diesem Monat anlegen?",
-          confirmLabel: "Ja, Beitraege anlegen",
+          question: "Beiträge für alle aktiven Mitglieder in diesem Monat anlegen?",
+          confirmLabel: "Ja, Beiträge anlegen",
         }}
       >
         <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
           <input type="hidden" name="group_id" value={groupId} />
           <label className="block">
-            <span className={labelStyle}>Monat fuer alle aktiven Mitglieder</span>
+            <span className={labelStyle}>Monat für alle aktiven Mitglieder</span>
             <input name="due_month" type="month" required className={inputStyle} />
           </label>
-          <SubmitButton pendingLabel="Wird angelegt...">Monatsbeitraege erzeugen</SubmitButton>
+          <SubmitButton pendingLabel="Wird angelegt...">Monatsbeiträge erzeugen</SubmitButton>
         </div>
       </ActionForm>
     </Surface>
@@ -294,7 +294,7 @@ export function CreateWinningForm({
           <label className="block">
             <span className={labelStyle}>Ziehung</span>
             <select name="draw_id" required className={inputStyle}>
-              <option value="">Auswaehlen</option>
+              <option value="">Auswählen</option>
               {draws.map((draw) => (
                 <option key={draw.id} value={draw.id}>
                   {draw.date}
@@ -305,7 +305,7 @@ export function CreateWinningForm({
           <label className="block">
             <span className={labelStyle}>Tipp</span>
             <select name="ticket_id" required className={inputStyle}>
-              <option value="">Auswaehlen</option>
+              <option value="">Auswählen</option>
               {tickets.map((ticket) => (
                 <option key={ticket.id} value={ticket.id}>
                   {ticket.label}
@@ -341,7 +341,7 @@ export function EvaluateDrawForm({ groupId, draws, isAdmin }: { groupId: string;
           <label className="block">
             <span className={labelStyle}>Ziehung auswerten</span>
             <select name="draw_id" required className={inputStyle}>
-              <option value="">Auswaehlen</option>
+              <option value="">Auswählen</option>
               {draws.map((draw) => (
                 <option key={draw.id} value={draw.id}>
                   {draw.date}
@@ -375,13 +375,13 @@ export function AutoEvaluateDrawForm({ groupId, draws, isAdmin }: { groupId: str
 
   return (
     <Surface>
-      <ActionForm action={autoEvaluateDraw} successMessage="Ziehung automatisch geprueft.">
+      <ActionForm action={autoEvaluateDraw} successMessage="Ziehung automatisch geprüft.">
         <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
           <input type="hidden" name="group_id" value={groupId} />
           <label className="block">
-            <span className={labelStyle}>Ziehung automatisch pruefen</span>
+            <span className={labelStyle}>Ziehung automatisch prüfen</span>
             <select name="draw_id" required className={inputStyle}>
-              <option value="">Auswaehlen</option>
+              <option value="">Auswählen</option>
               {draws.map((draw) => (
                 <option key={draw.id} value={draw.id}>
                   {draw.date}
@@ -389,7 +389,7 @@ export function AutoEvaluateDrawForm({ groupId, draws, isAdmin }: { groupId: str
               ))}
             </select>
           </label>
-          <SubmitButton disabled={draws.length === 0} pendingLabel="Prueft...">Automatisch pruefen</SubmitButton>
+          <SubmitButton disabled={draws.length === 0} pendingLabel="Prüft...">Automatisch prüfen</SubmitButton>
         </div>
       </ActionForm>
     </Surface>
@@ -409,7 +409,7 @@ export function TicketDocumentUploadForm({ groupId, tickets, isAdmin }: { groupI
           <label className="block">
             <span className={labelStyle}>Tipp</span>
             <select name="ticket_id" required className={inputStyle}>
-              <option value="">Auswaehlen</option>
+              <option value="">Auswählen</option>
               {tickets.map((ticket) => (
                 <option key={ticket.id} value={ticket.id}>
                   {ticket.label}
@@ -427,7 +427,7 @@ export function TicketDocumentUploadForm({ groupId, tickets, isAdmin }: { groupI
               className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-500 outline-none file:mr-3 file:rounded-xl file:border-0 file:bg-amber-300 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-950 focus:border-amber-400"
             />
           </label>
-          <SubmitButton disabled={tickets.length === 0} pendingLabel="Laedt hoch...">Spielschein hochladen</SubmitButton>
+          <SubmitButton disabled={tickets.length === 0} pendingLabel="Lädt hoch...">Spielschein hochladen</SubmitButton>
         </div>
       </ActionForm>
     </Surface>

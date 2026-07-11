@@ -9,7 +9,7 @@ export function PaymentReminderButton({ openCount }: { openCount: number }) {
 
   async function enableReminder() {
     if (!("Notification" in window)) {
-      setMessage("Browser unterstuetzt keine Hinweise.");
+      setMessage("Browser unterstützt keine Hinweise.");
       return;
     }
 

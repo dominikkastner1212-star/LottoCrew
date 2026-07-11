@@ -13,7 +13,7 @@ export default async function PrintPage() {
     <AppShell>
       <PageHeader
         title="Lottoschein-Druck"
-        description="Kreuze fuer Eurojackpot-Tippfelder drucken und die Position fuer echte Scheine feinjustieren."
+        description="Kreuze für Eurojackpot-Tippfelder drucken und die Position für echte Scheine feinjustieren."
       />
       <Panel>
         {app.draws.length && app.tickets.length ? (

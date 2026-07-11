@@ -11,15 +11,15 @@ type ActionState =
   | { status: "error"; message: string; at: number };
 
 /**
- * Wrapper fuer Server-Action-Formulare mit eingebautem Feedback.
+ * Wrapper für Server-Action-Formulare mit eingebautem Feedback.
  *
- * Loest zwei UX-Probleme auf einen Schlag:
- * 1. FEEDBACK: Nach jeder Aktion erscheint eine gruene Bestaetigung
- *    bzw. eine verstaendliche Fehlermeldung (mit aria-live fuer
+ * Löst zwei UX-Probleme auf einen Schlag:
+ * 1. FEEDBACK: Nach jeder Aktion erscheint eine grüne Bestätigung
+ *    bzw. eine verständliche Fehlermeldung (mit aria-live für
  *    Screenreader). Nie wieder "hat das jetzt geklappt?".
- * 2. RUECKFRAGE: Ueber das optionale `confirm`-Prop fragt das Formular
- *    vor dem Absenden nach ("Wirklich alle Beitraege anlegen?") –
- *    schuetzt vor Versehen-Klicks bei folgenreichen Aktionen.
+ * 2. RÜCKFRAGE: Über das optionale `confirm`-Prop fragt das Formular
+ *    vor dem Absenden nach ("Wirklich alle Beiträge anlegen?") -
+ *    schützt vor Versehen-Klicks bei folgenreichen Aktionen.
  *
  * Verwendung (Markup bleibt wie bei einem normalen <form>):
  *   <ActionForm action={createDraw} successMessage="Ziehung angelegt!">
@@ -60,7 +60,7 @@ export function ActionForm({
     { status: "idle" },
   );
 
-  // Faengt das Absenden ab, wenn eine Rueckfrage gewuenscht ist.
+  // Fängt das Absenden ab, wenn eine Rückfrage gewünscht ist.
   // Erst nach Klick auf "Ja, ..." wird wirklich abgeschickt.
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     if (!confirm) return;
@@ -124,8 +124,8 @@ export function ActionForm({
 }
 
 /**
- * Macht aus technischen Fehlern verstaendliche Saetze.
- * Die Server Actions werfen bereits deutsche Meldungen – die reichen
+ * Macht aus technischen Fehlern verständliche Sätze.
+ * Die Server Actions werfen bereits deutsche Meldungen - die reichen
  * wir durch. Nur generische/maskierte Meldungen (Next.js versteckt
  * Details in Produktion) ersetzen wir durch einen freundlichen Hinweis.
  */
@@ -143,7 +143,7 @@ function toFriendlyMessage(error: unknown): string {
     return "Das hat leider nicht geklappt. Bitte prüfe deine Eingaben und versuche es noch einmal.";
   }
 
-  // Haeufige Datenbank-Meldungen uebersetzen.
+  // Häufige Datenbank-Meldungen übersetzen.
   if (raw.includes("duplicate key")) {
     return "Diesen Eintrag gibt es schon.";
   }

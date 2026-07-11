@@ -6,8 +6,8 @@ import { useEffect } from "react";
  * Registriert den Service Worker (public/sw.js).
  * Rendert nichts – einfach einmal im RootLayout einbinden.
  *
- * Nur in Produktion aktiv: im Dev-Modus wuerde der Cache sonst
- * staendig veraltete Turbopack-Chunks ausliefern.
+ * Nur in Produktion aktiv: im Dev-Modus würde der Cache sonst
+ * ständig veraltete Turbopack-Chunks ausliefern.
  */
 export function ServiceWorkerRegister() {
   useEffect(() => {

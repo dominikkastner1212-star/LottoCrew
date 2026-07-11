@@ -10,7 +10,7 @@ import { Surface } from "@/components/ui/panel";
 import type { AppDraw } from "@/lib/app-data";
 import { cn, formatDate } from "@/lib/utils";
 
-/** Zufaellige, eindeutige Zahlen ziehen (Fisher-Yates). */
+/** Zufällige, eindeutige Zahlen ziehen (Fisher-Yates). */
 function pickUnique(max: number, count: number) {
   const values = Array.from({ length: max }, (_, index) => index + 1);
   for (let index = values.length - 1; index > 0; index -= 1) {
@@ -23,14 +23,14 @@ function pickUnique(max: number, count: number) {
 type SaveState = { status: "idle" } | { status: "saved"; at: number } | { status: "error"; message: string };
 
 /**
- * Tippeingabe mit antippbarem Zahlenraster – wie ein echter Lottoschein.
+ * Tippeingabe mit antippbarem Zahlenraster - wie ein echter Lottoschein.
  *
- * UX-Prinzipien fuer die Zielgruppe (auch aeltere Kollegen):
- * 1. Kein Freitext fuer Zahlen -> keine Tippfehler, keine Duplikate moeglich
- * 2. Der Speichern-Button ist erst aktiv, wenn alles vollstaendig ist,
+ * UX-Prinzipien für die Zielgruppe (auch ältere Kollegen):
+ * 1. Kein Freitext für Zahlen -> keine Tippfehler, keine Duplikate möglich
+ * 2. Der Speichern-Button ist erst aktiv, wenn alles vollständig ist,
  *    und ein Hinweistext sagt IMMER, was noch fehlt
- * 3. Nach dem Speichern gibt es eine unuebersehbare gruene Bestaetigung
- *    und das Raster wird fuer den naechsten Tipp geleert
+ * 3. Nach dem Speichern gibt es eine unübersehbare grüne Bestätigung
+ *    und das Raster wird für den nächsten Tipp geleert
  */
 export function TicketEntryForm({
   groupId,
@@ -54,7 +54,7 @@ export function TicketEntryForm({
   const complete = mainComplete && euroComplete;
 
   // Wrapper um die Server Action: liefert nach dem Speichern einen
-  // Erfolgs-Status zurueck, damit wir eine Bestaetigung anzeigen koennen.
+  // Erfolgs-Status zurück, damit wir eine Bestätigung anzeigen können.
   const action = isAdmin ? createTicket : createMemberTicket;
   const [saveState, formAction] = useActionState<SaveState, FormData>(
     async (_previous, formData) => {
@@ -89,7 +89,7 @@ export function TicketEntryForm({
     setEuroNumbers([]);
   }
 
-  // Verstaendlicher Hinweis, was noch fehlt – statt eines stumm
+  // Verständlicher Hinweis, was noch fehlt - statt eines stumm
   // deaktivierten Buttons.
   const missingHint = !mainComplete
     ? `Noch ${5 - mainNumbers.length} von 5 Hauptzahlen antippen`
@@ -149,7 +149,7 @@ export function TicketEntryForm({
 
         {/* Schritt 2: Hauptzahlen antippen */}
         <NumberGrid
-          label="5 Hauptzahlen wählen (1–50)"
+          label="5 Hauptzahlen wählen (1-50)"
           max={50}
           limit={5}
           selected={mainNumbers}
@@ -160,7 +160,7 @@ export function TicketEntryForm({
 
         {/* Schritt 3: Eurozahlen antippen */}
         <NumberGrid
-          label="2 Eurozahlen wählen (1–12)"
+          label="2 Eurozahlen wählen (1-12)"
           max={12}
           limit={2}
           selected={euroNumbers}
@@ -169,7 +169,7 @@ export function TicketEntryForm({
           tone="violet"
         />
 
-        {/* Aktionen + Status. aria-live sorgt dafuer, dass Screenreader
+        {/* Aktionen + Status. aria-live sorgt dafür, dass Screenreader
             Erfolg und Fehler mit vorlesen. */}
         <div className="flex flex-wrap items-center gap-3">
           <Button type="button" variant="secondary" onClick={randomize}>
@@ -213,7 +213,7 @@ export function TicketEntryForm({
 
         {draws.length === 0 ? (
           <p className={cn("rounded-2xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900")}>
-            Es gibt noch keine Ziehung. Ein Admin muss zuerst unter „Ziehungen&ldquo; eine anlegen.
+            Es gibt noch keine Ziehung. Ein Admin muss zuerst unter &quot;Ziehungen&quot; eine anlegen.
           </p>
         ) : null}
       </form>

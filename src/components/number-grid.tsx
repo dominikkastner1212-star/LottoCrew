@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 /**
  * Antippbares Zahlenraster wie auf einem echten Lottoschein.
  *
- * Bewusst simpel gehalten fuer maximale Verstaendlichkeit:
- * - Grosse Touch-Flaechen (min. 44x44px, Apple-Empfehlung)
+ * Bewusst simpel gehalten für maximale Verständlichkeit:
+ * - Große Touch-Flächen (min. 44x44px, Apple-Empfehlung)
  * - 10 Spalten wie auf dem Papier-Spielschein (Wiedererkennung!)
- * - Gewaehlte Zahlen sind unuebersehbar (gefuellt + Haken)
+ * - Gewählte Zahlen sind unübersehbar (gefüllt + Haken)
  * - Ist das Limit erreicht, werden restliche Zahlen ausgegraut
  */
 export function NumberGrid({
@@ -49,8 +49,8 @@ export function NumberGrid({
 
   return (
     <fieldset>
-      {/* Kopfzeile: Label + Live-Zaehler. aria-live liest den Fortschritt
-          fuer Screenreader mit vor. */}
+      {/* Kopfzeile: Label + Live-Zähler. aria-live liest den Fortschritt
+          für Screenreader mit vor. */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <legend className="text-sm font-semibold text-slate-700">{label}</legend>
         <span
@@ -62,7 +62,7 @@ export function NumberGrid({
         >
           {full ? (
             <>
-              <Check className="size-3.5" /> Fertig – {limit} von {limit} gewählt
+              <Check className="size-3.5" /> Fertig - {limit} von {limit} gewählt
             </>
           ) : (
             <>Noch {remaining} {remaining === 1 ? "Zahl" : "Zahlen"} antippen</>

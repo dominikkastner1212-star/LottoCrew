@@ -247,7 +247,7 @@ export async function ensureUserWorkspace(
 
   // Beitritt per Einladungscode: Wurde bei der Registrierung ein Code angegeben,
   // tritt der Nutzer der bestehenden Gruppe bei. Es wird dann NIE automatisch
-  // eine eigene Gruppe erstellt — auch nicht bei ungueltigem Code, damit keine
+  // eine eigene Gruppe erstellt - auch nicht bei ungültigem Code, damit keine
   // verwaisten Einzelgruppen entstehen.
   const inviteCode =
     typeof user.user_metadata?.invite_code === "string" ? user.user_metadata.invite_code.trim().toUpperCase() : "";
@@ -348,9 +348,9 @@ export async function getAppContext(): Promise<AppContext> {
   try {
     await ensureUserWorkspace(supabase, user);
   } catch (error) {
-    // Falls die Workspace-Anlage fehlschlaegt (z. B. weil die Session direkt nach
-    // der E-Mail-Bestaetigung noch nicht als Cookie steht), darf das die Seite nicht
-    // abstuerzen lassen. Beim naechsten Aufruf wird die Anlage erneut versucht.
+    // Falls die Workspace-Anlage fehlschlägt (z. B. weil die Session direkt nach
+    // der E-Mail-Bestätigung noch nicht als Cookie steht), darf das die Seite nicht
+    // abstürzen lassen. Beim nächsten Aufruf wird die Anlage erneut versucht.
     console.error("ensureUserWorkspace failed:", error);
   }
   const profile = await ensureProfile(supabase, user);

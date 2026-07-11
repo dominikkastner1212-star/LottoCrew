@@ -25,22 +25,22 @@ export default async function KassePage() {
     <AppShell>
       <PageHeader
         title="Kasse"
-        description="Beitraege, offene Zahlungen und Gewinne an einem Ort - im bestehenden Zahlungsmodell."
+        description="Beiträge, offene Zahlungen und Gewinne an einem Ort - im bestehenden Zahlungsmodell."
         action={
           <>
-            <LinkButton href="/api/export/payments.csv" variant="secondary"><Download className="size-4" />Beitraege CSV</LinkButton>
+            <LinkButton href="/api/export/payments.csv" variant="secondary"><Download className="size-4" />Beiträge CSV</LinkButton>
             <LinkButton href="/api/export/winnings.pdf" variant="secondary"><FileDown className="size-4" />Gewinne PDF</LinkButton>
           </>
         }
       />
 
       <Panel>
-        <h2 className="text-lg font-semibold text-slate-900">Beitragsuebersicht</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Beitragsübersicht</h2>
         <Stagger className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StaggerItem>
             <Surface>
               <Clock3 className="size-5 text-amber-600" />
-              <p className="mt-3 text-sm text-slate-500">Offene Beitraege</p>
+              <p className="mt-3 text-sm text-slate-500">Offene Beiträge</p>
               <p className="mt-2 text-2xl font-semibold text-slate-900">{formatCurrency(openPaymentAmount)}</p>
               <p className="mt-1 text-xs text-slate-500">{openPayments.length} Zahlung{openPayments.length === 1 ? "" : "en"} offen</p>
             </Surface>
@@ -58,7 +58,7 @@ export default async function KassePage() {
               <Clock3 className="size-5 text-sky-600" />
               <p className="mt-3 text-sm text-slate-500">Aktueller Monat</p>
               <p className="mt-2 text-2xl font-semibold text-slate-900">{currentMonthPayments.length}</p>
-              <p className="mt-1 text-xs text-slate-500">Beitraege angelegt</p>
+              <p className="mt-1 text-xs text-slate-500">Beiträge angelegt</p>
             </Surface>
           </StaggerItem>
           <StaggerItem>
@@ -73,10 +73,10 @@ export default async function KassePage() {
       </Panel>
 
       <Panel className="mt-5">
-        <h2 className="text-lg font-semibold text-slate-900">Beitraege und Zahlungen</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Beiträge und Zahlungen</h2>
         {app.group && app.isAdmin ? (
           <div className="mt-4 grid gap-3">
-            <AdminDisclosure label="Monatsbeitraege erzeugen">
+            <AdminDisclosure label="Monatsbeiträge erzeugen">
               <CreateMonthlyPaymentsForm groupId={app.group.id} isAdmin={app.isAdmin} />
             </AdminDisclosure>
             <AdminDisclosure label="Einzelne Zahlung anlegen">

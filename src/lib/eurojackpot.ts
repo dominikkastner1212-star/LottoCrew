@@ -169,7 +169,7 @@ export function splitAmountByMember(amount: number, memberCount: number) {
 
 function normalizeEurojackpotResult(payload: unknown, fallbackDate: string): EurojackpotResult {
   if (!payload || typeof payload !== "object") {
-    throw new Error("Eurojackpot-Antwort ist ungueltig.");
+    throw new Error("Eurojackpot-Antwort ist ungültig.");
   }
 
   const record = payload as Record<string, unknown>;
@@ -253,9 +253,9 @@ function assertEurojackpotNumbers(numbers: number[], euroNumbers: number[]) {
     throw new Error("Eurojackpot-Antwort braucht 5 Hauptzahlen und 2 Eurozahlen.");
   }
   if (numbers.some((number) => !Number.isInteger(number) || number < 1 || number > 50)) {
-    throw new Error("Eurojackpot-Hauptzahlen muessen zwischen 1 und 50 liegen.");
+    throw new Error("Eurojackpot-Hauptzahlen müssen zwischen 1 und 50 liegen.");
   }
   if (euroNumbers.some((number) => !Number.isInteger(number) || number < 1 || number > 12)) {
-    throw new Error("Eurojackpot-Eurozahlen muessen zwischen 1 und 12 liegen.");
+    throw new Error("Eurojackpot-Eurozahlen müssen zwischen 1 und 12 liegen.");
   }
 }

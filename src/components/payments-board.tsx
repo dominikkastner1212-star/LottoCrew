@@ -98,7 +98,7 @@ export function PaymentsBoard({ payments, groupId, isAdmin }: { payments: AppPay
       ))}
       {filteredPayments.length === 0 ? (
         <Surface className="py-10 text-center text-sm text-slate-500">
-          Keine Zahlungen fuer diese Auswahl vorhanden.
+          Keine Zahlungen für diese Auswahl vorhanden.
         </Surface>
       ) : null}
     </Stagger>

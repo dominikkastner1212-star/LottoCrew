@@ -41,8 +41,8 @@ export function LoginForm() {
       const message = error instanceof Error ? error.message : "";
       setMessage(
         message === "Failed to fetch"
-          ? "Supabase ist nicht erreichbar. Bitte NEXT_PUBLIC_SUPABASE_URL und NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in Railway pruefen und danach neu deployen."
-          : message || "Login konnte nicht ausgefuehrt werden.",
+          ? "Supabase ist nicht erreichbar. Bitte NEXT_PUBLIC_SUPABASE_URL und NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in Railway prüfen und danach neu deployen."
+          : message || "Login konnte nicht ausgeführt werden.",
       );
     }
   }

@@ -38,7 +38,7 @@ async function assertAdmin(supabase: SupabaseServerClient, userId: string, group
     .maybeSingle();
 
   if (data?.role !== "admin") {
-    throw new Error("Nur Admins duerfen diese Aktion ausfuehren.");
+    throw new Error("Nur Admins dürfen diese Aktion ausführen.");
   }
 }
 
@@ -64,15 +64,15 @@ function assertEurojackpotNumbers(mainNumbers: number[], euroNumbers: number[]) 
   }
 
   if (new Set(mainNumbers).size !== mainNumbers.length || new Set(euroNumbers).size !== euroNumbers.length) {
-    throw new Error("Zahlen duerfen sich innerhalb eines Tippfelds nicht doppeln.");
+    throw new Error("Zahlen dürfen sich innerhalb eines Tippfelds nicht doppeln.");
   }
 
   if (mainNumbers.some((number) => !Number.isInteger(number) || number < 1 || number > 50)) {
-    throw new Error("Hauptzahlen muessen zwischen 1 und 50 liegen.");
+    throw new Error("Hauptzahlen müssen zwischen 1 und 50 liegen.");
   }
 
   if (euroNumbers.some((number) => !Number.isInteger(number) || number < 1 || number > 12)) {
-    throw new Error("Eurozahlen muessen zwischen 1 und 12 liegen.");
+    throw new Error("Eurozahlen müssen zwischen 1 und 12 liegen.");
   }
 }
 
@@ -119,7 +119,7 @@ async function insertTicket(
     .throwOnError();
 
   if (!draw) {
-    throw new Error("Ziehung gehoert nicht zu dieser Gruppe.");
+    throw new Error("Ziehung gehört nicht zu dieser Gruppe.");
   }
 
   const { data: ticket } = await supabase
@@ -271,7 +271,7 @@ export async function updateMemberRole(formData: FormData) {
   }
 
   if (role !== "admin" && role !== "participant") {
-    throw new Error("Ungueltige Rolle.");
+    throw new Error("Ungültige Rolle.");
   }
 
   await supabase.from("group_members").update({ role }).eq("id", memberId).eq("group_id", groupId).throwOnError();
@@ -361,12 +361,12 @@ export async function updateMemberEmail(formData: FormData) {
   await assertAdmin(supabase, userId, groupId);
 
   if (!newEmail.includes("@")) {
-    throw new Error("Bitte eine gueltige E-Mail-Adresse eintragen.");
+    throw new Error("Bitte eine gültige E-Mail-Adresse eintragen.");
   }
 
   const admin = createAdminClient();
 
-  // Sicherstellen, dass das Mitglied wirklich zu dieser Gruppe gehoert.
+  // Sicherstellen, dass das Mitglied wirklich zu dieser Gruppe gehört.
   const { data: membership } = await admin
     .from("group_members")
     .select("id")
@@ -376,10 +376,10 @@ export async function updateMemberEmail(formData: FormData) {
     .throwOnError();
 
   if (!membership) {
-    throw new Error("Mitglied gehoert nicht zu dieser Gruppe.");
+    throw new Error("Mitglied gehört nicht zu dieser Gruppe.");
   }
 
-  // Pruefen, ob die neue Adresse bereits von jemand anderem verwendet wird.
+  // Prüfen, ob die neue Adresse bereits von jemand anderem verwendet wird.
   const { data: clash } = await admin
     .from("profiles")
     .select("id")
@@ -419,7 +419,7 @@ export async function addMemberWithPassword(formData: FormData) {
   await assertAdmin(supabase, userId, groupId);
 
   if (!email.includes("@")) {
-    throw new Error("Bitte eine gueltige E-Mail-Adresse eintragen.");
+    throw new Error("Bitte eine gültige E-Mail-Adresse eintragen.");
   }
 
   if (password.length < 6) {
@@ -427,7 +427,7 @@ export async function addMemberWithPassword(formData: FormData) {
   }
 
   if (role !== "admin" && role !== "participant") {
-    throw new Error("Ungueltige Rolle.");
+    throw new Error("Ungültige Rolle.");
   }
 
   const admin = createAdminClient();
@@ -446,12 +446,12 @@ export async function addMemberWithPassword(formData: FormData) {
     .throwOnError();
 
   if (existingProfile?.id) {
-    throw new Error("Fuer diese E-Mail gibt es bereits ein Konto. Bitte den normalen Einladungsweg nutzen.");
+    throw new Error("Für diese E-Mail gibt es bereits ein Konto. Bitte den normalen Einladungsweg nutzen.");
   }
 
-  // Konto direkt anlegen: E-Mail gilt sofort als bestaetigt (keine Mail noetig).
-  // Das Flag must_change_password fuehrt den Kollegen beim ersten Login zum
-  // Aendern des vom Admin vergebenen Startpassworts.
+  // Konto direkt anlegen: E-Mail gilt sofort als bestätigt (keine Mail nötig).
+  // Das Flag must_change_password führt den Kollegen beim ersten Login zum
+  // Ändern des vom Admin vergebenen Startpassworts.
   const { data: created, error: createError } = await admin.auth.admin.createUser({
     email,
     password,
@@ -499,11 +499,11 @@ export async function addMemberByEmail(formData: FormData) {
   await assertAdmin(supabase, userId, groupId);
 
   if (!email.includes("@")) {
-    throw new Error("Bitte eine gueltige E-Mail-Adresse eintragen.");
+    throw new Error("Bitte eine gültige E-Mail-Adresse eintragen.");
   }
 
   if (role !== "admin" && role !== "participant") {
-    throw new Error("Ungueltige Rolle.");
+    throw new Error("Ungültige Rolle.");
   }
 
   const admin = createAdminClient();
@@ -567,7 +567,7 @@ export async function updatePaymentStatus(formData: FormData) {
   await assertAdmin(supabase, userId, groupId);
 
   if (status !== "open" && status !== "paid") {
-    throw new Error("Ungueltiger Zahlungsstatus.");
+    throw new Error("Ungültiger Zahlungsstatus.");
   }
 
   const { data: payment } = await supabase
@@ -751,7 +751,7 @@ export async function createWinning(formData: FormData) {
   }
 
   // Entfernt einen eventuell von der automatischen Auswertung angelegten
-  // Platzhalter (source "auto", Betrag 0) fuer denselben Tipp, damit der
+  // Platzhalter (source "auto", Betrag 0) für denselben Tipp, damit der
   // manuell erfasste Betrag ihn ersetzt statt einen Doppeleintrag zu erzeugen.
   await supabase
     .from("winnings")
@@ -890,7 +890,7 @@ async function evaluateDrawResult(
   if (payload.totalAmount && payload.totalAmount > 0) {
     if (automaticWinnings.length === 0) {
       throw new Error(
-        "Es wurde ein Gewinnbetrag angegeben, aber kein Tipp hat laut Zahlen eine Gewinnklasse erreicht. Bitte Zahlen pruefen.",
+        "Es wurde ein Gewinnbetrag angegeben, aber kein Tipp hat laut Zahlen eine Gewinnklasse erreicht. Bitte Zahlen prüfen.",
       );
     }
 
@@ -983,7 +983,7 @@ export async function uploadTicketDocument(formData: FormData) {
   await assertAdmin(supabase, userId, groupId);
 
   if (!ticketId || !(file instanceof File) || file.size === 0) {
-    throw new Error("Bitte einen Spielschein auswaehlen.");
+    throw new Error("Bitte einen Spielschein auswählen.");
   }
 
   const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-|-$/g, "") || "spielschein";

@@ -29,12 +29,12 @@ export default async function SetPasswordPage({
         <AppLogo />
         <div className="mt-10">
           <h1 className="text-4xl font-semibold tracking-normal text-slate-900">
-            {isFirstLogin ? "Startpasswort aendern" : "Passwort festlegen"}
+            {isFirstLogin ? "Startpasswort ändern" : "Passwort festlegen"}
           </h1>
           <p className="mt-3 text-sm leading-6 text-slate-500">
             {isFirstLogin
               ? "Dein Konto wurde mit einem Startpasswort angelegt. Lege jetzt dein eigenes Passwort fest, das nur du kennst."
-              : "Du wurdest zu LottoCrew eingeladen. Lege einmalig ein Passwort fest, damit du dich kuenftig jederzeit mit E-Mail und Passwort einloggen kannst."}
+              : "Du wurdest zu LottoCrew eingeladen. Lege einmalig ein Passwort fest, damit du dich künftig jederzeit mit E-Mail und Passwort einloggen kannst."}
           </p>
         </div>
         <SetPasswordForm next={safeNext} />

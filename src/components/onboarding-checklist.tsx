@@ -11,13 +11,13 @@ type Step = {
 };
 
 /**
- * Gefuehrter Erststart fuer neue Gruppen.
+ * Geführter Erststart für neue Gruppen.
  *
  * Zeigt auf dem Dashboard eine Checkliste, die sich anhand echter Daten
  * selbst abhakt und automatisch verschwindet, sobald alles erledigt ist.
- * Kein gespeicherter Zustand noetig – die Daten SIND der Zustand.
+ * Kein gespeicherter Zustand nötig - die Daten SIND der Zustand.
  *
- * So weiss jeder neue Admin sofort, was als Naechstes zu tun ist,
+ * So weiß jeder neue Admin sofort, was als Nächstes zu tun ist,
  * ohne Handbuch und ohne Rumsuchen.
  */
 export function OnboardingChecklist({ app }: { app: AppContext }) {
@@ -38,7 +38,7 @@ export function OnboardingChecklist({ app }: { app: AppContext }) {
       description:
         app.totals.activeMembers > 1
           ? `${app.totals.activeMembers} Mitspieler sind dabei.`
-          : "Lade mindestens einen Kollegen ein – per E-Mail oder Einladungscode.",
+          : "Lade mindestens einen Kollegen ein - per E-Mail oder Einladungscode.",
       href: "/einstellungen",
       done: app.totals.activeMembers > 1,
     },
@@ -69,7 +69,7 @@ export function OnboardingChecklist({ app }: { app: AppContext }) {
     return null;
   }
 
-  // Nicht-Admins koennen Mitglieder/Ziehungen nicht anlegen – ihnen
+  // Nicht-Admins können Mitglieder/Ziehungen nicht anlegen - ihnen
   // zeigen wir die Liste nur, wenn ihr eigener Schritt (Tipp) offen ist.
   if (!app.isAdmin) {
     const tipStep = steps[3];
@@ -78,7 +78,7 @@ export function OnboardingChecklist({ app }: { app: AppContext }) {
       <section className="glass-panel mb-5 rounded-[28px] border border-amber-200 p-5">
         <p className="text-sm font-semibold text-amber-700">Los geht&apos;s!</p>
         <h2 className="mt-1 text-xl font-semibold text-slate-900">Gib deinen ersten Tipp ab</h2>
-        <p className="mt-1 text-base text-slate-600">Zahlen antippen oder den Zufall entscheiden lassen – dauert keine Minute.</p>
+        <p className="mt-1 text-base text-slate-600">Zahlen antippen oder den Zufall entscheiden lassen - dauert keine Minute.</p>
         <Link
           href="/tipps"
           className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-2xl bg-amber-400 px-5 text-sm font-semibold text-slate-950 shadow-[0_14px_32px_rgba(232,166,0,.28)] transition hover:bg-amber-300 active:scale-[0.97]"
@@ -102,7 +102,7 @@ export function OnboardingChecklist({ app }: { app: AppContext }) {
           <div>
             <h2 className="text-xl font-semibold text-slate-900">Eure Runde einrichten</h2>
             <p className="text-sm text-slate-600">
-              Schritt {doneCount + 1} von {steps.length} – gleich seid ihr startklar.
+              Schritt {doneCount + 1} von {steps.length} - gleich seid ihr startklar.
             </p>
           </div>
         </div>

@@ -3,7 +3,7 @@
 import { motion, useReducedMotion, type HTMLMotionProps } from "motion/react";
 import type { ReactNode } from "react";
 
-// Sanftes, gestaffeltes Einblenden fuer Karten-/Listengruppen.
+// Sanftes, gestaffeltes Einblenden für Karten-/Listengruppen.
 export function Stagger({ children, className }: { children: ReactNode; className?: string }) {
   const reduce = useReducedMotion();
 
@@ -50,7 +50,7 @@ export function StaggerItem({
   );
 }
 
-// Interaktive Karte/Flaeche mit dezenter Hover- und Tap-Reaktion.
+// Interaktive Karte/Fläche mit dezenter Hover- und Tap-Reaktion.
 export function Interactive({
   children,
   className,

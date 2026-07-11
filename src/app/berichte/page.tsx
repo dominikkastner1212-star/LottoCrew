@@ -68,16 +68,16 @@ export default async function ReportsPage() {
               </span>
               <div>
                 <p className="text-sm font-semibold text-amber-700">Regel-Assistent</p>
-                <h2 className="text-2xl font-semibold text-slate-900">Was steht als Naechstes an?</h2>
+                <h2 className="text-2xl font-semibold text-slate-900">Was steht als Nächstes an?</h2>
               </div>
             </div>
             <p className="mt-5 text-base leading-7 text-slate-700">{report.summary}</p>
           </div>
           <Surface className="lg:w-72">
             <p className="text-sm font-semibold text-slate-900">Wichtigste Aufgabe</p>
-            <p className="mt-2 text-2xl font-semibold text-amber-700">{app.isAdmin ? report.adminFocus : "Eigene Uebersicht pruefen"}</p>
+            <p className="mt-2 text-2xl font-semibold text-amber-700">{app.isAdmin ? report.adminFocus : "Eigene Übersicht prüfen"}</p>
             <p className="mt-2 text-sm leading-5 text-slate-500">
-              {app.isAdmin ? "Aus offenen Datenpunkten berechnet." : "Fokus auf sichtbare Beitraege, Tipps und Ergebnisse."}
+              {app.isAdmin ? "Aus offenen Datenpunkten berechnet." : "Fokus auf sichtbare Beiträge, Tipps und Ergebnisse."}
             </p>
           </Surface>
         </div>
@@ -105,7 +105,7 @@ export default async function ReportsPage() {
             <div>
               <h2 className="text-xl font-semibold text-slate-900">{app.isAdmin ? "Admin-To-dos" : "Meine Zusammenfassung"}</h2>
               <p className="mt-1 text-sm text-slate-500">
-                {app.isAdmin ? "Aus echten Gruppen-, Tipp-, Zahlungs- und Gewinn-Daten berechnet." : "Deine sichtbaren Punkte fuer die naechste Runde."}
+                {app.isAdmin ? "Aus echten Gruppen-, Tipp-, Zahlungs- und Gewinn-Daten berechnet." : "Deine sichtbaren Punkte für die nächste Runde."}
               </p>
             </div>
             <StatusPill status={app.isAdmin && report.adminTasks.some((task) => !task.done) ? "open" : "paid"} />
@@ -119,7 +119,7 @@ export default async function ReportsPage() {
           <h2 className="text-xl font-semibold text-slate-900">Details</h2>
           <div className="mt-5 grid gap-3">
             <Surface>
-              <p className="text-sm font-semibold text-slate-900">Naechste Ziehung</p>
+              <p className="text-sm font-semibold text-slate-900">Nächste Ziehung</p>
               <p className="mt-2 text-sm text-slate-600">
                 {report.nextDraw
                   ? `${formatDate(report.nextDraw.date)} mit ${report.nextDrawTickets.length} Tipp${report.nextDrawTickets.length === 1 ? "" : "s"}.`
@@ -127,11 +127,11 @@ export default async function ReportsPage() {
               </p>
             </Surface>
             <Surface>
-              <p className="text-sm font-semibold text-slate-900">Offene Beitraege</p>
+              <p className="text-sm font-semibold text-slate-900">Offene Beiträge</p>
               <p className="mt-2 text-sm text-slate-600">
                 {app.isAdmin
                   ? `${report.openPayments.length} offen, insgesamt ${formatCurrency(app.totals.openPayments)}.`
-                  : `${report.memberOpenPayments.length} fuer dich sichtbar, insgesamt ${formatCurrency(memberOpenAmount)}.`}
+                  : `${report.memberOpenPayments.length} für dich sichtbar, insgesamt ${formatCurrency(memberOpenAmount)}.`}
               </p>
             </Surface>
             <Surface>

@@ -5,12 +5,12 @@ import { useState } from "react";
 
 const COLORS = ["#E8A600", "#1B8F5C", "#7C5CFF", "#F2B705", "#34D399"];
 
-// Einmalig abspielender Konfetti-Regen. Rein dekorativ, liegt ueber dem Inhalt
-// und faengt keine Klicks ab. Wird bei reduzierter Bewegung nicht angezeigt.
+// Einmalig abspielender Konfetti-Regen. Rein dekorativ, liegt über dem Inhalt
+// und fängt keine Klicks ab. Wird bei reduzierter Bewegung nicht angezeigt.
 export function WinConfetti({ pieces = 34 }: { pieces?: number }) {
   const reduce = useReducedMotion();
 
-  // Zufallswerte einmalig beim Mounten erzeugen (useState-Initializer laeuft nur
+  // Zufallswerte einmalig beim Mounten erzeugen (useState-Initializer läuft nur
   // einmal und ist damit render-rein, anders als Math.random in useMemo).
   const [confetti] = useState(() =>
     Array.from({ length: pieces }).map((_, i) => ({

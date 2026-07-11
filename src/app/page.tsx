@@ -39,18 +39,18 @@ export default async function DashboardPage() {
     <AppShell>
       <PageHeader
         title="Dashboard"
-        description="Alles Wichtige fuer die naechste Runde: Ziehung, Tipps, offene Beitraege und Gewinne."
+        description="Alles Wichtige für die nächste Runde: Ziehung, Tipps, offene Beiträge und Gewinne."
       />
 
       <AdminWorkflowChecklist app={app} />
 
       <Stagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StaggerItem><MetricCard label="Aktueller Jackpot" value={formatCurrency(nextDraw?.jackpot ?? 0)} trend="Eurojackpot" icon={Euro} tone="gold" /></StaggerItem>
-        <StaggerItem><MetricCard label="Naechste offene Ziehung" value={nextOpenDraw ? formatDate(nextOpenDraw.date) : "keine"} trend={nextOpenDraw?.status ?? "alles ausgewertet"} icon={CalendarClock} tone="violet" /></StaggerItem>
-        <StaggerItem><MetricCard label="Tipps naechste Ziehung" value={`${nextDrawTickets.length}`} trend={nextDraw ? formatDate(nextDraw.date) : "keine Ziehung"} icon={Target} tone="green" /></StaggerItem>
+        <StaggerItem><MetricCard label="Nächste offene Ziehung" value={nextOpenDraw ? formatDate(nextOpenDraw.date) : "keine"} trend={nextOpenDraw?.status ?? "alles ausgewertet"} icon={CalendarClock} tone="violet" /></StaggerItem>
+        <StaggerItem><MetricCard label="Tipps nächste Ziehung" value={`${nextDrawTickets.length}`} trend={nextDraw ? formatDate(nextDraw.date) : "keine Ziehung"} icon={Target} tone="green" /></StaggerItem>
         <StaggerItem><MetricCard label="Aktive Mitspieler" value={`${app.totals.activeMembers}`} trend={app.group?.name ?? "Noch keine Gruppe"} icon={Users} tone="green" /></StaggerItem>
-        <StaggerItem><MetricCard label="Offene Zahlungen" value={formatCurrency(app.totals.openPayments)} trend={`${openPayments.length} offene Beitraege`} icon={CreditCard} tone="blue" /></StaggerItem>
-        <StaggerItem><MetricCard label="Auswertung offen" value={`${unevaluatedDraws.length}`} trend={openAmountWinnings.length ? `${openAmountWinnings.length} Gewinnbetrag offen` : "keine Betraege offen"} icon={ListChecks} tone="violet" /></StaggerItem>
+        <StaggerItem><MetricCard label="Offene Zahlungen" value={formatCurrency(app.totals.openPayments)} trend={`${openPayments.length} offene Beiträge`} icon={CreditCard} tone="blue" /></StaggerItem>
+        <StaggerItem><MetricCard label="Auswertung offen" value={`${unevaluatedDraws.length}`} trend={openAmountWinnings.length ? `${openAmountWinnings.length} Gewinnbetrag offen` : "keine Beträge offen"} icon={ListChecks} tone="violet" /></StaggerItem>
       </Stagger>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
@@ -67,7 +67,7 @@ export default async function DashboardPage() {
             <div>
               <p className="text-sm font-semibold text-amber-600">{app.group?.name ?? "LottoCrew"}</p>
               <h2 className="mt-2 max-w-xl text-3xl font-semibold tracking-normal text-slate-900 md:text-5xl">
-                <CountUpCurrency value={nextDraw?.jackpot ?? 0} /> fuer eure naechste Eurojackpot-Runde.
+                <CountUpCurrency value={nextDraw?.jackpot ?? 0} /> für eure nächste Eurojackpot-Runde.
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
                 Alle Kennzahlen kommen direkt aus eurer Gruppe.
@@ -91,7 +91,7 @@ export default async function DashboardPage() {
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-xl font-semibold text-slate-900">Erinnerungen</h2>
-              <p className="mt-1 text-sm text-slate-500">Offene Beitraege vor der Ziehung.</p>
+              <p className="mt-1 text-sm text-slate-500">Offene Beiträge vor der Ziehung.</p>
             </div>
             <AlertCircle className="size-5 text-amber-600" />
           </div>
@@ -116,7 +116,7 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-semibold text-slate-900">Aktive Tipps</h2>
-              <p className="mt-1 text-sm text-slate-500">Fuer die naechste relevante Ziehung.</p>
+              <p className="mt-1 text-sm text-slate-500">Für die nächste relevante Ziehung.</p>
             </div>
             <StatusPill status={nextDraw?.status === "evaluated" ? "evaluated" : "submitted"} />
           </div>
@@ -136,7 +136,7 @@ export default async function DashboardPage() {
               </Surface>
             ))}
             {nextDrawTickets.length === 0 ? (
-              <Surface className="py-10 text-center text-sm text-slate-500">Noch keine Tipps fuer diese Ziehung vorhanden.</Surface>
+              <Surface className="py-10 text-center text-sm text-slate-500">Noch keine Tipps für diese Ziehung vorhanden.</Surface>
             ) : null}
           </div>
         </Panel>
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-semibold text-slate-900">Gewinntrend</h2>
-              <p className="mt-1 text-sm text-slate-500">Einsaetze und Gewinne im Monatsvergleich.</p>
+              <p className="mt-1 text-sm text-slate-500">Einsätze und Gewinne im Monatsvergleich.</p>
             </div>
             <Trophy className="size-5 text-amber-600" />
           </div>
@@ -160,11 +160,11 @@ export default async function DashboardPage() {
               <p className="mt-2 text-2xl font-semibold text-slate-900">{formatCurrency(app.totals.totalWinnings)}</p>
             </Surface>
             <Surface>
-              <p className="text-sm text-slate-500">Gesamteinsaetze</p>
+              <p className="text-sm text-slate-500">Gesamteinsätze</p>
               <p className="mt-2 text-2xl font-semibold text-slate-900">{formatCurrency(totalStake)}</p>
             </Surface>
             <Surface>
-              <p className="text-sm text-slate-500">Rueckflussquote</p>
+              <p className="text-sm text-slate-500">Rückflussquote</p>
               <p className="mt-2 text-2xl font-semibold text-amber-700">{returnRate.toFixed(1)}%</p>
             </Surface>
           </div>

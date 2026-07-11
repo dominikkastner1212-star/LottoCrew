@@ -117,7 +117,7 @@ export function TipsBoard({ tickets }: { tickets: AppTicket[] }) {
         ))}
         {filteredTickets.length === 0 ? (
           <Surface className="py-10 text-center text-sm text-slate-500">
-            Keine Tipps fuer diese Auswahl vorhanden.
+            Keine Tipps für diese Auswahl vorhanden.
           </Surface>
         ) : null}
       </Stagger>

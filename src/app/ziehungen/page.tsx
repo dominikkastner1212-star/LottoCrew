@@ -32,7 +32,7 @@ function getDrawCheckStatus(draw: AppDraw, tickets: AppTicket[]) {
 
 function getAdminHint(draw: AppDraw, drawTickets: AppTicket[]) {
   if (drawTickets.length === 0) {
-    return "Noch keine Tipps fuer diese Ziehung eingetragen.";
+    return "Noch keine Tipps für diese Ziehung eingetragen.";
   }
   if (draw.status !== "evaluated") {
     return "Tipps sind vorhanden. Nach der Ziehung manuell auswerten.";
@@ -102,7 +102,7 @@ export default async function DrawsPage() {
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-slate-900">{evaluatedTickets}</p>
-                  <p className="text-xs text-slate-500">geprueft</p>
+                  <p className="text-xs text-slate-500">geprüft</p>
                 </div>
               </div>
               {app.isAdmin ? <p className="mt-4 text-sm leading-5 text-slate-600">{getAdminHint(draw, drawTickets)}</p> : null}

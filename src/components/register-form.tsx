@@ -29,7 +29,7 @@ export function RegisterForm() {
 
     if (password !== passwordConfirm) {
       setState("error");
-      setMessage("Die Passwoerter stimmen nicht ueberein.");
+      setMessage("Die Passwörter stimmen nicht überein.");
       return;
     }
 
@@ -63,7 +63,7 @@ export function RegisterForm() {
       const errorMessage = error instanceof Error ? error.message : "";
       setMessage(
         errorMessage === "Failed to fetch"
-          ? "Supabase ist nicht erreichbar. Bitte Railway-Variablen pruefen und neu deployen."
+          ? "Supabase ist nicht erreichbar. Bitte Railway-Variablen prüfen und neu deployen."
           : errorMessage || "Registrierung konnte nicht gestartet werden.",
       );
     }
@@ -88,7 +88,7 @@ export function RegisterForm() {
             mode === "create" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
           }`}
         >
-          Neue Gruppe gruenden
+          Neue Gruppe gründen
         </button>
       </div>
       <label className="block">

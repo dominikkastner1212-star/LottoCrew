@@ -66,7 +66,7 @@ describe("report assistant", () => {
 
     const report = buildAssistantReport(app, new Date("2026-07-11"));
 
-    expect(report.summary).toContain("Die naechste Eurojackpot-Ziehung ist am");
+    expect(report.summary).toContain("Die nächste Eurojackpot-Ziehung ist am");
     expect(report.summary).toContain("1 Tipp");
     expect(report.summary).toContain("1 offene Zahlung");
     expect(report.summary).toContain("Gewinnklasse 12");
@@ -119,7 +119,7 @@ describe("report assistant", () => {
     const report = buildAssistantReport(app, new Date("2026-07-11"));
 
     expect(report.memberOpenPayments.map((payment) => payment.id)).toEqual(["payment-own"]);
-    expect(report.memberSummaryItems.find((item) => item.title === "Eigene offene Beitraege")).toMatchObject({
+    expect(report.memberSummaryItems.find((item) => item.title === "Eigene offene Beiträge")).toMatchObject({
       done: false,
       urgent: true,
     });

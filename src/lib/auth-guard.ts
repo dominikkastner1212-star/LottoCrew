@@ -9,8 +9,8 @@ export async function requireAppContext() {
     redirect("/login");
   }
 
-  // Vom Admin mit Startpasswort angelegte Mitglieder muessen es beim ersten
-  // Login aendern, bevor sie die App nutzen koennen.
+  // Vom Admin mit Startpasswort angelegte Mitglieder müssen es beim ersten
+  // Login ändern, bevor sie die App nutzen können.
   const supabase = await createClient();
   const {
     data: { user },

@@ -18,8 +18,8 @@ function initials(name: string) {
   return (first + last).toUpperCase();
 }
 
-// Ueberlappende Avatar-Reihe der Mitspieler. Tippen/Hovern zeigt den Namen als
-// kleinen Tooltip, der federnd erscheint. Max. 6 Koepfe, Rest als "+N".
+// Überlappende Avatar-Reihe der Mitspieler. Tippen/Hovern zeigt den Namen als
+// kleinen Tooltip, der federnd erscheint. Max. 6 Köpfe, Rest als "+N".
 export function MemberAvatars({ names }: { names: string[] }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const reduce = useReducedMotion();

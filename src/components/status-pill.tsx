@@ -38,7 +38,7 @@ const labels: Record<keyof typeof styles, string> = {
   participant: "Teilnehmer",
   amount_open: "Gewinnbetrag offen",
   no_win: "kein Gewinn",
-  unchecked: "noch nicht geprueft",
+  unchecked: "noch nicht geprüft",
 };
 
 export function StatusPill({ status, className }: { status: keyof typeof styles; className?: string }) {

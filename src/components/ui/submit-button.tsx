@@ -15,8 +15,8 @@ const variants = {
 const base =
   "inline-flex min-h-10 select-none touch-manipulation items-center justify-center gap-2 rounded-2xl px-4 text-sm font-semibold transition duration-150 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100";
 
-// Button fuer Server-Action-Formulare. Zeigt automatisch einen Spinner, sobald
-// das umgebende <form> uebermittelt wird — sofortiges Feedback statt stummer
+// Button für Server-Action-Formulare. Zeigt automatisch einen Spinner, sobald
+// das umgebende <form> übermittelt wird - sofortiges Feedback statt stummer
 // Wartezeit. Muss innerhalb eines <form action={...}> stehen.
 export function SubmitButton({
   children,

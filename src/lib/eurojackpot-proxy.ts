@@ -42,7 +42,7 @@ function validateDrawDate(drawDate: string | null) {
 
   if (!normalizedDate || !drawDatePattern.test(normalizedDate)) {
     throw new EurojackpotResultsProxyError(
-      "Bitte ein gueltiges Ziehungsdatum als date=YYYY-MM-DD uebergeben.",
+      "Bitte ein gültiges Ziehungsdatum als date=YYYY-MM-DD übergeben.",
       400,
     );
   }

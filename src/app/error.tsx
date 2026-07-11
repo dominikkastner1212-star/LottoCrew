@@ -4,7 +4,7 @@ import { RotateCcw, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-// Faengt Fehler aus Seiten und Server-Actions ab und zeigt statt des rohen
+// Fängt Fehler aus Seiten und Server-Actions ab und zeigt statt des rohen
 // Crash-Screens eine freundliche Meldung mit Wiederholen-Option.
 export default function AppError({
   error,
@@ -29,7 +29,7 @@ export default function AppError({
         <p className="mt-3 text-sm leading-6 text-slate-500">
           {isReadableMessage
             ? error.message
-            : "Beim Verarbeiten ist ein Fehler aufgetreten. Deine Daten sind sicher — versuch es einfach nochmal."}
+            : "Beim Verarbeiten ist ein Fehler aufgetreten. Deine Daten sind sicher - versuch es einfach nochmal."}
         </p>
         <div className="mt-8 grid gap-2">
           <Button onClick={reset} className="w-full">
@@ -37,7 +37,7 @@ export default function AppError({
             Nochmal versuchen
           </Button>
           <Link href="/" className="text-sm font-semibold text-slate-500 transition hover:text-slate-900">
-            Zurueck zum Dashboard
+            Zurück zum Dashboard
           </Link>
         </div>
       </div>

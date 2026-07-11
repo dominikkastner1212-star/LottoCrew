@@ -73,8 +73,8 @@ export function MemberRow({
       ) : null}
 
       <div className="mt-3">
-        {/* Rollenwechsel mit Rueckfrage: Admin-Rechte zu vergeben oder zu
-            entziehen ist folgenreich – ein Versehen-Klick soll nicht reichen. */}
+        {/* Rollenwechsel mit Rückfrage: Admin-Rechte zu vergeben oder zu
+            entziehen ist folgenreich - ein Versehen-Klick soll nicht reichen. */}
         <ActionForm
           action={updateMemberRole}
           successMessage={`Rolle von ${member.name} gespeichert.`}

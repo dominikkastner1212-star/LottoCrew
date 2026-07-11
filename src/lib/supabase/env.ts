@@ -13,11 +13,11 @@ export function assertSupabaseEnv() {
   const env = getSupabaseEnv();
 
   if (!env.url || !env.key) {
-    throw new Error("Supabase ist nicht konfiguriert. Bitte Railway Variables pruefen.");
+    throw new Error("Supabase ist nicht konfiguriert. Bitte Railway Variables prüfen.");
   }
 
   if (!env.url.startsWith("https://") || !env.url.includes(".supabase.co")) {
-    throw new Error("Supabase URL ist ungueltig. Erwartet wird https://projekt-ref.supabase.co");
+    throw new Error("Supabase URL ist ungültig. Erwartet wird https://projekt-ref.supabase.co");
   }
 
   return {

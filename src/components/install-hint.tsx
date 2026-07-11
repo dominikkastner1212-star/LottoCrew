@@ -17,9 +17,9 @@ type BeforeInstallPromptEvent = Event & {
 /**
  * Einmaliger, wegklickbarer Hinweis: "Du kannst LottoCrew installieren."
  *
- * Gerade aeltere Kollegen wissen oft nicht, dass eine Website als App
- * auf den Startbildschirm kann – dieser Banner erklaert es ihnen genau
- * fuer ihr Geraet:
+ * Gerade ältere Kollegen wissen oft nicht, dass eine Website als App
+ * auf den Startbildschirm kann - dieser Banner erklärt es ihnen genau
+ * für ihr Gerät:
  * - Android/Chrome: echter Install-Knopf (nativer Prompt)
  * - iPhone/iPad:    kurze Anleitung mit den richtigen Symbolen
  * - Bereits installiert oder mal weggeklickt: erscheint nie wieder
@@ -29,7 +29,7 @@ export function InstallHint() {
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    // Laeuft die App schon als installierte PWA? Dann nichts anzeigen.
+    // Läuft die App schon als installierte PWA? Dann nichts anzeigen.
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       ("standalone" in window.navigator && (window.navigator as { standalone?: boolean }).standalone === true);
@@ -39,8 +39,8 @@ export function InstallHint() {
     try {
       if (window.localStorage.getItem(DISMISS_KEY)) return;
     } catch {
-      // localStorage gesperrt (z. B. strikte Privatsphaere) – Banner
-      // trotzdem zeigen, er laesst sich ja pro Sitzung wegklicken.
+      // localStorage gesperrt (z. B. strikte Privatsphäre) - Banner
+      // trotzdem zeigen, er lässt sich ja pro Sitzung wegklicken.
     }
 
     // iOS erkennen (iPadOS meldet sich teils als "MacIntel" mit Touch).
@@ -69,7 +69,7 @@ export function InstallHint() {
     try {
       window.localStorage.setItem(DISMISS_KEY, String(Date.now()));
     } catch {
-      // Ohne localStorage merken wir es uns eben nur fuer diese Sitzung.
+      // Ohne localStorage merken wir es uns eben nur für diese Sitzung.
     }
   }
 
@@ -80,7 +80,7 @@ export function InstallHint() {
     if (choice.outcome === "accepted") {
       setMode("hidden");
     }
-    // Bei "dismissed" bleibt der Banner offen – vielleicht war es ein
+    // Bei "dismissed" bleibt der Banner offen - vielleicht war es ein
     // Versehen. Das X ist der bewusste Weg, ihn loszuwerden.
   }
 
@@ -107,7 +107,7 @@ export function InstallHint() {
           {mode === "android" ? (
             <>
               <p className="mt-1 text-base leading-6 text-slate-600">
-                Ein Tipp genügt – danach findest du LottoCrew wie jede andere App auf deinem Startbildschirm.
+                Ein Tipp genügt - danach findest du LottoCrew wie jede andere App auf deinem Startbildschirm.
               </p>
               <Button onClick={install} className="mt-3">
                 <SquarePlus className="size-4" />
@@ -117,7 +117,7 @@ export function InstallHint() {
           ) : (
             <>
               <p className="mt-1 text-base leading-6 text-slate-600">
-                So geht&apos;s auf dem iPhone – dauert 10 Sekunden:
+                So geht&apos;s auf dem iPhone - dauert 10 Sekunden:
               </p>
               <ol className="mt-3 space-y-2 text-base text-slate-700">
                 <li className="flex items-center gap-2.5">
@@ -137,7 +137,7 @@ export function InstallHint() {
                 <li className="flex items-center gap-2.5">
                   <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-800">3</span>
                   <span>
-                    Oben rechts <strong>&quot;Hinzufügen&quot;</strong> tippen – fertig!
+                    Oben rechts <strong>&quot;Hinzufügen&quot;</strong> tippen - fertig!
                   </span>
                 </li>
               </ol>

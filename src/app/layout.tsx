@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   title: "LottoCrew",
   description: "Eure Eurojackpot-Tippgemeinschaft: Tipps, Beiträge und Gewinne an einem Ort.",
   manifest: "/manifest.webmanifest",
-  // Apple-spezifisch: sorgt fuer korrektes Icon und Vollbild-Verhalten,
-  // wenn die App auf dem iPhone zum Home-Bildschirm hinzugefuegt wird.
+  // Apple-spezifisch: sorgt für korrektes Icon und Vollbild-Verhalten,
+  // wenn die App auf dem iPhone zum Home-Bildschirm hinzugefügt wird.
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

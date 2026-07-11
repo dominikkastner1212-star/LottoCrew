@@ -23,7 +23,7 @@ export function SetPasswordForm({ next }: { next: string }) {
 
     if (password !== passwordConfirm) {
       setState("error");
-      setMessage("Die Passwoerter stimmen nicht ueberein.");
+      setMessage("Die Passwörter stimmen nicht überein.");
       return;
     }
 
@@ -49,7 +49,7 @@ export function SetPasswordForm({ next }: { next: string }) {
       const errorMessage = error instanceof Error ? error.message : "";
       setMessage(
         errorMessage === "Failed to fetch"
-          ? "Supabase ist nicht erreichbar. Bitte spaeter erneut versuchen."
+          ? "Supabase ist nicht erreichbar. Bitte später erneut versuchen."
           : errorMessage || "Passwort konnte nicht gespeichert werden.",
       );
     }

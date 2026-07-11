@@ -40,7 +40,7 @@ export function AdminWorkflowChecklist({ app }: { app: AppContext }) {
   const steps: ChecklistStep[] = [
     {
       title: "Ziehung angelegt?",
-      description: nextOpenDraw ? `Naechste offene Ziehung: ${formatDate(nextOpenDraw.date)}.` : "Lege die naechste Eurojackpot-Ziehung an.",
+      description: nextOpenDraw ? `Nächste offene Ziehung: ${formatDate(nextOpenDraw.date)}.` : "Lege die nächste Eurojackpot-Ziehung an.",
       href: "/ziehungen",
       done: Boolean(nextOpenDraw),
       urgent: !nextOpenDraw,
@@ -48,27 +48,27 @@ export function AdminWorkflowChecklist({ app }: { app: AppContext }) {
     {
       title: "Tipps eingetragen?",
       description: nextOpenDraw
-        ? `${nextDrawTickets.length} Tipp${nextDrawTickets.length === 1 ? "" : "s"} fuer diese Ziehung.`
-        : "Sobald eine Ziehung steht, koennen Tipps eingetragen werden.",
+        ? `${nextDrawTickets.length} Tipp${nextDrawTickets.length === 1 ? "" : "s"} für diese Ziehung.`
+        : "Sobald eine Ziehung steht, können Tipps eingetragen werden.",
       href: "/tipps",
       done: nextDrawTickets.length > 0,
       urgent: Boolean(nextOpenDraw) && nextDrawTickets.length === 0,
     },
     {
-      title: "Monatsbeitraege erzeugt?",
+      title: "Monatsbeiträge erzeugt?",
       description:
         currentMonthPayments.length > 0
-          ? `${currentMonthPayments.length} Beitrag${currentMonthPayments.length === 1 ? "" : "e"} fuer diesen Monat vorhanden.`
-          : "Erzeuge die Beitraege fuer den aktuellen Monat.",
+          ? `${currentMonthPayments.length} Beitrag${currentMonthPayments.length === 1 ? "" : "e"} für diesen Monat vorhanden.`
+          : "Erzeuge die Beiträge für den aktuellen Monat.",
       href: "/kasse",
       done: activeMemberCount > 0 && currentMonthPayments.length >= activeMemberCount,
       urgent: activeMemberCount > 0 && currentMonthPayments.length === 0,
     },
     {
-      title: "Offene Zahlungen geprueft?",
+      title: "Offene Zahlungen geprüft?",
       description:
         openPayments.length === 0
-          ? "Keine offenen Beitraege."
+          ? "Keine offenen Beiträge."
           : `${openPayments.length} offen, zusammen ${formatCurrency(openPayments.reduce((sum, payment) => sum + payment.amount, 0))}.`,
       href: "/kasse",
       done: openPayments.length === 0,
@@ -78,8 +78,8 @@ export function AdminWorkflowChecklist({ app }: { app: AppContext }) {
       title: "Ziehung ausgewertet?",
       description:
         unevaluatedDraws.length === 0
-          ? "Keine faellige Ziehung offen."
-          : `${unevaluatedDraws.length} faellige Ziehung${unevaluatedDraws.length === 1 ? "" : "en"} noch nicht ausgewertet.`,
+          ? "Keine fällige Ziehung offen."
+          : `${unevaluatedDraws.length} fällige Ziehung${unevaluatedDraws.length === 1 ? "" : "en"} noch nicht ausgewertet.`,
       href: "/ziehungen",
       done: unevaluatedDraws.length === 0,
       urgent: unevaluatedDraws.length > 0,

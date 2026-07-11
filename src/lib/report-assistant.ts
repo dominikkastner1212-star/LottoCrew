@@ -90,34 +90,34 @@ export function buildAssistantReport(app: AppContext, today = new Date()): Assis
 
   const adminTasks: AssistantTask[] = [
     {
-      title: "Zukuenftige Ziehung anlegen",
-      detail: nextDraw ? `Naechste Ziehung: ${formatDate(nextDraw.date)}.` : "Es gibt aktuell keine offene zukuenftige Ziehung.",
+      title: "Zukünftige Ziehung anlegen",
+      detail: nextDraw ? `Nächste Ziehung: ${formatDate(nextDraw.date)}.` : "Es gibt aktuell keine offene zukünftige Ziehung.",
       href: "/ziehungen",
       done: Boolean(nextDraw),
       urgent: !nextDraw,
     },
     {
-      title: "Tipps fuer die naechste Ziehung pruefen",
-      detail: nextDraw ? `${plural(nextDrawTickets.length, "Tipp", "Tipps")} fuer diese Ziehung.` : "Erst eine Ziehung anlegen.",
+      title: "Tipps für die nächste Ziehung prüfen",
+      detail: nextDraw ? `${plural(nextDrawTickets.length, "Tipp", "Tipps")} für diese Ziehung.` : "Erst eine Ziehung anlegen.",
       href: "/tipps",
       done: nextDrawTickets.length > 0,
       urgent: Boolean(nextDraw) && nextDrawTickets.length === 0,
     },
     {
-      title: "Monatsbeitraege erzeugen",
+      title: "Monatsbeiträge erzeugen",
       detail:
         currentMonthPayments.length >= activeMemberCount && activeMemberCount > 0
-          ? "Fuer alle aktiven Mitglieder sind Beitraege im aktuellen Monat vorhanden."
-          : `${currentMonthPayments.length} von ${activeMemberCount} Beitraegen fuer diesen Monat vorhanden.`,
+          ? "Für alle aktiven Mitglieder sind Beiträge im aktuellen Monat vorhanden."
+          : `${currentMonthPayments.length} von ${activeMemberCount} Beiträgen für diesen Monat vorhanden.`,
       href: "/kasse",
       done: activeMemberCount > 0 && currentMonthPayments.length >= activeMemberCount,
       urgent: activeMemberCount > 0 && currentMonthPayments.length === 0,
     },
     {
-      title: "Offene Zahlungen pruefen",
+      title: "Offene Zahlungen prüfen",
       detail:
         openPayments.length === 0
-          ? "Keine offenen Beitraege."
+          ? "Keine offenen Beiträge."
           : `${plural(openPayments.length, "Zahlung", "Zahlungen")} offen, zusammen ${formatCurrency(openPaymentAmount)}.`,
       href: "/kasse",
       done: openPayments.length === 0,
@@ -147,17 +147,17 @@ export function buildAssistantReport(app: AppContext, today = new Date()): Assis
 
   const memberSummaryItems: AssistantTask[] = [
     {
-      title: "Naechste Ziehung",
+      title: "Nächste Ziehung",
       detail: nextDraw ? `${formatDate(nextDraw.date)} mit ${plural(nextDrawTickets.length, "Tipp", "Tipps")}.` : "Noch keine offene Ziehung vorhanden.",
       href: "/ziehungen",
       done: Boolean(nextDraw),
     },
     {
-      title: "Eigene offene Beitraege",
+      title: "Eigene offene Beiträge",
       detail:
         memberOpenPayments.length === 0
-          ? "Fuer dich sind keine offenen Beitraege sichtbar."
-          : `${plural(memberOpenPayments.length, "Beitrag", "Beitraege")} offen.`,
+          ? "Für dich sind keine offenen Beiträge sichtbar."
+          : `${plural(memberOpenPayments.length, "Beitrag", "Beiträge")} offen.`,
       href: "/kasse",
       done: memberOpenPayments.length === 0,
       urgent: memberOpenPayments.length > 0,
@@ -189,7 +189,7 @@ export function buildAssistantReport(app: AppContext, today = new Date()): Assis
     ? `Der letzte erfasste Gewinn ist ${lastWinning.rank} mit ${formatCurrency(lastWinning.amount)}.`
     : "Bisher ist kein Gewinn erfasst.";
   const nextDrawText = nextDraw
-    ? `Die naechste Eurojackpot-Ziehung ist am ${formatDate(nextDraw.date)}. Fuer diese Ziehung sind aktuell ${plural(nextDrawTickets.length, "Tipp", "Tipps")} eingetragen.`
+    ? `Die nächste Eurojackpot-Ziehung ist am ${formatDate(nextDraw.date)}. Für diese Ziehung sind aktuell ${plural(nextDrawTickets.length, "Tipp", "Tipps")} eingetragen.`
     : "Aktuell ist keine offene Eurojackpot-Ziehung angelegt.";
   const paymentText =
     openPayments.length > 0
@@ -218,19 +218,19 @@ export function buildAssistantReport(app: AppContext, today = new Date()): Assis
     summary: `${nextDrawText} ${paymentText} ${evaluationText} ${lastWinningText}`,
     metrics: [
       {
-        label: "Naechste Ziehung",
+        label: "Nächste Ziehung",
         value: nextDraw ? formatDate(nextDraw.date) : "keine",
         detail: nextDraw ? `${plural(nextDrawTickets.length, "Tipp", "Tipps")} eingetragen` : "Bitte Ziehung anlegen",
       },
       {
-        label: "Offene Beitraege",
+        label: "Offene Beiträge",
         value: formatCurrency(openPaymentAmount),
         detail: `${plural(openPayments.length, "Zahlung", "Zahlungen")} offen`,
       },
       {
         label: "Auswertung offen",
         value: `${submittedDraws.length}`,
-        detail: `${unevaluatedDraws.length} faellige offene Ziehung${unevaluatedDraws.length === 1 ? "" : "en"}`,
+        detail: `${unevaluatedDraws.length} fällige offene Ziehung${unevaluatedDraws.length === 1 ? "" : "en"}`,
       },
       {
         label: "Letzter Gewinn",
