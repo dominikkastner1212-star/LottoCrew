@@ -19,8 +19,8 @@ export default async function TipsPage() {
         description="Eigene Eurojackpot-Tipps abgeben, Zufallszahlen nutzen und Spielscheine sauber nachhalten."
         action={
           <>
-            <LinkButton href="/druck" variant="secondary"><Printer className="size-4" />Druck</LinkButton>
-            {app.isAdmin ? <LinkButton href="#spielschein-upload" variant="secondary"><Upload className="size-4" />Upload</LinkButton> : null}
+            <LinkButton href="/druck" variant="secondary" className="w-full sm:w-auto"><Printer className="size-4" />Druckansicht</LinkButton>
+            {app.isAdmin ? <LinkButton href="#spielschein-upload" variant="secondary" className="w-full sm:w-auto"><Upload className="size-4" />Spielschein hochladen</LinkButton> : null}
           </>
         }
       />

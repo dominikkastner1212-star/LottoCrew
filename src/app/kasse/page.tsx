@@ -6,7 +6,7 @@ import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { PaymentsBoard } from "@/components/payments-board";
 import { WinConfetti } from "@/components/win-confetti";
 import { LinkButton } from "@/components/ui/button";
-import { Panel, Surface } from "@/components/ui/panel";
+import { EmptyState, Panel, Surface } from "@/components/ui/panel";
 import { requireAppContext } from "@/lib/auth-guard";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -28,14 +28,19 @@ export default async function KassePage() {
         description="Beiträge, offene Zahlungen und Gewinne an einem Ort - im bestehenden Zahlungsmodell."
         action={
           <>
-            <LinkButton href="/api/export/payments.csv" variant="secondary"><Download className="size-4" />Beiträge CSV</LinkButton>
-            <LinkButton href="/api/export/winnings.pdf" variant="secondary"><FileDown className="size-4" />Gewinne PDF</LinkButton>
+            <LinkButton href="/api/export/payments.csv" variant="secondary" className="w-full sm:w-auto"><Download className="size-4" />Beiträge CSV</LinkButton>
+            <LinkButton href="/api/export/winnings.pdf" variant="secondary" className="w-full sm:w-auto"><FileDown className="size-4" />Gewinne PDF</LinkButton>
           </>
         }
       />
 
       <Panel>
-        <h2 className="text-lg font-semibold text-slate-900">Beitragsübersicht</h2>
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">Beitragsübersicht</h2>
+            <p className="mt-1 text-sm text-slate-500">Monatsbeiträge bleiben vom Gewinnbereich getrennt.</p>
+          </div>
+        </div>
         <Stagger className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StaggerItem>
             <Surface>
@@ -70,6 +75,14 @@ export default async function KassePage() {
             </Surface>
           </StaggerItem>
         </Stagger>
+        {currentMonthPayments.length === 0 && app.isAdmin ? (
+          <EmptyState
+            className="mt-4"
+            icon={<Clock3 className="size-5" />}
+            title="Für diesen Monat fehlen Beiträge"
+            description="Erzeuge die Monatsbeiträge, damit offene Zahlungen für alle aktiven Mitglieder sichtbar werden."
+          />
+        ) : null}
       </Panel>
 
       <Panel className="mt-5">
@@ -123,7 +136,17 @@ export default async function KassePage() {
             </StaggerItem>
           ))}
           {app.winnings.length === 0 ? (
-            <Surface className="py-8 text-center text-sm text-slate-500 md:col-span-2 xl:col-span-4">Noch keine Gewinne vorhanden.</Surface>
+            <div className="md:col-span-2 xl:col-span-4">
+              <EmptyState
+                icon={<Trophy className="size-5" />}
+                title="Noch keine Gewinne erfasst"
+                description={
+                  app.isAdmin
+                    ? "Wenn eine Ziehung ausgewertet wurde und ein Gewinn feststeht, kannst du ihn hier erfassen."
+                    : "Sobald ein Gewinn erfasst wurde, erscheint er hier mit Betrag und Anteil pro Teilnehmer."
+                }
+              />
+            </div>
           ) : null}
         </Stagger>
       </Panel>

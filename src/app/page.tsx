@@ -12,7 +12,7 @@ import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { NumberRow } from "@/components/number-row";
 import { PaymentReminderButton } from "@/components/payment-reminder";
 import { StatusPill } from "@/components/status-pill";
-import { Panel, Surface } from "@/components/ui/panel";
+import { EmptyState, Panel, Surface } from "@/components/ui/panel";
 import { requireAppContext } from "@/lib/auth-guard";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -66,7 +66,7 @@ export default async function DashboardPage() {
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-semibold text-amber-600">{app.group?.name ?? "LottoCrew"}</p>
-              <h2 className="mt-2 max-w-xl text-3xl font-semibold tracking-normal text-slate-900 md:text-5xl">
+              <h2 className="mt-2 max-w-xl text-3xl font-semibold tracking-normal text-slate-900 sm:text-4xl md:text-5xl">
                 <CountUpCurrency value={nextDraw?.jackpot ?? 0} /> für eure nächste Eurojackpot-Runde.
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500">
@@ -77,7 +77,7 @@ export default async function DashboardPage() {
                 <span className="text-xs font-semibold text-slate-500">{app.totals.activeMembers} Mitspieler dabei</span>
               </div>
             </div>
-            <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-5">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5 lg:min-w-56">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Live-Fokus</p>
               <DrawCountdown date={nextDraw?.date ?? null} />
             </div>
@@ -105,7 +105,14 @@ export default async function DashboardPage() {
                 <p className="font-semibold text-amber-700">{formatCurrency(payment.amount)}</p>
               </Surface>
             ))}
-            {openPayments.length === 0 ? <Surface className="text-sm text-slate-500">Keine offenen Zahlungen.</Surface> : null}
+            {openPayments.length === 0 ? (
+              <EmptyState
+                icon={<CreditCard className="size-5" />}
+                title="Keine offenen Zahlungen"
+                description="Aktuell ist alles abgehakt. Sobald neue Monatsbeiträge erzeugt werden, erscheinen offene Zahlungen hier."
+                className="py-7"
+              />
+            ) : null}
           </div>
           <PaymentReminderButton openCount={openPayments.length} />
         </Panel>
@@ -136,7 +143,15 @@ export default async function DashboardPage() {
               </Surface>
             ))}
             {nextDrawTickets.length === 0 ? (
-              <Surface className="py-10 text-center text-sm text-slate-500">Noch keine Tipps für diese Ziehung vorhanden.</Surface>
+              <EmptyState
+                icon={<Target className="size-5" />}
+                title={nextDraw ? "Noch keine Tipps für diese Ziehung" : "Noch keine Ziehung angelegt"}
+                description={
+                  nextDraw
+                    ? "Sobald Tipps für diese Runde gespeichert sind, erscheinen sie hier mit Zahlen und Status."
+                    : "Lege zuerst eine Ziehung an. Danach können Tipps erfasst werden."
+                }
+              />
             ) : null}
           </div>
         </Panel>

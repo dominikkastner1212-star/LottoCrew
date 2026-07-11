@@ -17,7 +17,7 @@ const variants = {
 // touch-manipulation nimmt die iOS-Tap-Verzögerung, select-none verhindert
 // versehentliches Markieren beim Gedrückthalten.
 const base =
-  "inline-flex min-h-10 select-none touch-manipulation items-center justify-center gap-2 rounded-2xl px-4 text-sm font-semibold transition duration-150 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70";
+  "inline-flex min-h-11 select-none touch-manipulation items-center justify-center gap-2 rounded-2xl px-4 text-sm font-semibold transition duration-150 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70";
 
 export function Button({ className, variant = "primary", ...props }: ButtonProps) {
   return (

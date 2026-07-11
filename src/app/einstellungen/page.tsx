@@ -1,7 +1,7 @@
 import { Database, Shield, UserCircle, UsersRound } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { GroupSettingsForm, MemberRoleList, ProfileForm } from "@/components/admin-forms";
-import { Panel, Surface } from "@/components/ui/panel";
+import { EmptyState, Panel } from "@/components/ui/panel";
 import { requireAppContext } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +39,12 @@ export default async function SettingsPage() {
             {app.group ? (
               <MemberRoleList members={app.members} groupId={app.group.id} currentProfileId={app.profile?.id ?? null} isAdmin={app.isAdmin} />
             ) : (
-              <Surface className="text-sm text-slate-500">Erstelle zuerst eine Gruppe.</Surface>
+              <EmptyState
+                icon={<UsersRound className="size-5" />}
+                title="Noch keine Gruppe eingerichtet"
+                description="Erstelle zuerst eine Gruppe. Danach kannst du Mitglieder einladen und Rollen verwalten."
+                className="py-7"
+              />
             )}
           </div>
         </Panel>

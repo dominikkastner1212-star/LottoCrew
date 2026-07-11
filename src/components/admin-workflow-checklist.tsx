@@ -40,7 +40,7 @@ export function AdminWorkflowChecklist({ app }: { app: AppContext }) {
   const steps: ChecklistStep[] = [
     {
       title: "Ziehung angelegt?",
-      description: nextOpenDraw ? `Nächste offene Ziehung: ${formatDate(nextOpenDraw.date)}.` : "Lege die nächste Eurojackpot-Ziehung an.",
+      description: nextOpenDraw ? `Nächste offene Ziehung: ${formatDate(nextOpenDraw.date)}.` : "Lege die nächste Eurojackpot-Ziehung an, damit Tipps zugeordnet werden können.",
       href: "/ziehungen",
       done: Boolean(nextOpenDraw),
       urgent: !nextOpenDraw,
@@ -49,7 +49,7 @@ export function AdminWorkflowChecklist({ app }: { app: AppContext }) {
       title: "Tipps eingetragen?",
       description: nextOpenDraw
         ? `${nextDrawTickets.length} Tipp${nextDrawTickets.length === 1 ? "" : "s"} für diese Ziehung.`
-        : "Sobald eine Ziehung steht, können Tipps eingetragen werden.",
+        : "Lege zuerst eine Ziehung an. Danach können Tipps erfasst werden.",
       href: "/tipps",
       done: nextDrawTickets.length > 0,
       urgent: Boolean(nextOpenDraw) && nextDrawTickets.length === 0,
@@ -59,7 +59,7 @@ export function AdminWorkflowChecklist({ app }: { app: AppContext }) {
       description:
         currentMonthPayments.length > 0
           ? `${currentMonthPayments.length} Beitrag${currentMonthPayments.length === 1 ? "" : "e"} für diesen Monat vorhanden.`
-          : "Erzeuge die Beiträge für den aktuellen Monat.",
+          : "Für diesen Monat wurden noch keine Beiträge erzeugt.",
       href: "/kasse",
       done: activeMemberCount > 0 && currentMonthPayments.length >= activeMemberCount,
       urgent: activeMemberCount > 0 && currentMonthPayments.length === 0,

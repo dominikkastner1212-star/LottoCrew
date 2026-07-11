@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { StatusPill } from "@/components/status-pill";
-import { Panel, Surface } from "@/components/ui/panel";
+import { EmptyState, Panel, Surface } from "@/components/ui/panel";
 import { requireAppContext } from "@/lib/auth-guard";
 import { buildAssistantReport, type AssistantTask } from "@/lib/report-assistant";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
@@ -14,6 +14,19 @@ export const dynamic = "force-dynamic";
 const metricIcons = [CalendarClock, CreditCard, ClipboardList, Trophy, Sparkles];
 
 function TaskList({ tasks }: { tasks: AssistantTask[] }) {
+  const openTasks = tasks.filter((task) => !task.done);
+
+  if (openTasks.length === 0) {
+    return (
+      <EmptyState
+        icon={<CheckCircle2 className="size-5" />}
+        title="Keine offenen To-dos"
+        description="Alle aktuell erkennbaren Punkte sind erledigt. Der Bericht aktualisiert sich automatisch mit neuen Ziehungen, Tipps, Zahlungen und Gewinnen."
+        className="py-7"
+      />
+    );
+  }
+
   return (
     <div className="grid gap-3">
       {tasks.map((task) => (
@@ -59,10 +72,10 @@ export default async function ReportsPage() {
         description="Smarte Zusammenfassungen aus euren vorhandenen LottoCrew-Daten - regelbasiert und ohne externe KI."
       />
 
-      <Panel className="overflow-hidden">
+      <Panel className="overflow-hidden border-amber-200">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl">
-            <div className="flex items-center gap-3">
+            <div className="flex items-start gap-3">
               <span className="grid size-11 place-items-center rounded-2xl bg-amber-100 text-amber-700">
                 <Bot className="size-5" />
               </span>
@@ -71,11 +84,11 @@ export default async function ReportsPage() {
                 <h2 className="text-2xl font-semibold text-slate-900">Was steht als Nächstes an?</h2>
               </div>
             </div>
-            <p className="mt-5 text-base leading-7 text-slate-700">{report.summary}</p>
+            <p className="mt-5 text-base leading-7 text-slate-700 sm:text-lg">{report.summary}</p>
           </div>
-          <Surface className="lg:w-72">
+          <Surface className="bg-amber-50/70 lg:w-80">
             <p className="text-sm font-semibold text-slate-900">Wichtigste Aufgabe</p>
-            <p className="mt-2 text-2xl font-semibold text-amber-700">{app.isAdmin ? report.adminFocus : "Eigene Übersicht prüfen"}</p>
+            <p className="mt-2 text-xl font-semibold leading-7 text-amber-800 sm:text-2xl">{app.isAdmin ? report.adminFocus : "Eigene Übersicht prüfen"}</p>
             <p className="mt-2 text-sm leading-5 text-slate-500">
               {app.isAdmin ? "Aus offenen Datenpunkten berechnet." : "Fokus auf sichtbare Beiträge, Tipps und Ergebnisse."}
             </p>
@@ -104,7 +117,7 @@ export default async function ReportsPage() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-semibold text-slate-900">{app.isAdmin ? "Admin-To-dos" : "Meine Zusammenfassung"}</h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm leading-6 text-slate-500">
                 {app.isAdmin ? "Aus echten Gruppen-, Tipp-, Zahlungs- und Gewinn-Daten berechnet." : "Deine sichtbaren Punkte für die nächste Runde."}
               </p>
             </div>

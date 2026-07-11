@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { NumberRow } from "@/components/number-row";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { StatusPill } from "@/components/status-pill";
-import { Surface } from "@/components/ui/panel";
+import { EmptyState, Surface } from "@/components/ui/panel";
 import type { AppTicket } from "@/lib/app-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -116,9 +116,15 @@ export function TipsBoard({ tickets }: { tickets: AppTicket[] }) {
           </StaggerItem>
         ))}
         {filteredTickets.length === 0 ? (
-          <Surface className="py-10 text-center text-sm text-slate-500">
-            Keine Tipps für diese Auswahl vorhanden.
-          </Surface>
+          <EmptyState
+            icon={<Target className="size-5" />}
+            title={tickets.length === 0 ? "Noch keine Tipps vorhanden" : "Keine Tipps für diese Auswahl"}
+            description={
+              tickets.length === 0
+                ? "Lege zuerst eine Ziehung an. Danach können Tipps erfasst und hier gefiltert werden."
+                : "Passe Suche oder Statusfilter an, um wieder gespeicherte Tipps zu sehen."
+            }
+          />
         ) : null}
       </Stagger>
     </div>

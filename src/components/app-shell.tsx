@@ -46,7 +46,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="rounded-3xl border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm font-semibold text-amber-900">Admin-Fokus</p>
-            <p className="mt-1 text-xs leading-5 text-amber-800/80">Ziehungen, Tipps und Beitrage in wenigen Klicks pflegen.</p>
+            <p className="mt-1 text-xs leading-5 text-amber-800/80">Ziehungen, Tipps und Beiträge in wenigen Klicks pflegen.</p>
             <LinkButton href="/einstellungen" className="mt-4 w-full" variant="secondary">
               Aktionen
             </LinkButton>
@@ -54,7 +54,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </aside>
 
         <main className="relative flex min-w-0 flex-1 flex-col pb-24 lg:pb-4">
-          <header className="glass-panel sticky top-4 z-30 mb-5 flex items-center gap-3 rounded-[28px] px-4 py-3 lg:top-4">
+          <header className="glass-panel sticky top-3 z-30 mb-4 flex items-center gap-3 rounded-[24px] px-3 py-2.5 sm:px-4 sm:py-3 lg:top-4 lg:mb-5 lg:rounded-[28px]">
             <div className="lg:hidden">
               <AppLogo />
             </div>
@@ -120,12 +120,12 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="mb-5 flex flex-col gap-4 md:mb-6 md:flex-row md:items-end md:justify-between">
       <div>
-        <h1 className="text-3xl font-semibold tracking-normal text-slate-900 md:text-5xl">{title}</h1>
+        <h1 className="text-3xl font-semibold tracking-normal text-slate-900 sm:text-4xl md:text-5xl">{title}</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 md:text-base">{description}</p>
       </div>
-      {action ? <div className="flex shrink-0 gap-2">{action}</div> : null}
+      {action ? <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap md:justify-end">{action}</div> : null}
     </div>
   );
 }

@@ -1,9 +1,10 @@
+import { CalendarPlus } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { AdminDisclosure } from "@/components/admin-disclosure";
 import { CreateDrawForm, EvaluateDrawForm } from "@/components/admin-forms";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { StatusPill } from "@/components/status-pill";
-import { Panel, Surface } from "@/components/ui/panel";
+import { EmptyState, Panel, Surface } from "@/components/ui/panel";
 import { requireAppContext } from "@/lib/auth-guard";
 import type { AppDraw, AppTicket } from "@/lib/app-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -32,13 +33,13 @@ function getDrawCheckStatus(draw: AppDraw, tickets: AppTicket[]) {
 
 function getAdminHint(draw: AppDraw, drawTickets: AppTicket[]) {
   if (drawTickets.length === 0) {
-    return "Noch keine Tipps für diese Ziehung eingetragen.";
+    return "Lege oder sammle zuerst Tipps für diese Ziehung. Erst danach lohnt sich die Auswertung.";
   }
   if (draw.status !== "evaluated") {
-    return "Tipps sind vorhanden. Nach der Ziehung manuell auswerten.";
+    return "Tipps sind vorhanden. Nach der Ziehung kannst du diese Runde auswerten.";
   }
   if (drawTickets.some((ticket) => ticket.prizeRank && ticket.winnings <= 0)) {
-    return "Gewinnklasse erkannt. Betrag noch unter Kasse erfassen.";
+    return "Gewinnklasse erkannt. Trage den Betrag unter Kasse nach, sobald er feststeht.";
   }
   return "Diese Ziehung ist abgearbeitet.";
 }
@@ -91,7 +92,7 @@ export default async function DrawsPage() {
                   </p>
                 </div>
               ) : null}
-              <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-3 text-center">
+              <div className="mt-5 grid grid-cols-3 gap-2 rounded-2xl bg-white p-3 text-center">
                 <div>
                   <p className="text-lg font-semibold text-slate-900">{drawTickets.length}</p>
                   <p className="text-xs text-slate-500">Tipps</p>
@@ -111,7 +112,17 @@ export default async function DrawsPage() {
             );
           })}
           {app.draws.length === 0 ? (
-            <Surface className="py-10 text-center text-sm text-slate-500 md:col-span-2 xl:col-span-4">Noch keine Ziehungen vorhanden.</Surface>
+            <div className="md:col-span-2 xl:col-span-4">
+              <EmptyState
+                icon={<CalendarPlus className="size-5" />}
+                title="Noch keine Ziehung angelegt"
+                description={
+                  app.isAdmin
+                    ? "Lege zuerst die nächste Eurojackpot-Ziehung an. Danach können Tipps erfasst und später ausgewertet werden."
+                    : "Es ist noch keine Ziehung sichtbar. Sobald ein Admin eine Runde anlegt, erscheinen Datum, Jackpot und Tipps hier."
+                }
+              />
+            </div>
           ) : null}
         </Stagger>
       </Panel>

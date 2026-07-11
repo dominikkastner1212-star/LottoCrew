@@ -1,13 +1,13 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, CreditCard } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { updatePaymentStatus } from "@/app/actions";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { StatusPill } from "@/components/status-pill";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { Surface } from "@/components/ui/panel";
+import { EmptyState, Surface } from "@/components/ui/panel";
 import type { AppPayment } from "@/lib/app-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -87,9 +87,9 @@ export function PaymentsBoard({ payments, groupId, isAdmin }: { payments: AppPay
               <input type="hidden" name="group_id" value={groupId} />
               <input type="hidden" name="payment_id" value={payment.id} />
               <input type="hidden" name="status" value={payment.status === "paid" ? "open" : "paid"} />
-              <SubmitButton variant={payment.status === "paid" ? "secondary" : "primary"} className="min-w-36" pendingLabel="...">
+              <SubmitButton variant={payment.status === "paid" ? "secondary" : "primary"} className="w-full min-w-36 md:w-auto" pendingLabel="...">
                 <Check className="size-4" />
-                {payment.status === "paid" ? "Wieder offen" : "Als bezahlt markieren"}
+                {payment.status === "paid" ? "Zahlung wieder öffnen" : "Zahlung abhaken"}
               </SubmitButton>
             </form>
           ) : null}
@@ -97,9 +97,15 @@ export function PaymentsBoard({ payments, groupId, isAdmin }: { payments: AppPay
         </StaggerItem>
       ))}
       {filteredPayments.length === 0 ? (
-        <Surface className="py-10 text-center text-sm text-slate-500">
-          Keine Zahlungen für diese Auswahl vorhanden.
-        </Surface>
+        <EmptyState
+          icon={<CreditCard className="size-5" />}
+          title={payments.length === 0 ? "Noch keine Zahlungen vorhanden" : "Keine Zahlungen für diese Auswahl"}
+          description={
+            payments.length === 0
+              ? "Für diesen Monat wurden noch keine Beiträge erzeugt. Admins können Monatsbeiträge in der Kasse anlegen."
+              : "Ändere Status- oder Monatsfilter, um vorhandene Zahlungen wieder einzublenden."
+          }
+        />
       ) : null}
     </Stagger>
     </div>
