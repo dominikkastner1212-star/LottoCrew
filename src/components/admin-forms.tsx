@@ -14,11 +14,10 @@ import {
 import { AddMemberForm } from "@/components/add-member-form";
 import { MemberRow } from "@/components/member-row";
 import { ActionForm } from "@/components/ui/action-form";
+import { MonthlyPaymentsPreview } from "@/components/monthly-payments-preview";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Surface } from "@/components/ui/panel";
-import { calculateMonthlyContribution } from "@/lib/contribution-calculation";
 import type { AppContext, AppDraw, AppMember, AppTicket } from "@/lib/app-data";
-import { formatCurrency } from "@/lib/utils";
 
 const inputStyle =
   "mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 outline-none focus:border-amber-400";
@@ -266,15 +265,6 @@ export function CreatePaymentForm({ groupId, members, isAdmin }: { groupId: stri
   );
 }
 
-function getPreviousMonth(month: string) {
-  const [year, monthIndex] = month.split("-").map((part) => Number(part));
-  return new Date(Date.UTC(year, monthIndex - 2, 1)).toISOString().slice(0, 7);
-}
-
-function formatMonth(month: string) {
-  return new Intl.DateTimeFormat("de-DE", { month: "long", year: "numeric" }).format(new Date(`${month}-01`));
-}
-
 export function CreateMonthlyPaymentsForm({ app }: { app: AppContext }) {
   const groupId = app.group?.id ?? "";
   const isAdmin = app.isAdmin;
@@ -282,55 +272,23 @@ export function CreateMonthlyPaymentsForm({ app }: { app: AppContext }) {
     return null;
   }
 
-  const currentMonth = new Date().toISOString().slice(0, 7);
-  const previousMonth = getPreviousMonth(currentMonth);
-  const ticketFieldCount = app.tickets.filter((ticket) => ticket.date?.slice(0, 7) === currentMonth).length;
-  const previousMonthWinnings = app.winnings
-    .filter((winning) => winning.date.slice(0, 7) === previousMonth)
-    .reduce((sum, winning) => sum + winning.amount, 0);
-  const calculation = calculateMonthlyContribution({
-    activeMemberCount: app.totals.activeMembers,
-    ticketFieldCount,
-    ticketFieldPrice: app.group?.ticketFieldPrice ?? app.group?.monthlyAmount ?? 0,
-    previousMonthWinnings,
-  });
-  const maxPayment = Math.max(...calculation.paymentAmounts, calculation.contributionPerMember);
-  const contributionText =
-    calculation.paymentAmounts.length > 0 && maxPayment !== calculation.contributionPerMember
-      ? `${formatCurrency(calculation.contributionPerMember)} bis ${formatCurrency(maxPayment)} pro Mitglied`
-      : `${formatCurrency(calculation.contributionPerMember)} pro Mitglied`;
-
   return (
     <Surface>
       <ActionForm
         action={createMonthlyPayments}
         successMessage="Monatsbeiträge für aktive Mitglieder angelegt."
         confirm={{
-          question: "Beiträge mit automatischer Berechnung für diesen Monat anlegen?",
+          question: "Beiträge mit automatischer Berechnung für den ausgewählten Monat anlegen?",
           confirmLabel: "Ja, Beiträge anlegen",
         }}
       >
-        <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
-          <input type="hidden" name="group_id" value={groupId} />
-          <label className="block">
-            <span className={labelStyle}>Monat für alle aktiven Mitglieder</span>
-            <input name="due_month" type="month" required defaultValue={currentMonth} className={inputStyle} />
-          </label>
-          <SubmitButton pendingLabel="Wird angelegt...">Monatsbeiträge erzeugen</SubmitButton>
-        </div>
-        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-          <p className="font-semibold">Berechnung für {formatMonth(currentMonth)}</p>
-          <p className="mt-2">
-            Für {formatMonth(currentMonth)} wurden {calculation.ticketFieldCount} Kästchen gespielt. Bei{" "}
-            {formatCurrency(calculation.ticketFieldPrice)} pro Kästchen entstehen {formatCurrency(calculation.gameCost)} Spielkosten.
-            Im Vormonat wurden {formatCurrency(calculation.previousMonthWinnings)} Gewinne erfasst. Verteilt auf{" "}
-            {calculation.activeMemberCount} aktive Mitglieder ergibt das {contributionText}.
-          </p>
-          <dl className="mt-3 grid gap-2 sm:grid-cols-2">
-            <div><dt className="text-amber-800/80">Zu verteilender Betrag</dt><dd className="font-semibold">{formatCurrency(calculation.distributableAmount)}</dd></div>
-            <div><dt className="text-amber-800/80">Aktive Mitglieder</dt><dd className="font-semibold">{calculation.activeMemberCount}</dd></div>
-          </dl>
-        </div>
+        <MonthlyPaymentsPreview
+          groupId={groupId}
+          activeMemberCount={app.totals.activeMembers}
+          ticketFieldPrice={app.group?.ticketFieldPrice ?? app.group?.monthlyAmount ?? 0}
+          tickets={app.tickets.map((ticket) => ({ date: ticket.date }))}
+          winnings={app.winnings.map((winning) => ({ date: winning.date, amount: winning.amount }))}
+        />
       </ActionForm>
     </Surface>
   );
