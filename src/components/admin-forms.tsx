@@ -16,7 +16,9 @@ import { MemberRow } from "@/components/member-row";
 import { ActionForm } from "@/components/ui/action-form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Surface } from "@/components/ui/panel";
+import { calculateMonthlyContribution } from "@/lib/contribution-calculation";
 import type { AppContext, AppDraw, AppMember, AppTicket } from "@/lib/app-data";
+import { formatCurrency } from "@/lib/utils";
 
 const inputStyle =
   "mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 outline-none focus:border-amber-400";
@@ -46,9 +48,16 @@ export function CreateGroupForm() {
         <input name="name" className={inputStyle} defaultValue="AbteilungsJackpot" required />
       </label>
       <label className="block">
-        <span className={labelStyle}>Monatsbeitrag (EUR)</span>
+        <span className={labelStyle}>Kosten pro Kästchen (EUR)</span>
+        <input name="ticket_field_price" inputMode="decimal" className={inputStyle} defaultValue="2,50" required />
+      </label>
+      <label className="block">
+        <span className={labelStyle}>Standard-/Fallback-Beitrag (EUR)</span>
         <input name="monthly_amount" inputMode="decimal" className={inputStyle} defaultValue="24" required />
       </label>
+      <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+        Der Monatsbeitrag wird automatisch aus gespielten Kästchen, aktiven Mitgliedern und Gewinnen aus dem Vormonat berechnet.
+      </p>
       <SubmitButton className="w-full" pendingLabel="Wird erstellt...">Gruppe erstellen und mich als Admin setzen</SubmitButton>
     </ActionForm>
   );
@@ -67,7 +76,18 @@ export function GroupSettingsForm({ app }: { app: AppContext }) {
         <input name="name" className={inputStyle} defaultValue={app.group.name} disabled={!app.isAdmin} required />
       </label>
       <label className="block">
-        <span className={labelStyle}>Monatsbeitrag (EUR)</span>
+        <span className={labelStyle}>Kosten pro Kästchen (EUR)</span>
+        <input
+          name="ticket_field_price"
+          inputMode="decimal"
+          className={inputStyle}
+          defaultValue={app.group.ticketFieldPrice.toFixed(2).replace(".", ",")}
+          disabled={!app.isAdmin}
+          required
+        />
+      </label>
+      <label className="block">
+        <span className={labelStyle}>Standard-/Fallback-Beitrag (EUR)</span>
         <input
           name="monthly_amount"
           inputMode="decimal"
@@ -77,6 +97,9 @@ export function GroupSettingsForm({ app }: { app: AppContext }) {
           required
         />
       </label>
+      <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+        Der Monatsbeitrag wird automatisch aus gespielten Kästchen, aktiven Mitgliedern und Gewinnen aus dem Vormonat berechnet.
+      </p>
       <SubmitButton className="w-full" disabled={!app.isAdmin} pendingLabel="Wird gespeichert...">Gruppe speichern</SubmitButton>
       {app.group.inviteCode ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
@@ -243,18 +266,47 @@ export function CreatePaymentForm({ groupId, members, isAdmin }: { groupId: stri
   );
 }
 
-export function CreateMonthlyPaymentsForm({ groupId, isAdmin }: { groupId: string; isAdmin: boolean }) {
+function getPreviousMonth(month: string) {
+  const [year, monthIndex] = month.split("-").map((part) => Number(part));
+  return new Date(Date.UTC(year, monthIndex - 2, 1)).toISOString().slice(0, 7);
+}
+
+function formatMonth(month: string) {
+  return new Intl.DateTimeFormat("de-DE", { month: "long", year: "numeric" }).format(new Date(`${month}-01`));
+}
+
+export function CreateMonthlyPaymentsForm({ app }: { app: AppContext }) {
+  const groupId = app.group?.id ?? "";
+  const isAdmin = app.isAdmin;
   if (!isAdmin) {
     return null;
   }
+
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const previousMonth = getPreviousMonth(currentMonth);
+  const ticketFieldCount = app.tickets.filter((ticket) => ticket.date?.slice(0, 7) === currentMonth).length;
+  const previousMonthWinnings = app.winnings
+    .filter((winning) => winning.date.slice(0, 7) === previousMonth)
+    .reduce((sum, winning) => sum + winning.amount, 0);
+  const calculation = calculateMonthlyContribution({
+    activeMemberCount: app.totals.activeMembers,
+    ticketFieldCount,
+    ticketFieldPrice: app.group?.ticketFieldPrice ?? app.group?.monthlyAmount ?? 0,
+    previousMonthWinnings,
+  });
+  const maxPayment = Math.max(...calculation.paymentAmounts, calculation.contributionPerMember);
+  const contributionText =
+    calculation.paymentAmounts.length > 0 && maxPayment !== calculation.contributionPerMember
+      ? `${formatCurrency(calculation.contributionPerMember)} bis ${formatCurrency(maxPayment)} pro Mitglied`
+      : `${formatCurrency(calculation.contributionPerMember)} pro Mitglied`;
 
   return (
     <Surface>
       <ActionForm
         action={createMonthlyPayments}
-        successMessage="Monatsbeiträge für alle aktiven Mitglieder angelegt."
+        successMessage="Monatsbeiträge für aktive Mitglieder angelegt."
         confirm={{
-          question: "Beiträge für alle aktiven Mitglieder in diesem Monat anlegen?",
+          question: "Beiträge mit automatischer Berechnung für diesen Monat anlegen?",
           confirmLabel: "Ja, Beiträge anlegen",
         }}
       >
@@ -262,9 +314,22 @@ export function CreateMonthlyPaymentsForm({ groupId, isAdmin }: { groupId: strin
           <input type="hidden" name="group_id" value={groupId} />
           <label className="block">
             <span className={labelStyle}>Monat für alle aktiven Mitglieder</span>
-            <input name="due_month" type="month" required className={inputStyle} />
+            <input name="due_month" type="month" required defaultValue={currentMonth} className={inputStyle} />
           </label>
           <SubmitButton pendingLabel="Wird angelegt...">Monatsbeiträge erzeugen</SubmitButton>
+        </div>
+        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+          <p className="font-semibold">Berechnung für {formatMonth(currentMonth)}</p>
+          <p className="mt-2">
+            Für {formatMonth(currentMonth)} wurden {calculation.ticketFieldCount} Kästchen gespielt. Bei{" "}
+            {formatCurrency(calculation.ticketFieldPrice)} pro Kästchen entstehen {formatCurrency(calculation.gameCost)} Spielkosten.
+            Im Vormonat wurden {formatCurrency(calculation.previousMonthWinnings)} Gewinne erfasst. Verteilt auf{" "}
+            {calculation.activeMemberCount} aktive Mitglieder ergibt das {contributionText}.
+          </p>
+          <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+            <div><dt className="text-amber-800/80">Zu verteilender Betrag</dt><dd className="font-semibold">{formatCurrency(calculation.distributableAmount)}</dd></div>
+            <div><dt className="text-amber-800/80">Aktive Mitglieder</dt><dd className="font-semibold">{calculation.activeMemberCount}</dd></div>
+          </dl>
         </div>
       </ActionForm>
     </Surface>

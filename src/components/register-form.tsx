@@ -180,7 +180,7 @@ export function RegisterForm() {
             </div>
           </label>
           <label className="block">
-            <span className="text-sm font-semibold text-slate-500">Beitrag</span>
+            <span className="text-sm font-semibold text-slate-500">Fallback-Beitrag</span>
             <input
               required
               inputMode="decimal"

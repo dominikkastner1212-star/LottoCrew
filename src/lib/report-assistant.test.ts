@@ -7,7 +7,7 @@ function baseApp(overrides: Partial<AppContext> = {}): AppContext {
   return {
     userId: "user-1",
     profile: { id: "profile-1", email: "member@example.com", displayName: "Mitglied", avatarUrl: null },
-    group: { id: "group-1", name: "LottoCrew", monthlyAmount: 12, currency: "EUR", inviteCode: "ABC123" },
+    group: { id: "group-1", name: "LottoCrew", monthlyAmount: 12, ticketFieldPrice: 2.5, currency: "EUR", inviteCode: "ABC123" },
     membership: { id: "member-1", role: "admin", status: "active", groupId: "group-1", monthlyAmount: 12 },
     isAdmin: true,
     members: [

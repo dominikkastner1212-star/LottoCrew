@@ -90,7 +90,7 @@ export default async function KassePage() {
         {app.group && app.isAdmin ? (
           <div className="mt-4 grid gap-3">
             <AdminDisclosure label="Monatsbeiträge erzeugen">
-              <CreateMonthlyPaymentsForm groupId={app.group.id} isAdmin={app.isAdmin} />
+              <CreateMonthlyPaymentsForm app={app} />
             </AdminDisclosure>
             <AdminDisclosure label="Einzelne Zahlung anlegen">
               <CreatePaymentForm groupId={app.group.id} members={app.members} isAdmin={app.isAdmin} />

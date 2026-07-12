@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getDefaultDisplayName } from "@/lib/app-data";
+import { buildMonthlyPaymentRows, calculateMonthlyContribution } from "@/lib/contribution-calculation";
 import {
   evaluateTicketsForDraw,
   fetchEurojackpotResult,
@@ -195,6 +196,7 @@ export async function createInitialGroup(formData: FormData) {
   const { supabase, userId, email } = await getUserId();
   const name = String(formData.get("name") ?? "AbteilungsJackpot").trim();
   const monthlyAmount = Number(String(formData.get("monthly_amount") ?? "24").replace(",", "."));
+  const ticketFieldPrice = parseAmount(formData.get("ticket_field_price"), 2.5);
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "abteilungsjackpot";
 
   await supabase
@@ -213,6 +215,7 @@ export async function createInitialGroup(formData: FormData) {
       slug: `${slug}-${userId.slice(0, 8)}`,
       invite_code: generateInviteCode(),
       monthly_amount: Number.isFinite(monthlyAmount) ? monthlyAmount : 24,
+      ticket_field_price: ticketFieldPrice,
       created_by: userId,
     })
     .select("id")
@@ -239,6 +242,7 @@ export async function updateGroupSettings(formData: FormData) {
   const groupId = String(formData.get("group_id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
   const monthlyAmount = Number(String(formData.get("monthly_amount") ?? "0").replace(",", "."));
+  const ticketFieldPrice = parseAmount(formData.get("ticket_field_price"), 2.5);
 
   await assertAdmin(supabase, userId, groupId);
 
@@ -247,6 +251,7 @@ export async function updateGroupSettings(formData: FormData) {
     .update({
       name,
       monthly_amount: Number.isFinite(monthlyAmount) ? monthlyAmount : 0,
+      ticket_field_price: ticketFieldPrice,
       updated_at: new Date().toISOString(),
     })
     .eq("id", groupId)
@@ -703,32 +708,74 @@ export async function createMonthlyPayments(formData: FormData) {
     throw new Error("Monat ist erforderlich.");
   }
 
+  const [year, month] = dueMonth.split("-").map((part) => Number(part));
+  if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) {
+    throw new Error("Monat ist ungültig.");
+  }
+
+  const monthStart = `${dueMonth}-01`;
+  const nextMonth = new Date(Date.UTC(year, month, 1));
+  const nextMonthStart = nextMonth.toISOString().slice(0, 10);
+  const previousMonthStartDate = new Date(Date.UTC(year, month - 2, 1));
+  const previousMonthStart = previousMonthStartDate.toISOString().slice(0, 10);
+
   const { data: group } = await supabase
     .from("groups")
-    .select("monthly_amount")
+    .select("monthly_amount,ticket_field_price")
     .eq("id", groupId)
     .single()
     .throwOnError();
 
   const { data: members } = await supabase
     .from("group_members")
-    .select("id,monthly_amount")
+    .select("id")
     .eq("group_id", groupId)
     .eq("status", "active")
+    .order("joined_at", { ascending: true })
     .throwOnError();
 
-  const paymentRows = (members ?? []).map((member) => ({
-    group_id: groupId,
-    member_id: member.id,
-    due_month: `${dueMonth}-01`,
-    amount: member.monthly_amount ?? group?.monthly_amount ?? 24,
-    status: "open",
-  }));
+  const { data: tickets } = await supabase
+    .from("tickets")
+    .select("id,draws!inner(draw_date)")
+    .eq("group_id", groupId)
+    .gte("draws.draw_date", monthStart)
+    .lt("draws.draw_date", nextMonthStart)
+    .throwOnError();
+
+  const { data: winnings } = await supabase
+    .from("winnings")
+    .select("amount,recorded_at")
+    .eq("group_id", groupId)
+    .gte("recorded_at", previousMonthStart)
+    .lt("recorded_at", monthStart)
+    .throwOnError();
+
+  const { data: existingPayments } = await supabase
+    .from("payments")
+    .select("member_id")
+    .eq("group_id", groupId)
+    .eq("due_month", monthStart)
+    .throwOnError();
+
+  const calculation = calculateMonthlyContribution({
+    activeMemberCount: members?.length ?? 0,
+    ticketFieldCount: tickets?.length ?? 0,
+    ticketFieldPrice: Number(group?.ticket_field_price ?? group?.monthly_amount ?? 0),
+    previousMonthWinnings: (winnings ?? []).reduce((sum, winning) => sum + Number(winning.amount ?? 0), 0),
+  });
+
+  const paymentRows = buildMonthlyPaymentRows({
+    groupId,
+    dueMonth,
+    members: members ?? [],
+    existingPayments: existingPayments ?? [],
+    paymentAmounts: calculation.paymentAmounts,
+  });
 
   if (paymentRows.length) {
     await supabase
       .from("payments")
-      .upsert(paymentRows, { onConflict: "member_id,due_month" })
+      .insert(paymentRows)
       .throwOnError();
   }
 

@@ -13,6 +13,7 @@ export type AppGroup = {
   id: string;
   name: string;
   monthlyAmount: number;
+  ticketFieldPrice: number;
   currency: string;
   inviteCode: string;
 };
@@ -357,7 +358,7 @@ export async function getAppContext(): Promise<AppContext> {
 
   const { data: membershipRow } = await supabase
     .from("group_members")
-    .select("id,group_id,role,status,monthly_amount,groups(id,name,monthly_amount,currency,invite_code)")
+    .select("id,group_id,role,status,monthly_amount,groups(id,name,monthly_amount,ticket_field_price,currency,invite_code)")
     .eq("profile_id", user.id)
     .eq("status", "active")
     .limit(1)
@@ -376,6 +377,7 @@ export async function getAppContext(): Promise<AppContext> {
     id: membershipRow.group_id,
     name: rawGroup?.name ?? "LottoCrew",
     monthlyAmount: toNumber(rawGroup?.monthly_amount),
+    ticketFieldPrice: toNumber(rawGroup?.ticket_field_price ?? 2.5),
     currency: rawGroup?.currency ?? "EUR",
     inviteCode: rawGroup?.invite_code ?? "",
   };
