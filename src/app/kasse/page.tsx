@@ -13,7 +13,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export default async function KassePage() {
-  const app = await requireAppContext();
+  const app = await requireAppContext({ includeTicketImageUrls: false });
   const openPayments = app.payments.filter((payment) => payment.status === "open");
   const paidPayments = app.payments.filter((payment) => payment.status === "paid");
   const openPaymentAmount = openPayments.reduce((sum, payment) => sum + payment.amount, 0);

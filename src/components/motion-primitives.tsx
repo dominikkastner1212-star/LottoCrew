@@ -15,7 +15,7 @@ export function Stagger({ children, className }: { children: ReactNode; classNam
       variants={{
         hidden: {},
         visible: {
-          transition: { staggerChildren: reduce ? 0 : 0.07 },
+          transition: { staggerChildren: reduce ? 0 : 0.03 },
         },
       }}
     >
@@ -36,11 +36,11 @@ export function StaggerItem({
     <motion.div
       className={className}
       variants={{
-        hidden: { opacity: 0, y: reduce ? 0 : 14 },
+        hidden: { opacity: 0, y: reduce ? 0 : 6 },
         visible: {
           opacity: 1,
           y: 0,
-          transition: { type: "spring", stiffness: 260, damping: 26 },
+          transition: { duration: 0.16, ease: "easeOut" },
         },
       }}
       {...props}

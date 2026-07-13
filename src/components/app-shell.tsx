@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { signOut } from "@/app/actions";
 import { AppLogo } from "@/components/app-logo";
 import { InstallHint } from "@/components/install-hint";
@@ -14,9 +13,15 @@ import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const [pendingNavigation, setPendingNavigation] = useState<{ href: string; from: string } | null>(null);
+
+  const navigationPending =
+    pendingNavigation !== null && pendingNavigation.from === pathname && pendingNavigation.href !== pathname;
+  const pendingHref = navigationPending ? pendingNavigation.href : null;
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      {navigationPending ? <div className="fixed inset-x-0 top-0 z-50 h-1 bg-amber-300" /> : null}
       <div className="soft-grid pointer-events-none absolute inset-x-0 top-0 h-72 opacity-60" />
       <div className="mx-auto flex min-h-screen w-full max-w-[1540px] gap-5 px-4 py-4 sm:px-5 lg:px-6">
         <aside className="glass-panel sticky top-4 hidden h-[calc(100vh-2rem)] w-72 shrink-0 flex-col rounded-[32px] p-4 lg:flex">
@@ -31,9 +36,15 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch
+                  onClick={() => {
+                    if (item.href !== pathname) {
+                      setPendingNavigation({ href: item.href, from: pathname });
+                    }
+                  }}
                   className={cn(
                     "group flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-semibold transition",
-                    active
+                    active || pendingHref === item.href
                       ? "bg-amber-100 text-slate-900 shadow-[0_10px_28px_rgba(232,166,0,.14)]"
                       : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
                   )}
@@ -67,7 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </header>
           <InstallHint />
-          <PageTransition pathname={pathname}>{children}</PageTransition>
+          <div>{children}</div>
         </main>
       </div>
 
@@ -82,25 +93,23 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link
               key={item.href}
               href={item.href}
+              prefetch
+              onClick={() => {
+                if (item.href !== pathname) {
+                  setPendingNavigation({ href: item.href, from: pathname });
+                }
+              }}
               className={cn(
                 "relative flex min-h-14 min-w-20 select-none touch-manipulation flex-col items-center justify-center gap-1 rounded-2xl text-[0.68rem] font-semibold transition active:scale-95",
-                active ? "text-slate-900" : "text-slate-500",
+                active || pendingHref === item.href ? "text-slate-900" : "text-slate-500",
               )}
             >
-              {active ? (
-                <motion.span
-                  layoutId="dock-active"
-                  className="absolute inset-0 rounded-2xl bg-amber-100"
-                  transition={{ type: "spring", stiffness: 420, damping: 32 }}
-                />
+              {active || pendingHref === item.href ? (
+                <span className="absolute inset-0 rounded-2xl bg-amber-100" />
               ) : null}
-              <motion.span
-                className="relative"
-                animate={{ scale: active ? 1.18 : 1, y: active ? -1 : 0 }}
-                transition={{ type: "spring", stiffness: 420, damping: 20 }}
-              >
+              <span className={cn("relative transition-transform", active ? "-translate-y-px scale-110" : "")}>
                 <Icon className={cn("size-4", active ? "text-amber-600" : "")} />
-              </motion.span>
+              </span>
               <span className="relative">{item.label}</span>
             </Link>
           );
@@ -109,7 +118,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
 export function PageHeader({
   title,
   description,
@@ -129,7 +137,6 @@ export function PageHeader({
     </div>
   );
 }
-
 export function QuickActionRail() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -149,23 +156,5 @@ export function QuickActionRail() {
         );
       })}
     </div>
-  );
-}
-
-function PageTransition({ pathname, children }: { pathname: string; children: ReactNode }) {
-  const reduce = useReducedMotion();
-
-  return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={pathname}
-        initial={reduce ? { opacity: 0 } : { opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
-        transition={{ duration: 0.28, ease: [0.22, 0.8, 0.2, 1] }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
   );
 }

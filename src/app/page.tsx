@@ -19,7 +19,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const app = await requireAppContext();
+  const app = await requireAppContext({ includeTicketImageUrls: false });
   const openPayments = app.payments.filter((payment) => payment.status === "open");
   const today = new Date();
   today.setHours(0, 0, 0, 0);

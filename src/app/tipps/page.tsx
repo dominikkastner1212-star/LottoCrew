@@ -10,7 +10,7 @@ import { requireAppContext } from "@/lib/auth-guard";
 export const dynamic = "force-dynamic";
 
 export default async function TipsPage() {
-  const app = await requireAppContext();
+  const app = await requireAppContext({ includePayments: false, includeWinnings: false });
 
   return (
     <AppShell>

@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { getAppContext } from "@/lib/app-data";
+import { getAppContext, type AppContextOptions } from "@/lib/app-data";
 import { createClient } from "@/lib/supabase/server";
 
-export async function requireAppContext() {
-  const app = await getAppContext();
+export async function requireAppContext(options?: AppContextOptions) {
+  const app = await getAppContext(options);
 
   if (!app.userId) {
     redirect("/login");

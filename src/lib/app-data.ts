@@ -114,6 +114,14 @@ export type AppContext = {
   };
 };
 
+export type AppContextOptions = {
+  includeDraws?: boolean;
+  includeTickets?: boolean;
+  includeTicketImageUrls?: boolean;
+  includePayments?: boolean;
+  includeWinnings?: boolean;
+};
+
 export function toNumber(value: unknown) {
   return typeof value === "number" ? value : Number(value ?? 0);
 }
@@ -317,7 +325,12 @@ export async function ensureUserWorkspace(
     .throwOnError();
 }
 
-export async function getAppContext(): Promise<AppContext> {
+export async function getAppContext(options: AppContextOptions = {}): Promise<AppContext> {
+  const includeDraws = options.includeDraws ?? true;
+  const includeTickets = options.includeTickets ?? true;
+  const includeTicketImageUrls = options.includeTicketImageUrls ?? true;
+  const includePayments = options.includePayments ?? true;
+  const includeWinnings = options.includeWinnings ?? true;
   const empty: AppContext = {
     userId: null,
     profile: null,
@@ -397,26 +410,34 @@ export async function getAppContext(): Promise<AppContext> {
       .select("id,profile_id,role,status,monthly_amount,joined_at,profiles(id,email,display_name)")
       .eq("group_id", group.id)
       .order("joined_at", { ascending: true }),
-    supabase
-      .from("draws")
-      .select("id,draw_date,jackpot_amount,status,result_numbers,result_extra_numbers,closed_at,closed_by")
-      .eq("group_id", group.id)
-      .order("draw_date", { ascending: false }),
-    supabase
-      .from("tickets")
-      .select("id,label,status,stake_amount,draw_id,created_by,main_matches,euro_matches,prize_rank,ticket_image_path,draws(draw_date)")
-      .eq("group_id", group.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("payments")
-      .select("id,member_id,due_month,amount,status,paid_at")
-      .eq("group_id", group.id)
-      .order("due_month", { ascending: false }),
-    supabase
-      .from("winnings")
-      .select("id,amount,prize_rank,recorded_at,ticket_id")
-      .eq("group_id", group.id)
-      .order("recorded_at", { ascending: false }),
+    includeDraws
+      ? supabase
+          .from("draws")
+          .select("id,draw_date,jackpot_amount,status,result_numbers,result_extra_numbers,closed_at,closed_by")
+          .eq("group_id", group.id)
+          .order("draw_date", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    includeTickets
+      ? supabase
+          .from("tickets")
+          .select("id,label,status,stake_amount,draw_id,created_by,main_matches,euro_matches,prize_rank,ticket_image_path,draws(draw_date)")
+          .eq("group_id", group.id)
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    includePayments
+      ? supabase
+          .from("payments")
+          .select("id,member_id,due_month,amount,status,paid_at")
+          .eq("group_id", group.id)
+          .order("due_month", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    includeWinnings
+      ? supabase
+          .from("winnings")
+          .select("id,amount,prize_rank,recorded_at,ticket_id")
+          .eq("group_id", group.id)
+          .order("recorded_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
   ]);
 
   const memberRows = membersResult.data ?? [];
@@ -485,7 +506,7 @@ export async function getAppContext(): Promise<AppContext> {
     const imagePath = ticket.ticket_image_path ?? null;
     let imageUrl: string | null = null;
 
-    if (imagePath) {
+    if (imagePath && includeTicketImageUrls) {
       const { data: signed } = await supabase.storage.from("ticket-documents").createSignedUrl(imagePath, 60 * 30);
       imageUrl = signed?.signedUrl ?? null;
     }

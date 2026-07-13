@@ -49,7 +49,7 @@ function getAdminHint(draw: AppDraw, drawTickets: AppTicket[]) {
 }
 
 export default async function DrawsPage() {
-  const app = await requireAppContext();
+  const app = await requireAppContext({ includeTicketImageUrls: false, includeWinnings: false });
 
   return (
     <AppShell>

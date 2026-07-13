@@ -61,7 +61,7 @@ function TaskList({ tasks }: { tasks: AssistantTask[] }) {
 }
 
 export default async function ReportsPage() {
-  const app = await requireAppContext();
+  const app = await requireAppContext({ includeTicketImageUrls: false });
   const report = buildAssistantReport(app);
   const memberOpenAmount = report.memberOpenPayments.reduce((sum, payment) => sum + payment.amount, 0);
 

@@ -7,7 +7,12 @@ import { requireAppContext } from "@/lib/auth-guard";
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const app = await requireAppContext();
+  const app = await requireAppContext({
+    includeDraws: false,
+    includeTickets: false,
+    includePayments: false,
+    includeWinnings: false,
+  });
 
   return (
     <AppShell>
