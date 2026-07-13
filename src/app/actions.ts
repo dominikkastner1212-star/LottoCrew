@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getDefaultDisplayName } from "@/lib/app-data";
 import { buildMonthlyPaymentRows, calculateMonthlyContribution } from "@/lib/contribution-calculation";
+import { buildDrawCompletion, canCloseDrawForRole } from "@/lib/draw-completion";
 import {
   evaluateTicketsForDraw,
   fetchEurojackpotResult,
@@ -664,6 +665,95 @@ export async function createMemberTicket(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/tipps");
   revalidatePath("/ziehungen");
+}
+
+export async function closeDraw(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const drawId = String(formData.get("draw_id") ?? "");
+
+  await assertAdmin(supabase, userId, groupId);
+
+  const { data: draw } = await supabase
+    .from("draws")
+    .select("id,draw_date,status,closed_at")
+    .eq("id", drawId)
+    .eq("group_id", groupId)
+    .single()
+    .throwOnError();
+
+  const drawMonth = String(draw.draw_date).slice(0, 7);
+  const { data: members } = await supabase
+    .from("group_members")
+    .select("id")
+    .eq("group_id", groupId)
+    .eq("status", "active")
+    .throwOnError();
+
+  const { data: tickets } = await supabase
+    .from("tickets")
+    .select("id,status,prize_rank,ticket_image_path")
+    .eq("group_id", groupId)
+    .eq("draw_id", drawId)
+    .throwOnError();
+
+  const ticketIds = (tickets ?? []).map((ticket) => ticket.id);
+  const { data: ticketWinnings } = ticketIds.length
+    ? await supabase.from("winnings").select("ticket_id,amount").in("ticket_id", ticketIds).throwOnError()
+    : { data: [] };
+  const winningsByTicket = new Map<string, number>();
+  (ticketWinnings ?? []).forEach((winning) => {
+    winningsByTicket.set(winning.ticket_id, (winningsByTicket.get(winning.ticket_id) ?? 0) + Number(winning.amount ?? 0));
+  });
+
+  const { data: payments } = await supabase
+    .from("payments")
+    .select("due_month,status")
+    .eq("group_id", groupId)
+    .gte("due_month", `${drawMonth}-01`)
+    .lt("due_month", new Date(Date.UTC(Number(drawMonth.slice(0, 4)), Number(drawMonth.slice(5, 7)), 1)).toISOString().slice(0, 10))
+    .throwOnError();
+
+  const completion = buildDrawCompletion({
+    draw: {
+      id: draw.id,
+      date: draw.draw_date,
+      status: draw.status,
+      closedAt: draw.closed_at,
+    },
+    tickets: (tickets ?? []).map((ticket) => ({
+      drawId,
+      status: ticket.status,
+      prizeRank: ticket.prize_rank ?? null,
+      winnings: winningsByTicket.get(ticket.id) ?? 0,
+      imagePath: ticket.ticket_image_path ?? null,
+    })),
+    payments: (payments ?? []).map((payment) => ({
+      month: payment.due_month,
+      status: payment.status === "paid" ? "paid" : "open",
+    })),
+    activeMemberCount: members?.length ?? 0,
+  });
+
+  const permission = canCloseDrawForRole({ isAdmin: true, completion });
+  if (!permission.allowed) {
+    throw new Error(permission.reason);
+  }
+
+  await supabase
+    .from("draws")
+    .update({
+      closed_at: new Date().toISOString(),
+      closed_by: userId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", drawId)
+    .eq("group_id", groupId)
+    .throwOnError();
+
+  revalidatePath("/");
+  revalidatePath("/ziehungen");
+  revalidatePath("/berichte");
 }
 
 export async function createPayment(formData: FormData) {

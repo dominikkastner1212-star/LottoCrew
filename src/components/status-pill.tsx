@@ -19,6 +19,7 @@ const styles = {
   amount_open: "border-amber-200 bg-amber-50 text-amber-800",
   no_win: "border-slate-200 bg-slate-50 text-slate-600",
   unchecked: "border-slate-200 bg-white text-slate-600",
+  closed: "border-emerald-200 bg-emerald-50 text-emerald-700",
 };
 
 const labels: Record<keyof typeof styles, string> = {
@@ -39,6 +40,7 @@ const labels: Record<keyof typeof styles, string> = {
   amount_open: "Gewinnbetrag offen",
   no_win: "kein Gewinn",
   unchecked: "noch nicht geprüft",
+  closed: "abgeschlossen",
 };
 
 export function StatusPill({ status, className }: { status: keyof typeof styles; className?: string }) {
@@ -47,7 +49,7 @@ export function StatusPill({ status, className }: { status: keyof typeof styles;
     Icon = AlertCircle;
   } else if (status === "no_win") {
     Icon = MinusCircle;
-  } else if (status === "bezahlt" || status === "paid" || status === "ausgewertet" || status === "evaluated") {
+  } else if (status === "bezahlt" || status === "paid" || status === "ausgewertet" || status === "evaluated" || status === "closed") {
     Icon = CheckCircle2;
   } else if (status === "offen" || status === "open") {
     Icon = XCircle;

@@ -36,7 +36,7 @@ describe("report assistant", () => {
   it("builds a readable summary from existing draw, ticket, payment and winning data", () => {
     const app = baseApp({
       draws: [
-        { id: "draw-1", date: "2026-07-17", jackpot: 12000000, status: "submitted", resultNumbers: [], resultEuroNumbers: [] },
+        { id: "draw-1", date: "2026-07-17", jackpot: 12000000, status: "submitted", resultNumbers: [], resultEuroNumbers: [], closedAt: null, closedBy: null },
       ],
       tickets: [
         {
@@ -74,7 +74,7 @@ describe("report assistant", () => {
 
   it("flags admin tasks for missing tickets and open win amounts", () => {
     const app = baseApp({
-      draws: [{ id: "draw-1", date: "2026-07-11", jackpot: 1000000, status: "submitted", resultNumbers: [], resultEuroNumbers: [] }],
+      draws: [{ id: "draw-1", date: "2026-07-11", jackpot: 1000000, status: "submitted", resultNumbers: [], resultEuroNumbers: [], closedAt: null, closedBy: null }],
       tickets: [
         {
           id: "ticket-1",

@@ -76,6 +76,7 @@ export function buildAssistantReport(app: AppContext, today = new Date()): Assis
     : [];
   const submittedDraws = app.draws.filter((draw) => draw.status === "submitted");
   const unevaluatedDraws = app.draws.filter((draw) => draw.status !== "evaluated" && sameOrBefore(draw.date, today));
+  const unclosedPastDraws = app.draws.filter((draw) => !draw.closedAt && draw.status === "evaluated" && sameOrBefore(draw.date, today));
   const openAmountTickets = app.tickets.filter((ticket) => ticket.prizeRank && ticket.winnings <= 0);
   const lastEvaluatedDraw = app.draws.find((draw) => draw.status === "evaluated") ?? null;
   const lastWinning = app.winnings[0] ?? null;
@@ -142,6 +143,16 @@ export function buildAssistantReport(app: AppContext, today = new Date()): Assis
       href: "/kasse",
       done: openAmountTickets.length === 0,
       urgent: openAmountTickets.length > 0,
+    },
+    {
+      title: "Runde abschließen",
+      detail:
+        unclosedPastDraws.length === 0
+          ? "Keine ausgewertete Runde wartet auf Abschluss."
+          : `${plural(unclosedPastDraws.length, "ausgewertete Runde", "ausgewertete Runden")} noch nicht abgeschlossen.`,
+      href: "/ziehungen",
+      done: unclosedPastDraws.length === 0,
+      urgent: unclosedPastDraws.length > 0,
     },
   ];
 

@@ -44,6 +44,8 @@ export type AppDraw = {
   status: string;
   resultNumbers: number[];
   resultEuroNumbers: number[];
+  closedAt: string | null;
+  closedBy: string | null;
 };
 
 export type AppTicket = {
@@ -397,7 +399,7 @@ export async function getAppContext(): Promise<AppContext> {
       .order("joined_at", { ascending: true }),
     supabase
       .from("draws")
-      .select("id,draw_date,jackpot_amount,status,result_numbers,result_extra_numbers")
+      .select("id,draw_date,jackpot_amount,status,result_numbers,result_extra_numbers,closed_at,closed_by")
       .eq("group_id", group.id)
       .order("draw_date", { ascending: false }),
     supabase
@@ -439,6 +441,8 @@ export async function getAppContext(): Promise<AppContext> {
     status: draw.status,
     resultNumbers: Array.isArray(draw.result_numbers) ? draw.result_numbers.map(Number) : [],
     resultEuroNumbers: Array.isArray(draw.result_extra_numbers) ? draw.result_extra_numbers.map(Number) : [],
+    closedAt: draw.closed_at ?? null,
+    closedBy: draw.closed_by ?? null,
   }));
 
   const ticketRows = ticketsResult.data ?? [];

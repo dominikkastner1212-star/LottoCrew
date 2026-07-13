@@ -30,6 +30,7 @@ export default async function DashboardPage() {
   const nextDraw = nextOpenDraw ?? app.draws[0];
   const nextDrawTickets = nextDraw ? app.tickets.filter((ticket) => ticket.drawId === nextDraw.id) : [];
   const unevaluatedDraws = app.draws.filter((draw) => draw.status !== "evaluated" && new Date(draw.date) <= today);
+  const unclosedPastDraws = app.draws.filter((draw) => !draw.closedAt && new Date(draw.date) <= today);
   const openAmountWinnings = app.winnings.filter((winning) => winning.amount <= 0);
   const totalStake = app.tickets.reduce((sum, ticket) => sum + ticket.stake, 0);
   const returnRate = totalStake > 0 ? (app.totals.totalWinnings / totalStake) * 100 : 0;
@@ -43,6 +44,20 @@ export default async function DashboardPage() {
       />
 
       <AdminWorkflowChecklist app={app} />
+
+      {app.isAdmin && unclosedPastDraws.length > 0 ? (
+        <Panel className="mb-5 border-amber-200 bg-amber-50/70">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">Eine vergangene Runde ist noch nicht abgeschlossen.</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                Prüfe die Checkliste auf der Ziehungsseite und schließe die Runde ab, sobald Auswertung, Beiträge und Gewinnprüfung erledigt sind.
+              </p>
+            </div>
+            <StatusPill status="open" />
+          </div>
+        </Panel>
+      ) : null}
 
       <Stagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StaggerItem><MetricCard label="Aktueller Jackpot" value={formatCurrency(nextDraw?.jackpot ?? 0)} trend="Eurojackpot" icon={Euro} tone="gold" /></StaggerItem>
