@@ -11,6 +11,7 @@ import {
   splitAmountByMember,
   type EurojackpotResult,
 } from "@/lib/eurojackpot";
+import { fetchEurojackpotLiveSnapshot } from "@/lib/eurojackpot-live";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { generateInviteCode } from "@/lib/utils";
@@ -615,6 +616,106 @@ export async function createDraw(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/ziehungen");
   revalidatePath("/tipps");
+}
+
+export async function syncLiveEurojackpotData(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+
+  await assertAdmin(supabase, userId, groupId);
+
+  const snapshot = await fetchEurojackpotLiveSnapshot();
+  const now = new Date().toISOString();
+
+  if (!snapshot.nextDraw && !snapshot.latestResult) {
+    throw new Error("Die Live-API hat weder Jackpot noch Ziehungszahlen geliefert.");
+  }
+
+  if (snapshot.latestResult) {
+    const drawId = await ensureDrawForLiveData(supabase, {
+      groupId,
+      userId,
+      drawDate: snapshot.latestResult.drawDate,
+      jackpotAmount: snapshot.nextDraw?.drawDate === snapshot.latestResult.drawDate ? snapshot.nextDraw.jackpot : 0,
+      now,
+    });
+
+    await evaluateDrawResult(supabase, {
+      groupId,
+      drawId,
+      result: {
+        drawDate: snapshot.latestResult.drawDate,
+        numbers: snapshot.latestResult.numbers,
+        euroNumbers: snapshot.latestResult.euroNumbers,
+        prizeAmounts: snapshot.latestResult.prizeAmounts ? new Map(Object.entries(snapshot.latestResult.prizeAmounts)) : undefined,
+      },
+      userId,
+    });
+  }
+
+  if (snapshot.nextDraw) {
+    await ensureDrawForLiveData(supabase, {
+      groupId,
+      userId,
+      drawDate: snapshot.nextDraw.drawDate,
+      jackpotAmount: snapshot.nextDraw.jackpot,
+      now,
+    });
+  }
+
+  revalidatePath("/");
+  revalidatePath("/kasse");
+  revalidatePath("/tipps");
+  revalidatePath("/ziehungen");
+}
+
+async function ensureDrawForLiveData(
+  supabase: SupabaseServerClient,
+  payload: {
+    groupId: string;
+    userId: string;
+    drawDate: string;
+    jackpotAmount: number;
+    now: string;
+  },
+) {
+  const { data: existingDraw } = await supabase
+    .from("draws")
+    .select("id")
+    .eq("group_id", payload.groupId)
+    .eq("draw_date", payload.drawDate)
+    .maybeSingle()
+    .throwOnError();
+
+  if (existingDraw) {
+    await supabase
+      .from("draws")
+      .update({
+        ...(payload.jackpotAmount > 0 ? { jackpot_amount: payload.jackpotAmount } : {}),
+        updated_at: payload.now,
+      })
+      .eq("id", existingDraw.id)
+      .eq("group_id", payload.groupId)
+      .throwOnError();
+
+    return existingDraw.id;
+  }
+
+  const { data: draw } = await supabase
+    .from("draws")
+    .insert({
+      group_id: payload.groupId,
+      lottery_type: "eurojackpot",
+      draw_date: payload.drawDate,
+      jackpot_amount: payload.jackpotAmount,
+      status: "planned",
+      created_by: payload.userId,
+    })
+    .select("id")
+    .single()
+    .throwOnError();
+
+  return draw.id;
 }
 
 export async function createTicket(formData: FormData) {

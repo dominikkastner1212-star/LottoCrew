@@ -7,6 +7,7 @@ import {
   createTicket,
   createWinning,
   evaluateDraw,
+  syncLiveEurojackpotData,
   updateGroupSettings,
   updateProfile,
   uploadTicketDocument,
@@ -139,6 +140,29 @@ export function CreateDrawForm({ groupId, isAdmin }: { groupId: string; isAdmin:
             <input name="jackpot_amount" inputMode="decimal" required placeholder="0" className={inputStyle} />
           </label>
           <SubmitButton pendingLabel="Wird angelegt...">Ziehung anlegen</SubmitButton>
+        </div>
+      </ActionForm>
+    </Surface>
+  );
+}
+
+export function LiveEurojackpotSyncForm({ groupId, isAdmin }: { groupId: string; isAdmin: boolean }) {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <Surface>
+      <ActionForm action={syncLiveEurojackpotData} successMessage="Live-Daten synchronisiert." resetOnSuccess={false}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <input type="hidden" name="group_id" value={groupId} />
+          <div>
+            <p className="text-sm font-semibold text-slate-900">Jackpot und Ziehungszahlen</p>
+            <p className="mt-1 text-sm leading-5 text-slate-500">
+              Holt die aktuellen Eurojackpot-Daten aus der konfigurierten Live-API.
+            </p>
+          </div>
+          <SubmitButton pendingLabel="Holt Live-Daten...">Live-Daten holen</SubmitButton>
         </div>
       </ActionForm>
     </Surface>

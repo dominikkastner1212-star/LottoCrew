@@ -39,6 +39,8 @@ Neue Nutzer starten ueber `/registrieren`: Name, E-Mail und Passwort reichen aus
 
 Geschuetzte App-Seiten leiten ohne Session zu `/login` weiter. Admins koennen Ziehungen, Tipps, Zahlungen, Gewinne und Rollen direkt in der App pflegen.
 
+Live-Daten fuer Eurojackpot werden ueber `EUROJACKPOT_LIVE_API_URL` geladen. Die Antwort darf Jackpot/naechste Ziehung und optional die letzten Gewinnzahlen enthalten. Fuer reine Ergebnis-Abfragen pro Datum bleiben `EUROJACKPOT_RESULTS_API_URL` und `EUROJACKPOT_UPSTREAM_RESULTS_API_URL` erhalten.
+
 Automatische Ziehungspruefung nutzt serverseitig `EUROJACKPOT_RESULTS_API_URL`. Die URL kann `{date}` enthalten, sonst haengt die App `?date=YYYY-MM-DD` an. Erwartet wird JSON mit 5 Hauptzahlen und 2 Eurozahlen, optional mit Gewinnbetraegen pro Gewinnklasse.
 
 Die App stellt dafuer eine interne Proxy-Route bereit: `/api/eurojackpot/results?date=YYYY-MM-DD`. In Railway kann `EUROJACKPOT_RESULTS_API_URL` auf die eigene App zeigen, z. B. `https://deine-app.up.railway.app/api/eurojackpot/results`. Diese Route liest serverseitig `EUROJACKPOT_UPSTREAM_RESULTS_API_URL`, ruft die eigentliche Quelle ab und normalisiert die Antwort. Falls kein Upstream gesetzt ist, bricht die Route mit einer verstaendlichen Fehlermeldung ab.

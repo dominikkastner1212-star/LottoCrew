@@ -2,7 +2,7 @@ import { CalendarPlus, CheckCircle2, CircleAlert, CircleDashed } from "lucide-re
 import { closeDraw } from "@/app/actions";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { AdminDisclosure } from "@/components/admin-disclosure";
-import { CreateDrawForm, EvaluateDrawForm } from "@/components/admin-forms";
+import { CreateDrawForm, EvaluateDrawForm, LiveEurojackpotSyncForm } from "@/components/admin-forms";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { StatusPill } from "@/components/status-pill";
 import { ActionForm } from "@/components/ui/action-form";
@@ -60,6 +60,9 @@ export default async function DrawsPage() {
       <Panel>
         {app.group && app.isAdmin ? (
           <div className="mb-5 grid gap-3">
+            <AdminDisclosure label="Live-Daten holen">
+              <LiveEurojackpotSyncForm groupId={app.group.id} isAdmin={app.isAdmin} />
+            </AdminDisclosure>
             <AdminDisclosure label="Ziehung anlegen">
               <CreateDrawForm groupId={app.group.id} isAdmin={app.isAdmin} />
             </AdminDisclosure>
