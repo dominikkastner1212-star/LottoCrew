@@ -679,7 +679,7 @@ export async function syncLiveEurojackpotData(formData: FormData) {
 function getLiveSyncErrorMessage(error: unknown) {
   if (error instanceof EurojackpotLiveError) {
     if (error.message.includes("EUROJACKPOT_LIVE_API_URL")) {
-      return "Live-Daten sind noch nicht konfiguriert. Setze in Railway die Variable EUROJACKPOT_LIVE_API_URL auf die Eurojackpot-API-URL und deploye neu.";
+      return "Live-Daten sind noch nicht konfiguriert. Ohne eigene URL nutzt die App automatisch den kostenlosen Archiv-Feed.";
     }
     return error.message;
   }
@@ -688,7 +688,7 @@ function getLiveSyncErrorMessage(error: unknown) {
     return `Live-Daten konnten nicht synchronisiert werden: ${error.message}`;
   }
 
-  return "Live-Daten konnten nicht synchronisiert werden. Bitte prüfe die Railway-Variable EUROJACKPOT_LIVE_API_URL.";
+  return "Live-Daten konnten nicht synchronisiert werden. Bitte später erneut versuchen oder optional EUROJACKPOT_LIVE_API_URL in Railway auf eine eigene Quelle setzen.";
 }
 
 async function ensureDrawForLiveData(

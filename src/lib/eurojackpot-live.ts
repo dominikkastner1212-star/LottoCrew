@@ -2,6 +2,9 @@ import { serializeEurojackpotResult, type SerializableEurojackpotResult } from "
 
 type Fetcher = typeof fetch;
 
+export const DEFAULT_EUROJACKPOT_LIVE_API_URL =
+  "https://raw.githubusercontent.com/protomultix/eurojackpot-api/main/public/api/draws.json";
+
 export type EurojackpotLiveSnapshot = {
   fetchedAt: string;
   provider: string;
@@ -22,10 +25,7 @@ export async function fetchEurojackpotLiveSnapshot(
   fetchImpl: Fetcher = fetch,
   apiUrl = process.env.EUROJACKPOT_LIVE_API_URL,
 ) {
-  const configuredUrl = apiUrl?.trim();
-  if (!configuredUrl) {
-    throw new EurojackpotLiveError("EUROJACKPOT_LIVE_API_URL ist nicht gesetzt.");
-  }
+  const configuredUrl = apiUrl?.trim() || DEFAULT_EUROJACKPOT_LIVE_API_URL;
 
   const response = await fetchImpl(configuredUrl, {
     headers: { accept: "application/json" },
@@ -43,7 +43,7 @@ export function normalizeEurojackpotLiveSnapshot(payload: unknown): EurojackpotL
   const candidates = collectRecords(payload);
   const latestResult = findLatestResult(candidates);
   const nextDraw = findNextDraw(candidates, latestResult);
-  const provider = findFirstString(candidates, ["provider", "source", "dataSource"]) ?? "custom";
+  const provider = findFirstString(candidates, ["provider", "source_name", "source", "dataSource"]) ?? "custom";
 
   return {
     fetchedAt: new Date().toISOString(),
@@ -62,6 +62,7 @@ function findLatestResult(candidates: Record<string, unknown>[]) {
     const numbers = readNumberArray(numberSource, [
       "numbers",
       "mainNumbers",
+      "main_numbers",
       "resultNumbers",
       "result_numbers",
       "resultsJson",
@@ -71,6 +72,7 @@ function findLatestResult(candidates: Record<string, unknown>[]) {
     const euroNumbers = readNumberArray(numberSource, [
       "euroNumbers",
       "extraNumbers",
+      "euro_numbers",
       "resultEuroNumbers",
       "result_extra_numbers",
       "specialResults",

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  DEFAULT_EUROJACKPOT_LIVE_API_URL,
   fetchEurojackpotLiveSnapshot,
   normalizeEurojackpotLiveSnapshot,
 } from "./eurojackpot-live";
@@ -43,6 +44,30 @@ describe("eurojackpot live data", () => {
     });
   });
 
+  it("normalizes the free LOTTO Bayern archive feed", () => {
+    expect(
+      normalizeEurojackpotLiveSnapshot({
+        source_name: "LOTTO Bayern Eurojackpot Archiv",
+        latest_date: "2026-08-28",
+        draws: [
+          {
+            date: "2026-08-28",
+            main_numbers: [45, 34, 39, 23, 49],
+            euro_numbers: [1, 4],
+          },
+        ],
+      }),
+    ).toMatchObject({
+      provider: "LOTTO Bayern Eurojackpot Archiv",
+      latestResult: {
+        drawDate: "2026-08-28",
+        numbers: [45, 34, 39, 23, 49],
+        euroNumbers: [1, 4],
+      },
+      nextDraw: null,
+    });
+  });
+
   it("fetches a configured live snapshot without browser caching", async () => {
     const fetchImpl = vi.fn(async () =>
       Response.json({
@@ -66,6 +91,21 @@ describe("eurojackpot live data", () => {
     });
 
     expect(fetchImpl).toHaveBeenCalledWith("https://provider.example/live", {
+      headers: { accept: "application/json" },
+      cache: "no-store",
+    });
+  });
+
+  it("uses the free archive feed by default", async () => {
+    const fetchImpl = vi.fn(async () =>
+      Response.json({
+        draws: [{ date: "2026-08-28", main_numbers: [45, 34, 39, 23, 49], euro_numbers: [1, 4] }],
+      }),
+    ) as unknown as typeof fetch;
+
+    await fetchEurojackpotLiveSnapshot(fetchImpl, "");
+
+    expect(fetchImpl).toHaveBeenCalledWith(DEFAULT_EUROJACKPOT_LIVE_API_URL, {
       headers: { accept: "application/json" },
       cache: "no-store",
     });
