@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getDefaultDisplayName } from "@/lib/app-data";
 import { buildMonthlyPaymentRows, calculateMonthlyContribution } from "@/lib/contribution-calculation";
+import { buildDrawCleanupPlan, parseDrawJackpotAmount } from "@/lib/draw-admin";
 import { buildDrawCompletion, canCloseDrawForRole } from "@/lib/draw-completion";
 import {
   evaluateTicketsForDraw,
@@ -616,6 +617,104 @@ export async function createDraw(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/ziehungen");
   revalidatePath("/tipps");
+}
+
+export async function updateDrawJackpot(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const drawId = String(formData.get("draw_id") ?? "");
+  const jackpotAmount = parseDrawJackpotAmount(formData.get("jackpot_amount"));
+
+  await assertAdmin(supabase, userId, groupId);
+
+  if (!drawId) {
+    throw new Error("Ziehung fehlt.");
+  }
+
+  const { data: draw } = await supabase
+    .from("draws")
+    .update({
+      jackpot_amount: jackpotAmount,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", drawId)
+    .eq("group_id", groupId)
+    .select("id")
+    .maybeSingle()
+    .throwOnError();
+
+  if (!draw) {
+    throw new Error("Ziehung nicht gefunden.");
+  }
+
+  revalidatePath("/");
+  revalidatePath("/ziehungen");
+  revalidatePath("/tipps");
+}
+
+export async function deleteDraw(formData: FormData) {
+  const { supabase, userId } = await getUserId();
+  const groupId = String(formData.get("group_id") ?? "");
+  const drawId = String(formData.get("draw_id") ?? "");
+
+  await assertAdmin(supabase, userId, groupId);
+
+  if (!drawId) {
+    throw new Error("Ziehung fehlt.");
+  }
+
+  const { data: draw } = await supabase
+    .from("draws")
+    .select("id")
+    .eq("id", drawId)
+    .eq("group_id", groupId)
+    .maybeSingle()
+    .throwOnError();
+
+  if (!draw) {
+    throw new Error("Ziehung nicht gefunden.");
+  }
+
+  const { data: tickets } = await supabase
+    .from("tickets")
+    .select("id,ticket_image_path")
+    .eq("draw_id", drawId)
+    .eq("group_id", groupId)
+    .throwOnError();
+
+  const { data: winnings } = await supabase
+    .from("winnings")
+    .select("id")
+    .eq("draw_id", drawId)
+    .eq("group_id", groupId)
+    .throwOnError();
+
+  const cleanup = buildDrawCleanupPlan({
+    tickets: tickets ?? [],
+    winnings: winnings ?? [],
+  });
+
+  if (cleanup.winningIds.length) {
+    await supabase.from("member_transactions").delete().in("related_winning_id", cleanup.winningIds).throwOnError();
+  }
+  if (cleanup.ticketIds.length) {
+    await supabase.from("member_transactions").delete().in("related_ticket_id", cleanup.ticketIds).throwOnError();
+  }
+  if (cleanup.ticketDocumentPaths.length) {
+    const { error } = await supabase.storage.from("ticket-documents").remove(cleanup.ticketDocumentPaths);
+    if (error) {
+      throw error;
+    }
+  }
+
+  await supabase.from("draws").delete().eq("id", drawId).eq("group_id", groupId).throwOnError();
+
+  revalidatePath("/");
+  revalidatePath("/kasse");
+  revalidatePath("/tipps");
+  revalidatePath("/ziehungen");
+  revalidatePath("/berichte");
+  revalidatePath("/druck");
 }
 
 export async function syncLiveEurojackpotData(formData: FormData) {

@@ -2,7 +2,7 @@ import { CalendarPlus, CheckCircle2, CircleAlert, CircleDashed } from "lucide-re
 import { closeDraw } from "@/app/actions";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { AdminDisclosure } from "@/components/admin-disclosure";
-import { CreateDrawForm, EvaluateDrawForm, LiveEurojackpotSyncForm } from "@/components/admin-forms";
+import { CreateDrawForm, DrawAdminControls, EvaluateDrawForm, LiveEurojackpotSyncForm } from "@/components/admin-forms";
 import { Stagger, StaggerItem } from "@/components/motion-primitives";
 import { StatusPill } from "@/components/status-pill";
 import { ActionForm } from "@/components/ui/action-form";
@@ -174,6 +174,7 @@ export default async function DrawsPage() {
                   </div>
                 ) : null}
               </div>
+              {app.isAdmin && app.group ? <DrawAdminControls groupId={app.group.id} draw={draw} isAdmin={app.isAdmin} /> : null}
               {app.isAdmin ? <p className="mt-4 text-sm leading-5 text-slate-600">{getAdminHint(draw, drawTickets)}</p> : null}
             </Surface>
             </StaggerItem>

@@ -1,6 +1,7 @@
 import {
   autoEvaluateDraw,
   createDraw,
+  deleteDraw,
   createInitialGroup,
   createMonthlyPayments,
   createPayment,
@@ -8,6 +9,7 @@ import {
   createWinning,
   evaluateDraw,
   syncLiveEurojackpotData,
+  updateDrawJackpot,
   updateGroupSettings,
   updateProfile,
   uploadTicketDocument,
@@ -166,6 +168,47 @@ export function LiveEurojackpotSyncForm({ groupId, isAdmin }: { groupId: string;
         </div>
       </ActionForm>
     </Surface>
+  );
+}
+
+export function DrawAdminControls({ groupId, draw, isAdmin }: { groupId: string; draw: AppDraw; isAdmin: boolean }) {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 grid gap-3 rounded-2xl border border-slate-200 bg-white p-3">
+      <ActionForm action={updateDrawJackpot} successMessage="Jackpot aktualisiert." resetOnSuccess={false}>
+        <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+          <input type="hidden" name="group_id" value={groupId} />
+          <input type="hidden" name="draw_id" value={draw.id} />
+          <label className="block">
+            <span className={labelStyle}>Jackpot ändern (EUR)</span>
+            <input
+              name="jackpot_amount"
+              inputMode="decimal"
+              defaultValue={draw.jackpot.toFixed(2).replace(".", ",")}
+              required
+              className={inputStyle}
+            />
+          </label>
+          <SubmitButton pendingLabel="Speichert...">Speichern</SubmitButton>
+        </div>
+      </ActionForm>
+      <ActionForm
+        action={deleteDraw}
+        successMessage="Ziehung gelöscht."
+        resetOnSuccess={false}
+        confirm={{
+          question: "Diese Ziehung inklusive Tipps, Zahlen, Gewinnen und Spielschein-Dateien löschen?",
+          confirmLabel: "Ja, Ziehung löschen",
+        }}
+      >
+        <input type="hidden" name="group_id" value={groupId} />
+        <input type="hidden" name="draw_id" value={draw.id} />
+        <SubmitButton variant="danger" pendingLabel="Löscht...">Ziehung löschen</SubmitButton>
+      </ActionForm>
+    </div>
   );
 }
 
