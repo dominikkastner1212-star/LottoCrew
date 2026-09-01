@@ -14,15 +14,13 @@ describe("password auth helpers", () => {
     });
   });
 
-  it("registers new admins with password and workspace metadata", async () => {
+  it("registers coworkers with password and personal metadata only", async () => {
     const signUp = vi.fn().mockResolvedValue({ error: null });
     const client = { auth: { signInWithPassword: vi.fn(), signUp } };
 
     await registerWithEmailPassword(client, {
       displayName: " Dominik ",
       email: "admin@example.com",
-      groupName: " LottoCrew ",
-      monthlyAmount: "24,50",
       password: "secret123",
     });
 
@@ -32,9 +30,6 @@ describe("password auth helpers", () => {
       options: {
         data: {
           display_name: "Dominik",
-          group_name: "LottoCrew",
-          monthly_amount: 24.5,
-          invite_code: "",
         },
       },
     });

@@ -35,7 +35,7 @@ Die RLS-Policies erlauben Teilnehmern nur Zugriff auf ihre Gruppen. Gruppen-Admi
 Beim ersten Login kann der erste Nutzer im Admin-Bereich eine Gruppe erstellen und wird automatisch Admin.
 Zum Hinzufuegen von Mitgliedern per E-Mail braucht die Server-App `SUPABASE_SECRET_KEY` mit dem Supabase `service_role` Key. Dieser Key darf niemals als `NEXT_PUBLIC_` Variable gesetzt werden.
 
-Neue Admins starten ueber `/registrieren`: Name, E-Mail, Passwort, Gruppenname und Monatsbeitrag werden erfasst. Danach melden sie sich klassisch mit E-Mail und Passwort an.
+Neue Nutzer starten ueber `/registrieren`: Name, E-Mail und Passwort reichen aus. Wenn bereits eine Gruppe existiert, landen sie automatisch dort; nur der erste Nutzer erstellt intern die erste LottoCrew-Gruppe.
 
 Geschuetzte App-Seiten leiten ohne Session zu `/login` weiter. Admins koennen Ziehungen, Tipps, Zahlungen, Gewinne und Rollen direkt in der App pflegen.
 

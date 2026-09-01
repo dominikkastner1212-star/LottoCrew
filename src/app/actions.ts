@@ -195,10 +195,9 @@ export async function updateProfile(formData: FormData) {
 
 export async function createInitialGroup(formData: FormData) {
   const { supabase, userId, email } = await getUserId();
-  const name = String(formData.get("name") ?? "AbteilungsJackpot").trim();
-  const monthlyAmount = Number(String(formData.get("monthly_amount") ?? "24").replace(",", "."));
+  const name = String(formData.get("name") ?? "LottoCrew").trim();
   const ticketFieldPrice = parseAmount(formData.get("ticket_field_price"), 2.5);
-  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "abteilungsjackpot";
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "lottocrew";
 
   await supabase
     .from("profiles")
@@ -215,7 +214,7 @@ export async function createInitialGroup(formData: FormData) {
       name,
       slug: `${slug}-${userId.slice(0, 8)}`,
       invite_code: generateInviteCode(),
-      monthly_amount: Number.isFinite(monthlyAmount) ? monthlyAmount : 24,
+      monthly_amount: 0,
       ticket_field_price: ticketFieldPrice,
       created_by: userId,
     })
@@ -230,7 +229,7 @@ export async function createInitialGroup(formData: FormData) {
       profile_id: userId,
       role: "admin",
       status: "active",
-      monthly_amount: Number.isFinite(monthlyAmount) ? monthlyAmount : 24,
+      monthly_amount: null,
     })
     .throwOnError();
 
@@ -242,7 +241,6 @@ export async function updateGroupSettings(formData: FormData) {
   const { supabase, userId } = await getUserId();
   const groupId = String(formData.get("group_id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
-  const monthlyAmount = Number(String(formData.get("monthly_amount") ?? "0").replace(",", "."));
   const ticketFieldPrice = parseAmount(formData.get("ticket_field_price"), 2.5);
 
   await assertAdmin(supabase, userId, groupId);
@@ -251,7 +249,7 @@ export async function updateGroupSettings(formData: FormData) {
     .from("groups")
     .update({
       name,
-      monthly_amount: Number.isFinite(monthlyAmount) ? monthlyAmount : 0,
+      monthly_amount: 0,
       ticket_field_price: ticketFieldPrice,
       updated_at: new Date().toISOString(),
     })
@@ -437,13 +435,6 @@ export async function addMemberWithPassword(formData: FormData) {
   }
 
   const admin = createAdminClient();
-  const { data: group } = await admin
-    .from("groups")
-    .select("monthly_amount")
-    .eq("id", groupId)
-    .single()
-    .throwOnError();
-
   const { data: existingProfile } = await admin
     .from("profiles")
     .select("id")
@@ -486,7 +477,7 @@ export async function addMemberWithPassword(formData: FormData) {
         profile_id: profileId,
         role,
         status: "active",
-        monthly_amount: group?.monthly_amount ?? 24,
+        monthly_amount: null,
       },
       { onConflict: "group_id,profile_id" },
     )
@@ -513,13 +504,6 @@ export async function addMemberByEmail(formData: FormData) {
   }
 
   const admin = createAdminClient();
-  const { data: group } = await admin
-    .from("groups")
-    .select("monthly_amount")
-    .eq("id", groupId)
-    .single()
-    .throwOnError();
-
   const { data: profile } = await admin
     .from("profiles")
     .select("id,email")
@@ -554,7 +538,7 @@ export async function addMemberByEmail(formData: FormData) {
         profile_id: profileId,
         role,
         status: "active",
-        monthly_amount: group?.monthly_amount ?? 24,
+        monthly_amount: null,
       },
       { onConflict: "group_id,profile_id" },
     )
@@ -850,7 +834,7 @@ export async function createMonthlyPayments(formData: FormData) {
   const calculation = calculateMonthlyContribution({
     activeMemberCount: members?.length ?? 0,
     ticketFieldCount: tickets?.length ?? 0,
-    ticketFieldPrice: Number(group?.ticket_field_price ?? group?.monthly_amount ?? 0),
+    ticketFieldPrice: Number(group?.ticket_field_price ?? 0),
     previousMonthWinnings: (winnings ?? []).reduce((sum, winning) => sum + Number(winning.amount ?? 0), 0),
   });
 

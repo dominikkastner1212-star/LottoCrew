@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Surface } from "@/components/ui/panel";
 import type { AppMember } from "@/lib/app-data";
-import { formatCurrency } from "@/lib/utils";
 
 export function MemberRow({
   member,
@@ -34,7 +33,7 @@ export function MemberRow({
             {isInactive ? <span className="ml-2 rounded-full bg-slate-200 px-2 py-0.5 text-[0.65rem] font-semibold text-slate-500">inaktiv</span> : null}
           </p>
           <p className="mt-1 truncate text-xs text-slate-500">
-            {member.email || "ohne E-Mail"} - {formatCurrency(member.monthlyAmount)}
+            {member.email || "ohne E-Mail"}
           </p>
         </div>
         {isAdmin ? (

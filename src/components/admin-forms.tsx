@@ -44,15 +44,11 @@ export function CreateGroupForm() {
     <ActionForm action={createInitialGroup} successMessage="Gruppe erstellt! Du bist jetzt Admin." resetOnSuccess={false} className="space-y-4">
       <label className="block">
         <span className={labelStyle}>Gruppenname</span>
-        <input name="name" className={inputStyle} defaultValue="AbteilungsJackpot" required />
+        <input name="name" className={inputStyle} defaultValue="LottoCrew" required />
       </label>
       <label className="block">
         <span className={labelStyle}>Kosten pro Kästchen (EUR)</span>
         <input name="ticket_field_price" inputMode="decimal" className={inputStyle} defaultValue="2,50" required />
-      </label>
-      <label className="block">
-        <span className={labelStyle}>Standard-/Fallback-Beitrag (EUR)</span>
-        <input name="monthly_amount" inputMode="decimal" className={inputStyle} defaultValue="24" required />
       </label>
       <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
         Der Monatsbeitrag wird automatisch aus gespielten Kästchen, aktiven Mitgliedern und Gewinnen aus dem Vormonat berechnet.
@@ -85,30 +81,10 @@ export function GroupSettingsForm({ app }: { app: AppContext }) {
           required
         />
       </label>
-      <label className="block">
-        <span className={labelStyle}>Standard-/Fallback-Beitrag (EUR)</span>
-        <input
-          name="monthly_amount"
-          inputMode="decimal"
-          className={inputStyle}
-          defaultValue={app.group.monthlyAmount}
-          disabled={!app.isAdmin}
-          required
-        />
-      </label>
       <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
         Der Monatsbeitrag wird automatisch aus gespielten Kästchen, aktiven Mitgliedern und Gewinnen aus dem Vormonat berechnet.
       </p>
       <SubmitButton className="w-full" disabled={!app.isAdmin} pendingLabel="Wird gespeichert...">Gruppe speichern</SubmitButton>
-      {app.group.inviteCode ? (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">Einladungscode</p>
-          <p className="mt-2 select-all font-mono text-2xl font-bold tracking-[0.2em] text-slate-900">{app.group.inviteCode}</p>
-          <p className="mt-2 text-xs leading-5 text-amber-800/80">
-            Gib diesen Code weiter. Bei der Registrierung wählen Mitglieder &quot;Gruppe beitreten&quot; und landen direkt in eurer Runde.
-          </p>
-        </div>
-      ) : null}
     </ActionForm>
   );
 }
@@ -285,7 +261,7 @@ export function CreateMonthlyPaymentsForm({ app }: { app: AppContext }) {
         <MonthlyPaymentsPreview
           groupId={groupId}
           activeMemberCount={app.totals.activeMembers}
-          ticketFieldPrice={app.group?.ticketFieldPrice ?? app.group?.monthlyAmount ?? 0}
+          ticketFieldPrice={app.group?.ticketFieldPrice ?? 0}
           tickets={app.tickets.map((ticket) => ({ date: ticket.date }))}
           winnings={app.winnings.map((winning) => ({ date: winning.date, amount: winning.amount }))}
         />

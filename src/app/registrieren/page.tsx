@@ -13,7 +13,7 @@ export default function RegisterPage() {
         <div className="mt-10">
           <h1 className="text-4xl font-semibold tracking-normal text-slate-900">Registrieren</h1>
           <p className="mt-3 text-sm leading-6 text-slate-500">
-            Gib deine Daten einmal ein. Danach meldest du dich klassisch mit E-Mail und Passwort an.
+            Gib nur Name, E-Mail und Passwort ein. Deine LottoCrew-Zuordnung passiert automatisch.
           </p>
         </div>
         <RegisterForm />

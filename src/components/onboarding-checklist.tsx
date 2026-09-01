@@ -38,7 +38,7 @@ export function OnboardingChecklist({ app }: { app: AppContext }) {
       description:
         app.totals.activeMembers > 1
           ? `${app.totals.activeMembers} Mitspieler sind dabei.`
-          : "Lade mindestens einen Kollegen ein - per E-Mail oder Einladungscode.",
+          : "Lade mindestens einen Kollegen ein oder lass ihn sich direkt registrieren.",
       href: "/einstellungen",
       done: app.totals.activeMembers > 1,
     },

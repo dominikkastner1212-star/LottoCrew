@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { generateInviteCode } from "@/lib/utils";
+import { getWorkspaceProvisioningPlan } from "@/lib/workspace-provisioning";
 
 export type AppProfile = {
   id: string;
@@ -256,57 +257,45 @@ export async function ensureUserWorkspace(
     return;
   }
 
-  // Beitritt per Einladungscode: Wurde bei der Registrierung ein Code angegeben,
-  // tritt der Nutzer der bestehenden Gruppe bei. Es wird dann NIE automatisch
-  // eine eigene Gruppe erstellt - auch nicht bei ungültigem Code, damit keine
-  // verwaisten Einzelgruppen entstehen.
-  const inviteCode =
-    typeof user.user_metadata?.invite_code === "string" ? user.user_metadata.invite_code.trim().toUpperCase() : "";
+  const admin = createAdminClient();
+  const { data: existingGroups } = await admin
+    .from("groups")
+    .select("id,monthly_amount")
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .throwOnError();
 
-  if (inviteCode) {
-    const admin = createAdminClient();
-    const { data: inviteGroup } = await admin
-      .from("groups")
-      .select("id,monthly_amount")
-      .eq("invite_code", inviteCode)
-      .maybeSingle();
+  const plan = getWorkspaceProvisioningPlan({
+    existingGroups: existingGroups ?? [],
+    userId: user.id,
+    metadata: user.user_metadata ?? {},
+  });
 
-    if (inviteGroup) {
-      await admin
-        .from("group_members")
-        .upsert(
-          {
-            group_id: inviteGroup.id,
-            profile_id: user.id,
-            role: "participant",
-            status: "active",
-            monthly_amount: inviteGroup.monthly_amount ?? 24,
-          },
-          { onConflict: "group_id,profile_id" },
-        )
-        .throwOnError();
-    }
-
+  if (plan.type === "join") {
+    await admin
+      .from("group_members")
+      .upsert(
+        {
+          group_id: plan.groupId,
+          profile_id: user.id,
+          role: plan.role,
+          status: "active",
+          monthly_amount: plan.monthlyAmount,
+        },
+        { onConflict: "group_id,profile_id" },
+      )
+      .throwOnError();
     return;
   }
-
-  const metadataGroupName = typeof user.user_metadata?.group_name === "string" ? user.user_metadata.group_name.trim() : "";
-  const metadataMonthlyAmount =
-    typeof user.user_metadata?.monthly_amount === "number"
-      ? user.user_metadata.monthly_amount
-      : Number(String(user.user_metadata?.monthly_amount ?? "24").replace(",", "."));
-  const groupName = metadataGroupName || "AbteilungsJackpot";
-  const baseSlug = groupName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "abteilungsjackpot";
-  const monthlyAmount = Number.isFinite(metadataMonthlyAmount) && metadataMonthlyAmount >= 0 ? metadataMonthlyAmount : 24;
-  const slug = `${baseSlug}-${user.id.slice(0, 8)}`;
 
   const { data: group } = await supabase
     .from("groups")
     .insert({
-      name: groupName,
-      slug,
+      name: plan.groupName,
+      slug: plan.slug,
       invite_code: generateInviteCode(),
-      monthly_amount: monthlyAmount,
+      monthly_amount: plan.monthlyAmount,
+      ticket_field_price: 2.5,
       created_by: user.id,
     })
     .select("id")
@@ -318,9 +307,9 @@ export async function ensureUserWorkspace(
     .insert({
       group_id: group.id,
       profile_id: user.id,
-      role: "admin",
+      role: plan.role,
       status: "active",
-      monthly_amount: monthlyAmount,
+      monthly_amount: plan.monthlyAmount,
     })
     .throwOnError();
 }
@@ -450,7 +439,7 @@ export async function getAppContext(options: AppContextOptions = {}): Promise<Ap
       email: memberProfile?.email ?? "",
       role: toRole(member.role),
       status: member.status,
-      monthlyAmount: member.monthly_amount ? toNumber(member.monthly_amount) : group.monthlyAmount,
+      monthlyAmount: member.monthly_amount ? toNumber(member.monthly_amount) : 0,
       joinedAt: member.joined_at,
     };
   });
