@@ -4,6 +4,7 @@ type Fetcher = typeof fetch;
 
 export const DEFAULT_EUROJACKPOT_LIVE_API_URL =
   "https://raw.githubusercontent.com/protomultix/eurojackpot-api/main/public/api/draws.json";
+export const DEFAULT_EUROJACKPOT_JACKPOT_PAGE_URL = "https://www.lotto.de/eurojackpot";
 
 export type EurojackpotLiveSnapshot = {
   fetchedAt: string;
@@ -24,6 +25,8 @@ export class EurojackpotLiveError extends Error {
 export async function fetchEurojackpotLiveSnapshot(
   fetchImpl: Fetcher = fetch,
   apiUrl = process.env.EUROJACKPOT_LIVE_API_URL,
+  jackpotPageUrl = process.env.EUROJACKPOT_JACKPOT_PAGE_URL ?? DEFAULT_EUROJACKPOT_JACKPOT_PAGE_URL,
+  now = new Date(),
 ) {
   const configuredUrl = apiUrl?.trim() || DEFAULT_EUROJACKPOT_LIVE_API_URL;
 
@@ -36,7 +39,15 @@ export async function fetchEurojackpotLiveSnapshot(
     throw new EurojackpotLiveError(`Eurojackpot-Livedaten konnten nicht abgerufen werden (${response.status}).`, 502);
   }
 
-  return normalizeEurojackpotLiveSnapshot(await response.json());
+  const snapshot = normalizeEurojackpotLiveSnapshot(await response.json());
+  const configuredJackpotPageUrl = jackpotPageUrl?.trim();
+
+  if (snapshot.nextDraw || !configuredJackpotPageUrl) {
+    return snapshot;
+  }
+
+  const jackpotDraw = await fetchOptionalJackpotPage(fetchImpl, configuredJackpotPageUrl, now);
+  return jackpotDraw ? { ...snapshot, nextDraw: jackpotDraw } : snapshot;
 }
 
 export function normalizeEurojackpotLiveSnapshot(payload: unknown): EurojackpotLiveSnapshot {
@@ -128,6 +139,92 @@ function findNextDraw(
   }
 
   return latestResult ? null : null;
+}
+
+export function extractEurojackpotJackpotFromPage(html: string, now = new Date()): EurojackpotLiveSnapshot["nextDraw"] {
+  const text = normalizePageText(html);
+  const jackpot = readJackpotAmountFromPageText(text);
+  if (jackpot === null) {
+    return null;
+  }
+
+  return {
+    drawDate: getNextEurojackpotDrawDate(now),
+    jackpot,
+  };
+}
+
+async function fetchOptionalJackpotPage(fetchImpl: Fetcher, pageUrl: string, now: Date) {
+  try {
+    const response = await fetchImpl(pageUrl, {
+      headers: {
+        accept: "text/html,application/xhtml+xml",
+        "user-agent": "LottoCrew live jackpot crawler",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return extractEurojackpotJackpotFromPage(await response.text(), now);
+  } catch {
+    return null;
+  }
+}
+
+function normalizePageText(html: string) {
+  return html
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;|&#160;/gi, " ")
+    .replace(/&euro;|&#8364;/gi, "EUR")
+    .replace(/&amp;/gi, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function readJackpotAmountFromPageText(text: string) {
+  const millionAmountPattern = /(\d{1,3}(?:[,.]\d{1,2})?)\s*(?:mio\.?|million(?:en)?)\s*(?:eur|euro|€)?/gi;
+  const euroAmountPattern = /(\d{1,3}(?:[.\s]\d{3})+(?:,\d{2})?)\s*(?:eur|euro|€)/gi;
+
+  return readFirstJackpotAmount(text, millionAmountPattern, 1_000_000) ?? readFirstJackpotAmount(text, euroAmountPattern, 1);
+}
+
+function readFirstJackpotAmount(text: string, pattern: RegExp, multiplier: number) {
+  for (const match of text.matchAll(pattern)) {
+    const amountText = match[1];
+    if (!amountText || match.index === undefined) continue;
+
+    const context = text.slice(Math.max(0, match.index - 90), match.index + 140);
+    const guardContext = text.slice(Math.max(0, match.index - 18), match.index + match[0].length + 15);
+    if (!/jackpot/i.test(context) || /\b(?:min\.?|mindestens|garantie|garantiert)\b/i.test(guardContext)) {
+      continue;
+    }
+
+    const amount = parseGermanAmount(amountText) * multiplier;
+    if (Number.isFinite(amount) && amount >= 1_000_000) {
+      return Math.round(amount);
+    }
+  }
+
+  return null;
+}
+
+function parseGermanAmount(value: string) {
+  const hasDecimalComma = /,\d{1,2}$/.test(value);
+  const normalized = hasDecimalComma ? value.replace(/\./g, "").replace(",", ".") : value.replace(/[.\s]/g, "").replace(",", ".");
+  return Number(normalized);
+}
+
+function getNextEurojackpotDrawDate(now: Date) {
+  const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const day = date.getUTCDay();
+  const daysUntilDraw = day <= 2 ? 2 - day : day <= 5 ? 5 - day : 9 - day;
+  date.setUTCDate(date.getUTCDate() + daysUntilDraw);
+  return date.toISOString().slice(0, 10);
 }
 
 function collectRecords(value: unknown, output: Record<string, unknown>[] = [], depth = 0) {

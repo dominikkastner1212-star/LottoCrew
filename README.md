@@ -39,7 +39,7 @@ Neue Nutzer starten ueber `/registrieren`: Name, E-Mail und Passwort reichen aus
 
 Geschuetzte App-Seiten leiten ohne Session zu `/login` weiter. Admins koennen Ziehungen, Tipps, Zahlungen, Gewinne und Rollen direkt in der App pflegen.
 
-Live-Daten fuer Eurojackpot laufen ohne API-Key ueber den kostenlosen LOTTO-Bayern-Archiv-Feed auf GitHub. Optional kann `EUROJACKPOT_LIVE_API_URL` auf eine eigene Quelle gesetzt werden. Der kostenlose Feed liefert Gewinnzahlen/Ziehungen, aber keine garantierte aktuelle Jackpot-Schaetzung. Fuer reine Ergebnis-Abfragen pro Datum bleiben `EUROJACKPOT_RESULTS_API_URL` und `EUROJACKPOT_UPSTREAM_RESULTS_API_URL` erhalten.
+Live-Daten fuer Eurojackpot laufen ohne API-Key ueber den kostenlosen LOTTO-Bayern-Archiv-Feed auf GitHub. Optional kann `EUROJACKPOT_LIVE_API_URL` auf eine eigene Quelle gesetzt werden. Der kostenlose Feed liefert Gewinnzahlen/Ziehungen; falls dort kein Jackpot enthalten ist, versucht die App zusaetzlich `EUROJACKPOT_JACKPOT_PAGE_URL` als oeffentliche Jackpot-Seite zu lesen. Standard ist `https://www.lotto.de/eurojackpot`. Wenn die Seite nichts Verlaessliches liefert oder nicht erreichbar ist, bleibt die Ziehung trotzdem mit den gefundenen Zahlen erhalten und der Jackpot kann weiter manuell gepflegt werden. Fuer reine Ergebnis-Abfragen pro Datum bleiben `EUROJACKPOT_RESULTS_API_URL` und `EUROJACKPOT_UPSTREAM_RESULTS_API_URL` erhalten.
 
 Automatische Ziehungspruefung nutzt serverseitig `EUROJACKPOT_RESULTS_API_URL`. Die URL kann `{date}` enthalten, sonst haengt die App `?date=YYYY-MM-DD` an. Erwartet wird JSON mit 5 Hauptzahlen und 2 Eurozahlen, optional mit Gewinnbetraegen pro Gewinnklasse.
 

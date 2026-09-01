@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  DEFAULT_EUROJACKPOT_JACKPOT_PAGE_URL,
   DEFAULT_EUROJACKPOT_LIVE_API_URL,
+  extractEurojackpotJackpotFromPage,
   fetchEurojackpotLiveSnapshot,
   normalizeEurojackpotLiveSnapshot,
 } from "./eurojackpot-live";
@@ -78,7 +80,7 @@ describe("eurojackpot live data", () => {
       }),
     ) as unknown as typeof fetch;
 
-    await expect(fetchEurojackpotLiveSnapshot(fetchImpl, "https://provider.example/live")).resolves.toMatchObject({
+    await expect(fetchEurojackpotLiveSnapshot(fetchImpl, "https://provider.example/live", "")).resolves.toMatchObject({
       latestResult: {
         drawDate: "2026-09-01",
         numbers: [6, 21, 31, 47, 48],
@@ -103,11 +105,81 @@ describe("eurojackpot live data", () => {
       }),
     ) as unknown as typeof fetch;
 
-    await fetchEurojackpotLiveSnapshot(fetchImpl, "");
+    await fetchEurojackpotLiveSnapshot(fetchImpl, "", "");
 
     expect(fetchImpl).toHaveBeenCalledWith(DEFAULT_EUROJACKPOT_LIVE_API_URL, {
       headers: { accept: "application/json" },
       cache: "no-store",
+    });
+  });
+
+  it("extracts the current jackpot from a public page without using the minimum guarantee", () => {
+    expect(
+      extractEurojackpotJackpotFromPage(
+        `
+          <main>
+            <p>Jeden Dienstag und Freitag im Jackpot Min. 10 Mio. EUR</p>
+            <h1>Eurojackpot</h1>
+            <p>Aktueller Jackpot: 59 Mio. EUR</p>
+          </main>
+        `,
+        new Date("2026-09-02T08:00:00.000Z"),
+      ),
+    ).toEqual({
+      drawDate: "2026-09-04",
+      jackpot: 59000000,
+    });
+  });
+
+  it("keeps live results when the optional jackpot page cannot be read", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({
+          draws: [{ date: "2026-08-28", main_numbers: [45, 34, 39, 23, 49], euro_numbers: [1, 4] }],
+        }),
+      )
+      .mockResolvedValueOnce(new Response("kaputt", { status: 503 })) as unknown as typeof fetch;
+
+    await expect(fetchEurojackpotLiveSnapshot(fetchImpl, "", DEFAULT_EUROJACKPOT_JACKPOT_PAGE_URL)).resolves.toMatchObject({
+      latestResult: {
+        drawDate: "2026-08-28",
+        numbers: [45, 34, 39, 23, 49],
+        euroNumbers: [1, 4],
+      },
+      nextDraw: null,
+    });
+  });
+
+  it("merges the free draw feed with a scraped jackpot page", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(
+        Response.json({
+          draws: [{ date: "2026-08-28", main_numbers: [45, 34, 39, 23, 49], euro_numbers: [1, 4] }],
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response("<p>Jeden Dienstag und Freitag im Jackpot Min. 10 Mio. EUR</p><p>Jackpot: 59 Mio. EUR</p>", {
+          headers: { "content-type": "text/html" },
+        }),
+      ) as unknown as typeof fetch;
+
+    await expect(
+      fetchEurojackpotLiveSnapshot(
+        fetchImpl,
+        "",
+        DEFAULT_EUROJACKPOT_JACKPOT_PAGE_URL,
+        new Date("2026-09-02T08:00:00.000Z"),
+      ),
+    ).resolves.toMatchObject({
+      latestResult: {
+        drawDate: "2026-08-28",
+      },
+      nextDraw: {
+        drawDate: "2026-09-04",
+        jackpot: 59000000,
+      },
     });
   });
 });
