@@ -11,7 +11,7 @@ import {
   splitAmountByMember,
   type EurojackpotResult,
 } from "@/lib/eurojackpot";
-import { fetchEurojackpotLiveSnapshot } from "@/lib/eurojackpot-live";
+import { EurojackpotLiveError, fetchEurojackpotLiveSnapshot } from "@/lib/eurojackpot-live";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { generateInviteCode } from "@/lib/utils";
@@ -619,54 +619,76 @@ export async function createDraw(formData: FormData) {
 }
 
 export async function syncLiveEurojackpotData(formData: FormData) {
-  const { supabase, userId } = await getUserId();
-  const groupId = String(formData.get("group_id") ?? "");
+  try {
+    const { supabase, userId } = await getUserId();
+    const groupId = String(formData.get("group_id") ?? "");
 
-  await assertAdmin(supabase, userId, groupId);
+    await assertAdmin(supabase, userId, groupId);
 
-  const snapshot = await fetchEurojackpotLiveSnapshot();
-  const now = new Date().toISOString();
+    const snapshot = await fetchEurojackpotLiveSnapshot();
+    const now = new Date().toISOString();
 
-  if (!snapshot.nextDraw && !snapshot.latestResult) {
-    throw new Error("Die Live-API hat weder Jackpot noch Ziehungszahlen geliefert.");
-  }
+    if (!snapshot.nextDraw && !snapshot.latestResult) {
+      throw new EurojackpotLiveError("Die Live-API hat weder Jackpot noch Ziehungszahlen geliefert.", 502);
+    }
 
-  if (snapshot.latestResult) {
-    const drawId = await ensureDrawForLiveData(supabase, {
-      groupId,
-      userId,
-      drawDate: snapshot.latestResult.drawDate,
-      jackpotAmount: snapshot.nextDraw?.drawDate === snapshot.latestResult.drawDate ? snapshot.nextDraw.jackpot : 0,
-      now,
-    });
-
-    await evaluateDrawResult(supabase, {
-      groupId,
-      drawId,
-      result: {
+    if (snapshot.latestResult) {
+      const drawId = await ensureDrawForLiveData(supabase, {
+        groupId,
+        userId,
         drawDate: snapshot.latestResult.drawDate,
-        numbers: snapshot.latestResult.numbers,
-        euroNumbers: snapshot.latestResult.euroNumbers,
-        prizeAmounts: snapshot.latestResult.prizeAmounts ? new Map(Object.entries(snapshot.latestResult.prizeAmounts)) : undefined,
-      },
-      userId,
-    });
+        jackpotAmount: snapshot.nextDraw?.drawDate === snapshot.latestResult.drawDate ? snapshot.nextDraw.jackpot : 0,
+        now,
+      });
+
+      await evaluateDrawResult(supabase, {
+        groupId,
+        drawId,
+        result: {
+          drawDate: snapshot.latestResult.drawDate,
+          numbers: snapshot.latestResult.numbers,
+          euroNumbers: snapshot.latestResult.euroNumbers,
+          prizeAmounts: snapshot.latestResult.prizeAmounts ? new Map(Object.entries(snapshot.latestResult.prizeAmounts)) : undefined,
+        },
+        userId,
+      });
+    }
+
+    if (snapshot.nextDraw) {
+      await ensureDrawForLiveData(supabase, {
+        groupId,
+        userId,
+        drawDate: snapshot.nextDraw.drawDate,
+        jackpotAmount: snapshot.nextDraw.jackpot,
+        now,
+      });
+    }
+
+    revalidatePath("/");
+    revalidatePath("/kasse");
+    revalidatePath("/tipps");
+    revalidatePath("/ziehungen");
+  } catch (error) {
+    return {
+      status: "error" as const,
+      message: getLiveSyncErrorMessage(error),
+    };
+  }
+}
+
+function getLiveSyncErrorMessage(error: unknown) {
+  if (error instanceof EurojackpotLiveError) {
+    if (error.message.includes("EUROJACKPOT_LIVE_API_URL")) {
+      return "Live-Daten sind noch nicht konfiguriert. Setze in Railway die Variable EUROJACKPOT_LIVE_API_URL auf die Eurojackpot-API-URL und deploye neu.";
+    }
+    return error.message;
   }
 
-  if (snapshot.nextDraw) {
-    await ensureDrawForLiveData(supabase, {
-      groupId,
-      userId,
-      drawDate: snapshot.nextDraw.drawDate,
-      jackpotAmount: snapshot.nextDraw.jackpot,
-      now,
-    });
+  if (error instanceof Error && error.message) {
+    return `Live-Daten konnten nicht synchronisiert werden: ${error.message}`;
   }
 
-  revalidatePath("/");
-  revalidatePath("/kasse");
-  revalidatePath("/tipps");
-  revalidatePath("/ziehungen");
+  return "Live-Daten konnten nicht synchronisiert werden. Bitte prüfe die Railway-Variable EUROJACKPOT_LIVE_API_URL.";
 }
 
 async function ensureDrawForLiveData(

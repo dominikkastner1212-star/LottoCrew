@@ -9,6 +9,7 @@ type ActionState =
   | { status: "idle" }
   | { status: "success"; at: number }
   | { status: "error"; message: string; at: number };
+type ActionResult = void | { status?: "success" | "error"; message?: string; error?: string };
 
 /**
  * Wrapper für Server-Action-Formulare mit eingebautem Feedback.
@@ -34,7 +35,7 @@ export function ActionForm({
   className,
   children,
 }: {
-  action: (formData: FormData) => Promise<void>;
+  action: (formData: FormData) => Promise<ActionResult>;
   successMessage: string;
   confirm?: { question: string; confirmLabel: string };
   resetOnSuccess?: boolean;
@@ -48,7 +49,14 @@ export function ActionForm({
   const [state, formAction] = useActionState<ActionState, FormData>(
     async (_previous, formData) => {
       try {
-        await action(formData);
+        const result = await action(formData);
+        if (result && typeof result === "object" && (result.status === "error" || result.error)) {
+          return {
+            status: "error",
+            message: result.message || result.error || "Das hat leider nicht geklappt.",
+            at: Date.now(),
+          };
+        }
         if (resetOnSuccess) {
           formRef.current?.reset();
         }
